@@ -1,59 +1,135 @@
-# FinalAngularSAMS
+# SAMS Frontend (Angular 21 + TailwindCSS)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.0.
+This project is the frontend for the **SAMS Educational Center Management System**, built using:
 
-## Development server
+- **Angular 21 (Standalone Components)**
+- **TailwindCSS**
+- **Role-based dashboards**
+- **Clean scalable architecture**
 
-To start a local development server, run:
+### User Roles:
+- `admin`
+- `center_admin`
+- `teacher`
+- `assistant`
+- `parent`
+- `student`
 
-```bash
-ng serve
-```
+### Dashboard Grouping:
+| Roles | Dashboard |
+|-------|-----------|
+| admin | **Admin Dashboard** (exclusive) |
+| center_admin, teacher, assistant | **Shared Staff Dashboard** |
+| parent, student | **Shared Family Dashboard** |
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+# 📁 Project Structure (With Descriptions)
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Below is the complete project structure including **comments explaining each folder and file**.
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```txt
+src/
+└── app/
+    ├── core/                                   # Core global logic for the entire app
+    │   ├── auth/                               # Authentication/Authorization logic
+    │   │   ├── auth.service.ts                 # Login, register, logout, token refresh
+    │   │   ├── auth.guard.ts                   # Blocks access if user is not authenticated
+    │   │   ├── role.guard.ts                   # Checks user role before loading dashboard
+    │   │   └── token-storage.service.ts        # Handles token and user data storage
+    │   │
+    │   ├── interceptors/                       # HTTP interceptors
+    │   │   ├── auth.interceptor.ts             # Attaches JWT token to API requests
+    │   │   └── error.interceptor.ts            # Global error handler (401/500/etc)
+    │   │
+    │   ├── services/                           # Global reusable services
+    │   │   ├── api.service.ts                  # Generic HTTP API wrapper
+    │   │   ├── notification.service.ts         # Toast and alert service
+    │   │   └── loading.service.ts              # Controls global loading spinner
+    │   │
+    │   ├── models/                             # TypeScript interfaces and types
+    │   │   ├── user.model.ts                   # User interface with role
+    │   │   ├── group.model.ts                  # Groups data model
+    │   │   └── assessment.model.ts             # Assessment data model
+    │   │
+    │   └── utils/                              # Utility helper functions
+    │       └── date.util.ts                    # Example date formatting utility
+    │
+    ├── shared/                                 # Reusable UI blocks + pipes + directives
+    │   ├── components/                         # Shared UI components
+    │   │   ├── navbar/                         # Global navigation bar
+    │   │   │   └── navbar.component.ts
+    │   │   ├── footer/                         # Global footer
+    │   │   │   └── footer.component.ts
+    │   │   └── sidebar/                        # Sidebar used inside dashboards
+    │   │       └── sidebar.component.ts
+    │   │
+    │   ├── ui/                                 # Tailwind UI kit components
+    │   │   ├── button/                         # Reusable button component
+    │   │   │   └── button.component.ts
+    │   │   ├── card/                           # Reusable card wrapper
+    │   │   │   └── card.component.ts
+    │   │   └── modal/                          # Popup modal component
+    │   │       └── modal.component.ts
+    │   │
+    │   ├── directives/                         # Custom Angular directives
+    │   │   └── role.directive.ts               # Show/hide elements based on role
+    │   │
+    │   ├── pipes/                              # Custom pipes
+    │   │   └── capitalize.pipe.ts              # Example pipe
+    │   │
+    │   └── shared.module.ts (optional)         # Optional grouping for standalone components
+    │
+    ├── layout/                                 # Page layout wrappers
+    │   ├── public-layout/                      # Layout for public pages (home/login/register)
+    │   │   └── public-layout.component.ts
+    │   │
+    │   └── dashboard-layout/                   # Layout for all dashboard pages
+    │       └── dashboard-layout.component.ts
+    │
+    ├── features/                               # All main features grouped here
+    │   ├── public/                             # Public pages
+    │   │   └── home/
+    │   │       └── home.component.ts           # Landing page with services info + login/register
+    │   │
+    │   ├── auth/                               # Authentication screens
+    │   │   ├── login/                          # Login page
+    │   │   │   └── login.component.ts
+    │   │   ├── register/                       # Registration page
+    │   │   │   └── register.component.ts
+    │   │   └── auth.routes.ts                  # Routes for /auth/*
+    │   │
+    │   ├── admin-dashboard/                    # ADMIN-ONLY dashboard
+    │   │   ├── pages/
+    │   │   │   ├── overview/                   # Admin overview page
+    │   │   │   │   └── admin-overview.component.ts
+    │   │   │   ├── centers-management/         # Manage centers
+    │   │   │   │   └── centers-management.component.ts
+    │   │   │   └── users-management/           # Manage all users
+    │   │   │       └── users-management.component.ts
+    │   │   └── admin.routes.ts                 # /dashboard/admin routes
+    │   │
+    │   ├── staff-dashboard/                    # Shared dashboard (center_admin / teacher / assistant)
+    │   │   ├── pages/
+    │   │   │   ├── staff-overview/             # Staff dashboard home page
+    │   │   │   │   └── staff-overview.component.ts
+    │   │   │   ├── groups/                     # Group management/viewing
+    │   │   │   │   └── groups.component.ts
+    │   │   │   └── attendance/                 # Attendance tracking
+    │   │   │       └── attendance.component.ts
+    │   │   └── staff.routes.ts                 # /dashboard/staff routes
+    │   │
+    │   ├── family-dashboard/                   # Shared dashboard (parent / student)
+    │   │   ├── pages/
+    │   │   │   ├── family-overview/            # Dashboard home for parent/student
+    │   │   │   │   └── family-overview.component.ts
+    │   │   │   ├── timetable/                  # Student schedule
+    │   │   │   │   └── timetable.component.ts
+    │   │   │   └── results/                    # Exams, assessments, grades
+    │   │   │       └── results.component.ts
+    │   │   └── family.routes.ts                # /dashboard/family routes
+    │   │
+    │   └── dashboard.routes.ts                 # Determines which dashboard a role can access
+    │
+    ├── app.routes.ts                           # Main routing file for the entire app
+    └── app.component.ts                        # Root component
