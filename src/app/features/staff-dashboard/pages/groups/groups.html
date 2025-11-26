@@ -12,7 +12,8 @@
 
   <!-- GROUP CARDS -->
   <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-    <div *ngFor="let g of filteredGroups" class="card-item">
+    <div *ngFor="let g of filteredGroups" class="card-item cursor-pointer"
+      [routerLink]="['/dashboard/staff/groups', g.id]">
 
       <img class="w-20 h-20 object-cover rounded-full" [src]="g.img" />
 
