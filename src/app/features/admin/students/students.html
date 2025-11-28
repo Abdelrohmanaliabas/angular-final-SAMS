@@ -1,0 +1,52 @@
+﻿<section class="list-wrapper">
+  <header class="list-header">
+    <h2>{{ i18n.t('students.title') }}</h2>
+    <p class="muted">{{ i18n.t('students.subtitle') }}</p>
+  </header>
+
+  <div class="toolbar">
+    <input [placeholder]="i18n.t('students.search')" class="search" />
+    <button class="btn-primary" (click)="openForm()">{{ i18n.t('students.add') }}</button>
+  </div>
+
+  <table class="list-table glass">
+    <thead>
+      <tr><th>{{ i18n.t('table.name') }}</th><th>{{ i18n.t('table.email') }}</th><th>{{ i18n.t('table.center') }}</th><th>{{ i18n.t('table.status') }}</th><th>{{ i18n.t('table.actions') }}</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let s of students">
+        <td>{{s.name}}</td>
+        <td>{{s.email}}</td>
+        <td>{{s.center}}</td>
+        <td>{{s.status}}</td>
+        <td>
+          <button class="btn-simple" (click)="openForm(s)">{{ i18n.t('action.edit') }}</button>
+          <button class="btn-simple muted" (click)="delete(s)">{{ i18n.t('action.delete') }}</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="overlay" [class.open]="isFormOpen" (click)="closeForm()"></div>
+<div class="side-panel glass" [class.open]="isFormOpen" (click)="$event.stopPropagation()">
+  <div class="panel-header">
+    <h3>{{ isEditMode ? i18n.t('action.edit') : i18n.t('students.add') }}</h3>
+    <button class="close-btn" (click)="closeForm()">×</button>
+  </div>
+  <form class="panel-body" (ngSubmit)="save()">
+    <label class="label">{{ i18n.t('table.name') }}</label>
+    <input class="input" name="name" [(ngModel)]="formStudent.name" required />
+
+    <label class="label">{{ i18n.t('table.email') }}</label>
+    <input class="input" name="email" [(ngModel)]="formStudent.email" required />
+
+    <label class="label">{{ i18n.t('table.center') }}</label>
+    <input class="input" name="center" [(ngModel)]="formStudent.center" required />
+
+    <label class="label">{{ i18n.t('table.status') }}</label>
+    <input class="input" name="status" [(ngModel)]="formStudent.status" required />
+
+    <button type="submit" class="btn-primary full">{{ isEditMode ? i18n.t('action.edit') : i18n.t('students.add') }}</button>
+  </form>
+</div>

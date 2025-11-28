@@ -1,1 +1,48 @@
-<p>admin-dashboard works!</p>
+<section class="admin-dash-wrapper glass surface">
+  <header class="dash-header">
+    <div>
+      <h1 class="dash-title">{{ i18n.t('overview.title') }}</h1>
+      <p class="dash-sub">{{ i18n.t('overview.subtitle') }}</p>
+    </div>
+    <div class="dash-actions">
+      <button routerLink="/dashboard/admin/centers" class="btn-simple">{{ i18n.t('actions.viewCenters') }}</button>
+      <button routerLink="/dashboard/admin/courses" class="btn-simple">{{ i18n.t('actions.viewCourses') }}</button>
+    </div>
+  </header>
+
+  <div class="stats-grid">
+    <article class="stat-card centers glass">
+      <div class="stat-head">{{ i18n.t('stats.centers') }}</div>
+      <div class="stat-value">{{stats.centers}}</div>
+      <div class="stat-sub">{{ i18n.t('stats.paid') }}: {{stats.paidCenters}} • {{ i18n.t('stats.unpaid') }}: {{stats.unpaidCenters}}</div>
+    </article>
+
+    <article class="stat-card courses glass">
+      <div class="stat-head">{{ i18n.t('stats.courses') }}</div>
+      <div class="stat-value">{{stats.courses}}</div>
+      <div class="stat-sub">{{ i18n.t('stats.active') }}: {{stats.activeCourses}}</div>
+    </article>
+
+    <article class="stat-card teachers glass">
+      <div class="stat-head">{{ i18n.t('stats.teachers') }}</div>
+      <div class="stat-value">{{stats.teachers}}</div>
+      <div class="stat-sub">{{ i18n.t('stats.online') }}: {{stats.onlineTeachers}}</div>
+    </article>
+
+    <article class="stat-card students glass">
+      <div class="stat-head">{{ i18n.t('stats.students') }}</div>
+      <div class="stat-value">{{stats.students}}</div>
+      <div class="stat-sub">{{ i18n.t('stats.attendanceToday') }}: {{stats.attendanceToday}}</div>
+    </article>
+  </div>
+
+  <section class="recent-section glass">
+    <h2 class="section-title">{{ i18n.t('recent.title') }}</h2>
+    <ul class="activity-list">
+      <li *ngFor="let item of recent" class="activity-item">
+        <div class="activity-left">{{ i18n.t(item.titleKey) }}</div>
+        <div class="activity-right">{{item.time}}</div>
+      </li>
+    </ul>
+  </section>
+</section>

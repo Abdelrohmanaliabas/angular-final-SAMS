@@ -1,11 +1,11 @@
 <!-- NAVBAR -->
-<div class="bg-white shadow">
+<div class="glass nav-shell shadow">
   <div class="container mx-auto px-4">
     <div class="flex items-center justify-between py-4">
 
       <!-- Sidebar Toggle -->
       <button (click)="toggleSidebar.emit()" class="text-2xl font-bold cursor-pointer">
-        ☰
+        ?
       </button>
 
       <!-- Desktop Section -->
@@ -13,7 +13,7 @@
 
         <!-- Search -->
         <div class="relative mr-6">
-          <input type="text" placeholder="Search..."
+          <input type="text" [placeholder]="i18n.t('search.placeholder')"
             class="border rounded-lg pl-8 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600" />
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-2 top-2 text-gray-400" fill="none"
             viewBox="0 0 24 24" stroke="currentColor">
@@ -27,11 +27,23 @@
 
           <div class="text-right">
             <p class="text-gray-800 font-semibold">John Doe</p>
-            <p class="text-gray-500 text-sm">Admin</p>
+            <p class="text-gray-500 text-sm">{{ i18n.t('user.role.admin') }}</p>
           </div>
 
           <div class="w-10 h-10 rounded-full overflow-hidden">
             <img src="https://via.placeholder.com/150" class="w-full h-full object-cover" />
+          </div>
+
+          <!-- Theme + Lang + Dropdown -->
+          <div class="flex items-center gap-3 mr-2">
+            <button class="icon-btn" (click)="theme.toggle()" title="Toggle theme">
+              {{ (theme.theme$ | async) === 'dark' ? (i18n.t('theme.light')) : (i18n.t('theme.dark')) }}
+            </button>
+
+            <select (change)="i18n.setLang($any($event.target).value)" [value]="i18n.lang" class="rounded-lg border px-2 py-1 bg-transparent text-sm">
+              <option value="en">{{ i18n.t('language.en') }}</option>
+              <option value="ar">{{ i18n.t('language.ar') }}</option>
+            </select>
           </div>
 
           <!-- Dropdown -->
@@ -46,8 +58,8 @@
             @if(dropdown) {
               <div class="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-xl z-50">
                 <a class="block px-4 py-2 text-sm hover:bg-gray-100">Profile</a>
-                <a class="block px-4 py-2 text-sm hover:bg-gray-100">Settings</a>
-                <a class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</a>
+                <a class="block px-4 py-2 text-sm hover:bg-gray-100">{{ i18n.t('settings') }}</a>
+                <a class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">{{ i18n.t('auth.logout') }}</a>
               </div>
               }
 
@@ -67,11 +79,11 @@
     </div>
 
     <!-- Mobile Menu -->
-    <div class="block sm:hidden bg-white border-t py-3">
+    <div class="block sm:hidden glass border-t py-3">
       <div class="flex flex-col items-center gap-2">
         <a
           class="text-gray-800 font-semibold border px-4 py-1 rounded-lg hover:text-purple-600 hover:border-purple-600">
-          Logout
+          {{ i18n.t('auth.logout') }}
         </a>
       </div>
     </div>

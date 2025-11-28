@@ -1,0 +1,58 @@
+<section class="list-wrapper">
+  <header class="list-header">
+    <h2>{{ i18n.t('centers.title') }}</h2>
+    <p class="muted">{{ i18n.t('centers.subtitle') }}</p>
+  </header>
+
+  <div class="toolbar">
+    <input [placeholder]="i18n.t('centers.search')" class="search" />
+    <button class="btn-primary" (click)="openForm()">{{ i18n.t('centers.add') }}</button>
+  </div>
+
+  <table class="list-table glass">
+    <thead>
+      <tr><th>{{ i18n.t('table.name') }}</th><th>{{ i18n.t('table.location') }}</th><th>{{ i18n.t('table.phone') }}</th><th>{{ i18n.t('table.status') }}</th><th>{{ i18n.t('table.actions') }}</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of centers">
+        <td>{{c.name}}</td>
+        <td>{{c.city}}</td>
+        <td>{{c.phone}}</td>
+        <td>
+          <span [class.paid]="c.paid">{{c.paid ? i18n.t('status.paid') : i18n.t('status.unpaid')}}</span>
+        </td>
+        <td>
+          <button class="btn-simple" (click)="openForm(c)">{{ i18n.t('action.edit') }}</button>
+          <button class="btn-simple muted" (click)="delete(c)">{{ i18n.t('action.delete') }}</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- overlay form -->
+<div class="overlay" [class.open]="isFormOpen" (click)="closeForm()"></div>
+<div class="side-panel glass" [class.open]="isFormOpen" (click)="$event.stopPropagation()">
+  <div class="panel-header">
+    <h3>{{ isEditMode ? i18n.t('action.edit') : i18n.t('centers.add') }}</h3>
+    <button class="close-btn" (click)="closeForm()">×</button>
+  </div>
+  <form class="panel-body" (ngSubmit)="save()">
+    <label class="label">{{ i18n.t('table.name') }}</label>
+    <input class="input" name="name" [(ngModel)]="formCenter.name" required />
+
+    <label class="label">{{ i18n.t('table.location') }}</label>
+    <input class="input" name="city" [(ngModel)]="formCenter.city" required />
+
+    <label class="label">{{ i18n.t('table.phone') }}</label>
+    <input class="input" name="phone" [(ngModel)]="formCenter.phone" required />
+
+    <label class="label">{{ i18n.t('table.status') }}</label>
+    <select class="input" name="paid" [(ngModel)]="formCenter.paid">
+      <option [ngValue]="true">{{ i18n.t('status.paid') }}</option>
+      <option [ngValue]="false">{{ i18n.t('status.unpaid') }}</option>
+    </select>
+
+    <button type="submit" class="btn-primary full">{{ isEditMode ? i18n.t('action.edit') : i18n.t('centers.add') }}</button>
+  </form>
+</div>

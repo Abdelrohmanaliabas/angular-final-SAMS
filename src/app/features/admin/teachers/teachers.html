@@ -1,0 +1,54 @@
+﻿<section class="list-wrapper">
+  <header class="list-header">
+    <h2>{{ i18n.t('teachers.title') }}</h2>
+    <p class="muted">{{ i18n.t('teachers.subtitle') }}</p>
+  </header>
+
+  <div class="toolbar">
+    <input [placeholder]="i18n.t('teachers.search')" class="search" />
+    <button class="btn-primary" (click)="openForm()">{{ i18n.t('teachers.add') }}</button>
+  </div>
+
+  <div class="cards-grid">
+    <div class="teacher-card glass" *ngFor="let t of teachers">
+      <div class="card-head">
+        <div class="avatar">{{t.name[0]}}</div>
+        <div>
+          <div class="name">{{t.name}}</div>
+          <div class="muted">{{t.email}}</div>
+        </div>
+      </div>
+      <div class="meta">{{ i18n.t('meta.center') }}: {{t.center}} • {{ i18n.t('meta.courses') }}: {{t.courses}} • {{ i18n.t('meta.phone') }}: {{t.phone}}</div>
+      <div class="actions">
+        <button class="btn-simple" (click)="openForm(t)">{{ i18n.t('action.edit') }}</button>
+        <button class="btn-simple muted" (click)="delete(t)">{{ i18n.t('action.delete') }}</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="overlay" [class.open]="isFormOpen" (click)="closeForm()"></div>
+<div class="side-panel glass" [class.open]="isFormOpen" (click)="$event.stopPropagation()">
+  <div class="panel-header">
+    <h3>{{ isEditMode ? i18n.t('action.edit') : i18n.t('teachers.add') }}</h3>
+    <button class="close-btn" (click)="closeForm()">×</button>
+  </div>
+  <form class="panel-body" (ngSubmit)="save()">
+    <label class="label">{{ i18n.t('table.name') }}</label>
+    <input class="input" name="name" [(ngModel)]="formTeacher.name" required />
+
+    <label class="label">{{ i18n.t('table.email') }}</label>
+    <input class="input" name="email" [(ngModel)]="formTeacher.email" required />
+
+    <label class="label">{{ i18n.t('table.center') }}</label>
+    <input class="input" name="center" [(ngModel)]="formTeacher.center" required />
+
+    <label class="label">{{ i18n.t('meta.courses') }}</label>
+    <input class="input" type="number" name="courses" [(ngModel)]="formTeacher.courses" required />
+
+    <label class="label">{{ i18n.t('table.phone') }}</label>
+    <input class="input" name="phone" [(ngModel)]="formTeacher.phone" required />
+
+    <button type="submit" class="btn-primary full">{{ isEditMode ? i18n.t('action.edit') : i18n.t('teachers.add') }}</button>
+  </form>
+</div>

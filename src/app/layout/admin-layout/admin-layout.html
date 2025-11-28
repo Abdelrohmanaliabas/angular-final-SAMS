@@ -1,4 +1,4 @@
-<div class="dashboard-layout">
+<div class="dashboard-layout" [attr.dir]="i18n.lang === 'ar' ? 'rtl' : 'ltr'">
   <app-admin-sidebar [collapsed]="isSidebarCollapsed"></app-admin-sidebar>
 
   <div class="main-area">
