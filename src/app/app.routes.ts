@@ -14,11 +14,6 @@ export const routes: Routes = [
         path: '',
         loadComponent: () => import('./features/public/home/home').then(m => m.Home),
       },
-      {
-        path: 'home',
-        redirectTo: '',
-        pathMatch: 'full',
-      },
       // Add more public pages here if needed
     ],
   },
