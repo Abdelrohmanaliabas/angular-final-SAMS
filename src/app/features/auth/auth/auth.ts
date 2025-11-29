@@ -216,7 +216,8 @@ export class Auth {
           this.router.navigate(['/complete-profile']);
           return;
         }
-        this.router.navigate(['/dashboard/staff']);
+        const destination = this.getDashboardPath(response.user);
+        this.router.navigate([destination]);
       },
       error: (err) => {
         this.loadingService.hide();
@@ -438,7 +439,8 @@ export class Auth {
               title: 'Signed in with Google',
               message: 'Welcome back!'
             });
-            this.router.navigate(['/dashboard/staff']);
+            const destination = this.getDashboardPath(response.user);
+            this.router.navigate([destination]);
           }
         },
         error: (err) => {
@@ -479,7 +481,7 @@ export class Auth {
         this.mode.set('reset-password');
         this.position.set('right');
         this.setupFormForMode('reset-password');
-        
+
         const resetCode = params.get('code');
         if (resetCode) {
           this.loadingService.show();
@@ -515,8 +517,17 @@ export class Auth {
     if (!user) {
       return false;
     }
+    const hasAdminRole = Array.isArray(user.roles) && user.roles.includes('admin');
     // Only require profile completion when backend explicitly marks user as incomplete
-    return user.role !== 'admin' && user.is_data_complete === false;
+    return !hasAdminRole && user.is_data_complete === false;
+  }
+
+  private getDashboardPath(user?: User | null): string {
+    const roles = Array.isArray(user?.roles) ? user.roles : [];
+    if (roles.includes('admin')) {
+      return '/dashboard/admin';
+    }
+    return '/dashboard/staff';
   }
 
   private updateUrl(mode: AuthMode, params?: Record<string, string | null>) {
