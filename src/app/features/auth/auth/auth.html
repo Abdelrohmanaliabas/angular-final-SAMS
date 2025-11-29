@@ -64,7 +64,7 @@
 
           <!-- Google Button -->
           @if (mode() === 'login' || mode() === 'register') {
-          <button type="button"
+          <button type="button" (click)="onGoogleLogin()"
             class="w-full border border-neutral-300 dark:border-neutral-600 rounded-lg py-3 flex items-center justify-center gap-2 cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-700 transition mb-4">
             <i class="fa-brands fa-google text-red-500"></i>
             {{ mode() === 'login' ? 'Sign in with Google' : 'Create with Google' }}
