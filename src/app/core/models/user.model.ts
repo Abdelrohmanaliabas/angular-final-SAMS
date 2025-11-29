@@ -2,7 +2,9 @@ export interface User {
     id: number;
     username: string;
     email: string;
-    role: 'admin' | 'center_admin' | 'teacher' | 'assistant' | 'student' | 'parent';
+    roles: [
+      'admin' | 'center_admin' | 'teacher' | 'assistant' | 'student' | 'parent'
+    ];
     status: 'active' | 'pending' | 'inactive';
     is_data_complete?: boolean;
     firstName?: string;

@@ -10,6 +10,7 @@ export const StaffRoutes: Routes = [
   {
     path: 'dashboard/staff',
     component: DashboardLayout,
+    
     children: [
       { path: '', redirectTo: 'overview', pathMatch: 'full' },
       { path: 'overview', component: StaffDashboard },
