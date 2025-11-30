@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
-import { AdminLayout } from '../../layout/admin-layout/admin-layout';
+import { authGuard } from '../../core/auth/auth.guard';
+import { roleGuard } from '../../core/auth/role.guard';
+import { AdminLayout } from '../../layouts/admin-layout/admin-layout';
 import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { Setting } from './setting/setting';
 import { Centers } from './centers/centers';
@@ -13,6 +15,8 @@ export const AdminRoutes: Routes = [
   {
     path: 'dashboard/admin',
     component: AdminLayout,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['admin'] },
     children: [
       { path: '', component: AdminDashboard },
       { path: 'setting', component: Setting },
@@ -22,6 +26,6 @@ export const AdminRoutes: Routes = [
       { path: 'students', component: Students },
       { path: 'contacts', component: Contacts },
       { path: 'payments', component: Payments },
-    ],
-  },
+    ]
+  }
 ];

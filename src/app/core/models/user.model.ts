@@ -1,10 +1,9 @@
 export interface User {
     id: number;
-    username: string;
+    name: string;
     email: string;
-    roles: Array<
-      'admin' | 'center_admin' | 'teacher' | 'assistant' | 'student' | 'parent'
-    >;
+    phone?: string;
+    roles: string[];
     status: 'active' | 'pending' | 'inactive';
     is_data_complete?: boolean;
     firstName?: string;

@@ -6,11 +6,8 @@ import { map } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ThemeService {
-  darkMode = signal<boolean>(false);
-
-  theme$ = toObservable(this.darkMode).pipe(
-    map(isDark => (isDark ? 'dark' : 'light'))
-  );
+    darkMode = signal<boolean>(false);
+    theme$ = toObservable(this.darkMode).pipe(map(isDark => isDark ? 'dark' : 'light'));
 
   constructor() {
     const savedTheme = localStorage.getItem('theme');
