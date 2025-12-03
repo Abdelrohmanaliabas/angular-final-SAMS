@@ -1,211 +1,462 @@
-<div class="home-shell relative min-h-screen w-full overflow-hidden"
-  [ngClass]="isDark ? 'home-gradient-dark text-slate-50' : 'home-gradient-light text-slate-900'">
-  <div class="pointer-events-none absolute inset-0 opacity-40">
-    <div class="floating-orb absolute -left-20 top-10 h-72 w-72 rounded-full"
-      [ngClass]="isDark ? 'bg-cyan-500/30' : 'bg-cyan-200/70'"></div>
-    <div class="floating-orb floating-orb--secondary absolute right-0 bottom-0 h-104 w-104 rounded-full"
-      [ngClass]="isDark ? 'bg-emerald-400/20' : 'bg-amber-200/70'"></div>
+<div
+  class="home-shell relative min-h-screen w-full overflow-hidden"
+  [ngClass]="isDark ? 'bg-slate-950 text-slate-50' : 'bg-slate-50 text-slate-900'"
+>
+  <!-- Floating background orbs -->
+  <div class="pointer-events-none absolute inset-0 overflow-hidden">
+    <div
+      class="floating-orb absolute -left-32 top-20 h-96 w-96 rounded-full"
+      [ngClass]="isDark ? 'bg-cyan-500/20' : 'bg-cyan-300/40'"
+    ></div>
+    <div
+      class="floating-orb floating-orb--secondary absolute -right-32 top-1/3 h-96 w-96 rounded-full"
+      [ngClass]="isDark ? 'bg-purple-500/20' : 'bg-purple-300/40'"
+    ></div>
+    <div
+      class="floating-orb floating-orb--tertiary absolute left-1/2 bottom-20 h-96 w-96 rounded-full"
+      [ngClass]="isDark ? 'bg-amber-500/15' : 'bg-amber-300/30'"
+    ></div>
   </div>
 
   <app-header></app-header>
 
-  <main class="flex flex-col">
-    <section id="hero" class="relative isolate flex min-h-screen w-full items-center overflow-hidden">
-      <div class="absolute inset-0">
-        <ng-container *ngFor="let slide of slides; let i = index">
-          <div class="absolute inset-0 transform bg-cover bg-center transition-all duration-1200"
-            [ngClass]="activeSlideIndex === i ? 'opacity-100 scale-100' : 'opacity-0 scale-110'"
-            [ngStyle]="{'background-image': 'url(' + slide + ')'}">
-          </div>
-        </ng-container>
-      </div>
-      <div class="absolute inset-0"
-        [ngClass]="isDark ? 'bg-linear-to-br from-slate-950/90 via-slate-900/70 to-slate-900/60' : 'bg-linear-to-br from-slate-100/90 via-white/80 to-white/50'">
-      </div>
-      <div class="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-32">
+  <main class="relative z-10">
+    <!-- Hero Section -->
+    <section id="hero" class="mx-auto max-w-7xl px-6 pt-20 pb-24 sm:pt-32 sm:pb-32">
+      <div class="text-center">
+        <!-- Badge -->
         <div
-          class="animate-fade inline-flex w-fit items-center gap-2 rounded-full px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.25em]"
-          [ngClass]="isDark ? 'bg-white/10 text-slate-100' : 'bg-slate-900/5 text-slate-800'">
-          Learning made simple
+          class="animate-fade mb-8 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold"
+          [ngClass]="
+            isDark
+              ? 'bg-cyan-500/10 text-cyan-300 ring-1 ring-cyan-500/20'
+              : 'bg-cyan-50 text-cyan-700 ring-1 ring-cyan-200'
+          "
+        >
+          <span class="relative flex h-2 w-2">
+            <span
+              class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+              [ngClass]="isDark ? 'bg-cyan-400' : 'bg-cyan-500'"
+            ></span>
+            <span
+              class="relative inline-flex h-2 w-2 rounded-full"
+              [ngClass]="isDark ? 'bg-cyan-500' : 'bg-cyan-600'"
+            ></span>
+          </span>
+          Free Forever · Up to 75 Students
         </div>
-        <div class="space-y-6">
-          <h1 class="animate-fade anim-delay-200 text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl"
-            [ngClass]="isDark ? 'text-white' : 'text-slate-900'">
-            Manage classes, parents, and staff from one full-screen workspace.
-          </h1>
-          <p class="animate-fade anim-delay-300 max-w-3xl text-lg sm:text-xl"
-            [ngClass]="isDark ? 'text-slate-100/90' : 'text-slate-700/90'">
-            SAMS keeps every campus aligned with realtime attendance, staffing, and student insights wrapped in a
-            beautiful control center.
-          </p>
+
+        <!-- Main Headline -->
+        <h1
+          class="animate-fade anim-delay-100 mx-auto max-w-4xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl"
+          [ngClass]="isDark ? 'text-white' : 'text-slate-900'"
+        >
+          Start Your Own Academy in
+          <span class="bg-gradient-to-r from-cyan-500 to-purple-500 bg-clip-text text-transparent">
+            Under 5 Minutes
+          </span>
+        </h1>
+
+        <!-- Sub-headline -->
+        <p
+          class="animate-fade anim-delay-200 mx-auto mt-6 max-w-2xl text-lg sm:text-xl"
+          [ngClass]="isDark ? 'text-slate-300' : 'text-slate-600'"
+        >
+          The complete academy management system built for teachers and center owners. Track
+          attendance, manage grades, send weekly reports, and let AI handle student questions.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div
+          class="animate-fade anim-delay-300 mt-10 flex flex-wrap items-center justify-center gap-4"
+        >
+          <a
+            routerLink="/login"
+            class="group inline-flex items-center gap-2 rounded-full px-8 py-4 text-base font-semibold shadow-lg transition-all hover:scale-105"
+            [ngClass]="
+              isDark
+                ? 'bg-gradient-to-r from-cyan-500 to-purple-500 text-white hover:shadow-cyan-500/50'
+                : 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white hover:shadow-cyan-600/50'
+            "
+          >
+            Start Your Academy — It's Free
+            <svg
+              class="h-5 w-5 transition-transform group-hover:translate-x-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 7l5 5m0 0l-5 5m5-5H6"
+              />
+            </svg>
+          </a>
+          <a
+            href="#features"
+            class="inline-flex items-center gap-2 rounded-full px-8 py-4 text-base font-semibold transition-all"
+            [ngClass]="
+              isDark
+                ? 'bg-slate-800 text-slate-100 hover:bg-slate-700'
+                : 'bg-white text-slate-900 ring-1 ring-slate-200 hover:bg-slate-50'
+            "
+          >
+            See How It Works
+          </a>
         </div>
-        <div class="animate-fade anim-delay-400 flex flex-wrap gap-3 text-sm font-semibold">
-          <div *ngFor="let stat of heroStats"
-            class="inline-flex items-center gap-3 rounded-full border px-4 py-2 shadow-sm"
-            [ngClass]="isDark ? 'border-white/20 bg-white/10 text-white' : 'border-slate-200 bg-white text-slate-900'">
-            <span class="text-xl font-bold">{{ stat.value }}</span>
-            <span>{{ stat.label }}</span>
+
+        <!-- Trust Indicators -->
+        <div
+          class="animate-fade anim-delay-400 mt-12 flex flex-wrap items-center justify-center gap-8 text-sm"
+          [ngClass]="isDark ? 'text-slate-400' : 'text-slate-500'"
+        >
+          <div class="flex items-center gap-2">
+            <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span>No credit card required</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span>Setup in 5 minutes</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span>100% private & isolated</span>
           </div>
         </div>
-        <div class="animate-fade anim-delay-500 flex flex-wrap gap-4">
-          <a routerLink="/login"
-            class="inline-flex items-center gap-2 rounded-full px-6 py-3 text-base font-semibold shadow-lg transition"
-            [ngClass]="isDark ? 'bg-cyan-400 text-slate-950 hover:bg-cyan-300' : 'bg-slate-900 text-white hover:bg-slate-800'">
-            Launch the dashboard
-            <span aria-hidden="true">↗</span>
-          </a>
-          <a href="#stories"
-            class="inline-flex items-center gap-2 rounded-full border px-6 py-3 text-base font-semibold transition"
-            [ngClass]="isDark ? 'border-white/20 bg-white/5 hover:bg-white/10' : 'border-slate-200 bg-white hover:bg-slate-100'">
-            Watch live stories
-          </a>
-        </div>
-        <div class="animate-fade anim-delay-600 flex gap-2">
-          <button *ngFor="let slide of slides; let i = index" type="button"
-            class="h-1 flex-1 rounded-full transition-all" (click)="setActiveSlide(i)"
-            [ngClass]="activeSlideIndex === i ? 'bg-white' : 'bg-white/30'">
-          </button>
-        </div>
-      </div>
-      <div class="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-linear-to-t"
-        [ngClass]="isDark ? 'from-slate-950 to-transparent' : 'from-slate-50 to-transparent'"></div>
-    </section>
-
-    <section class="relative z-20 -mt-20 w-full px-6">
-      <div
-        class="animate-fade mx-auto grid max-w-5xl gap-4 rounded-[26px] border p-6 shadow-2xl backdrop-blur glow-divider"
-        [ngClass]="isDark ? 'border-slate-800/70 bg-slate-900/70' : 'border-slate-200 bg-white/80'">
-        <div class="grid gap-4 md:grid-cols-[1.1fr_1fr_1fr_auto]">
-          <label class="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.2em]">
-            <span [ngClass]="isDark ? 'text-slate-300' : 'text-slate-600'">What do you need?</span>
-            <input type="text" placeholder="e.g. Track attendance for Grade 8"
-              class="w-full rounded-2xl border px-4 py-3 font-semibold transition focus:outline-none focus:ring-2"
-              [ngClass]="isDark ? 'border-slate-700 bg-slate-900/70 text-white placeholder:text-slate-400 focus:ring-cyan-400' : 'border-slate-200 bg-white text-slate-900 placeholder:text-slate-500 focus:ring-cyan-500'">
-          </label>
-          <label class="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.2em]">
-            <span [ngClass]="isDark ? 'text-slate-300' : 'text-slate-600'">Location / branch</span>
-            <input type="text" placeholder="City, campus, or branch"
-              class="w-full rounded-2xl border px-4 py-3 font-semibold transition focus:outline-none focus:ring-2"
-              [ngClass]="isDark ? 'border-slate-700 bg-slate-900/70 text-white placeholder:text-slate-400 focus:ring-cyan-400' : 'border-slate-200 bg-white text-slate-900 placeholder:text-slate-500 focus:ring-cyan-500'">
-          </label>
-          <label class="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.2em]">
-            <span [ngClass]="isDark ? 'text-slate-300' : 'text-slate-600'">Role</span>
-            <select class="w-full rounded-2xl border px-4 py-3 font-semibold transition focus:outline-none focus:ring-2"
-              [ngClass]="isDark ? 'border-slate-700 bg-slate-900/70 text-white focus:ring-cyan-400' : 'border-slate-200 bg-white text-slate-900 focus:ring-cyan-500'">
-              <option>Admin / Center lead</option>
-              <option>Teacher</option>
-              <option>Parent</option>
-              <option>Student</option>
-            </select>
-          </label>
-          <button class="rounded-2xl px-5 py-3 font-bold shadow-lg transition"
-            [ngClass]="isDark ? 'bg-amber-400 text-slate-900 hover:bg-amber-300' : 'bg-cyan-500 text-white hover:bg-cyan-400'">
-            Search
-          </button>
-        </div>
-        <div class="flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em]"
-          [ngClass]="isDark ? 'text-slate-400' : 'text-slate-500'">
-          Response within 24h · Implementation in 2 weeks · Dedicated success partner
-        </div>
       </div>
     </section>
 
-    <section id="stories" class="relative z-10 mx-auto w-full max-w-6xl px-6 pt-24">
-      <div class="animate-fade flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p class="text-sm uppercase tracking-[0.25em]" [ngClass]="isDark ? 'text-slate-400' : 'text-slate-500'">Live
-            motion</p>
-          <h2 class="text-3xl font-bold">Highlights from the dashboard</h2>
-        </div>
-        <span class="text-xs uppercase tracking-[0.35em]"
-          [ngClass]="isDark ? 'text-slate-500' : 'text-slate-500'">Auto-updating</span>
+    <!-- 3-Step Flow Section -->
+    <section id="how-it-works" class="mx-auto max-w-7xl px-6 py-20">
+      <div class="text-center">
+        <h2
+          class="text-3xl font-bold sm:text-4xl"
+          [ngClass]="isDark ? 'text-white' : 'text-slate-900'"
+        >
+          Get Started in 3 Simple Steps
+        </h2>
+        <p class="mt-4 text-lg" [ngClass]="isDark ? 'text-slate-300' : 'text-slate-600'">
+          From signup to fully operational academy in minutes
+        </p>
       </div>
-      <div class="mt-6 rounded-[28px] border px-4 py-6"
-        [ngClass]="isDark ? 'border-slate-800 bg-slate-900/70' : 'border-slate-200 bg-white'">
-        <div class="slider-track flex gap-4 overflow-x-auto scroll-smooth px-2 pb-2 pt-1">
-          <article *ngFor="let card of highlightCards"
-            class="slider-card min-w-[240px] flex-1 scroll-mx-4 rounded-2xl border px-4 py-4 shadow-sm transition"
-            [ngClass]="isDark ? 'border-white/10 bg-white/5 hover:bg-white/10' : 'border-slate-200 bg-white hover:bg-slate-50'">
-            <p class="text-[11px] uppercase tracking-[0.35em]" [ngClass]="isDark ? 'text-slate-400' : 'text-slate-500'">
-              {{ card.tag }}</p>
-            <h3 class="mt-2 text-lg font-semibold">{{ card.title }}</h3>
-            <p class="text-sm" [ngClass]="isDark ? 'text-slate-300' : 'text-slate-600'">{{ card.copy }}</p>
-          </article>
-        </div>
-      </div>
-    </section>
 
-    <section id="features" class="relative z-10 mx-auto w-full max-w-6xl px-6 pt-20">
-      <div class="animate-fade flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p class="text-sm uppercase tracking-[0.25em]" [ngClass]="isDark ? 'text-slate-400' : 'text-slate-500'">
-            Product pillars</p>
-          <h2 class="text-3xl font-semibold">Everything your team needs in one workspace</h2>
-        </div>
-        <a routerLink="/dashboard/staff/students"
-          class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition"
-          [ngClass]="isDark ? 'border-slate-700 bg-white/5 hover:bg-white/10' : 'border-slate-200 bg-white hover:bg-slate-100'">
-          Preview student view
-        </a>
-      </div>
-      <div class="mt-8 grid gap-5 lg:grid-cols-3">
-        <article *ngFor="let pillar of featurePillars" class="animate-fade rounded-3xl border p-6 shadow-sm transition"
-          [ngClass]="isDark ? 'border-slate-800 bg-slate-900/70 hover:bg-slate-900/60' : 'border-slate-200 bg-white hover:bg-slate-50'">
-          <div class="h-12 w-12 rounded-2xl bg-linear-to-br" [ngClass]="pillar.accent"></div>
-          <h3 class="mt-4 text-xl font-semibold">{{ pillar.title }}</h3>
-          <p class="mt-2 text-sm" [ngClass]="isDark ? 'text-slate-300' : 'text-slate-600'">{{ pillar.copy }}</p>
+      <div class="mt-16 grid gap-8 md:grid-cols-3">
+        <article
+          *ngFor="let step of setupSteps; let i = index"
+          class="animate-fade relative rounded-3xl p-8 transition-all hover:scale-105"
+          [ngClass]="
+            isDark ? 'bg-slate-900/50 ring-1 ring-slate-800' : 'bg-white ring-1 ring-slate-200'
+          "
+          [style.animation-delay]="i * 0.15 + 's'"
+        >
+          <!-- Step Number -->
+          <div
+            class="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br text-2xl font-bold text-white shadow-lg"
+            [ngClass]="step.color"
+          >
+            {{ step.step }}
+          </div>
+
+          <!-- Content -->
+          <h3 class="text-xl font-semibold" [ngClass]="isDark ? 'text-white' : 'text-slate-900'">
+            {{ step.title }}
+          </h3>
+          <p class="mt-3 text-base" [ngClass]="isDark ? 'text-slate-400' : 'text-slate-600'">
+            {{ step.copy }}
+          </p>
+
+          <!-- Connector Arrow (except last) -->
+          <div
+            *ngIf="i < setupSteps.length - 1"
+            class="absolute -right-4 top-1/2 hidden -translate-y-1/2 md:block"
+          >
+            <svg
+              class="h-8 w-8"
+              [ngClass]="isDark ? 'text-slate-700' : 'text-slate-300'"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 7l5 5m0 0l-5 5m5-5H6"
+              />
+            </svg>
+          </div>
         </article>
       </div>
     </section>
 
-    <section id="contact" class="relative z-10 mx-auto w-full max-w-6xl px-6 pt-20 pb-16">
-      <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-        <div class="animate-fade space-y-5">
-          <p class="text-sm uppercase tracking-[0.25em]" [ngClass]="isDark ? 'text-slate-400' : 'text-slate-500'">
-            Getting started</p>
-          <h2 class="text-3xl font-semibold">We deploy SAMS with you—no heavy lift.</h2>
-          <p class="text-base" [ngClass]="isDark ? 'text-slate-300' : 'text-slate-600'">
-            From data migration to staff onboarding, our team co-pilots every step. Most campuses go live inside two
-            weeks with tailored playbooks and success partners.
+    <!-- Features Grid Section -->
+    <section id="features" class="mx-auto max-w-7xl px-6 py-20">
+      <div class="text-center">
+        <h2
+          class="text-3xl font-bold sm:text-4xl"
+          [ngClass]="isDark ? 'text-white' : 'text-slate-900'"
+        >
+          Everything You Need to Run Your Academy
+        </h2>
+        <p class="mt-4 text-lg" [ngClass]="isDark ? 'text-slate-300' : 'text-slate-600'">
+          Powerful features designed specifically for independent teachers and academy owners
+        </p>
+      </div>
+
+      <div class="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <article
+          *ngFor="let feature of features; let i = index"
+          class="animate-fade group rounded-2xl p-8 transition-all hover:scale-105"
+          [ngClass]="
+            isDark
+              ? 'bg-slate-900/50 ring-1 ring-slate-800 hover:bg-slate-900/70'
+              : 'bg-white ring-1 ring-slate-200 hover:shadow-xl'
+          "
+          [style.animation-delay]="i * 0.1 + 's'"
+        >
+          <!-- Icon -->
+          <div class="mb-4 text-5xl">{{ feature.icon }}</div>
+
+          <!-- Title -->
+          <h3 class="text-xl font-semibold" [ngClass]="isDark ? 'text-white' : 'text-slate-900'">
+            {{ feature.title }}
+          </h3>
+
+          <!-- Description -->
+          <p class="mt-3 text-base" [ngClass]="isDark ? 'text-slate-400' : 'text-slate-600'">
+            {{ feature.copy }}
           </p>
-          <div class="flex flex-wrap gap-3">
-            <a routerLink="/dashboard/staff/staff-dashboard"
-              class="inline-flex items-center gap-2 rounded-full px-6 py-3 text-base font-semibold shadow-lg transition"
-              [ngClass]="isDark ? 'bg-cyan-400 text-slate-900 hover:bg-cyan-300' : 'bg-slate-900 text-white hover:bg-slate-800'">
-              Start now
-            </a>
-            <a href="mailto:team@sams.app"
-              class="inline-flex items-center gap-2 rounded-full border px-6 py-3 text-base font-semibold transition"
-              [ngClass]="isDark ? 'border-slate-700 bg-white/5 hover:bg-white/10' : 'border-slate-200 bg-white hover:bg-slate-100'">
-              Email the team
-            </a>
-          </div>
-        </div>
-        <div class="animate-fade anim-delay-300 rounded-3xl border p-6 shadow-xl"
-          [ngClass]="isDark ? 'border-slate-800 bg-slate-900/70' : 'border-slate-200 bg-white'">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs uppercase tracking-[0.25em]" [ngClass]="isDark ? 'text-slate-400' : 'text-slate-500'">
-                Implementation timeline</p>
-              <h3 class="mt-1 text-xl font-semibold">Two-week runway</h3>
+        </article>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="mx-auto max-w-7xl px-6 py-20">
+      <div class="text-center">
+        <h2
+          class="text-3xl font-bold sm:text-4xl"
+          [ngClass]="isDark ? 'text-white' : 'text-slate-900'"
+        >
+          Trusted by Teachers Across Egypt
+        </h2>
+        <p class="mt-4 text-lg" [ngClass]="isDark ? 'text-slate-300' : 'text-slate-600'">
+          Real stories from academy owners who transformed their teaching business
+        </p>
+      </div>
+
+      <div class="mt-16 grid gap-8 md:grid-cols-3">
+        <article
+          *ngFor="let testimonial of testimonials; let i = index"
+          class="animate-fade rounded-2xl p-8"
+          [ngClass]="
+            isDark ? 'bg-slate-900/50 ring-1 ring-slate-800' : 'bg-white ring-1 ring-slate-200'
+          "
+          [style.animation-delay]="i * 0.15 + 's'"
+        >
+          <!-- Quote Icon -->
+          <svg
+            class="mb-4 h-10 w-10 opacity-50"
+            [ngClass]="isDark ? 'text-cyan-400' : 'text-cyan-600'"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+            />
+          </svg>
+
+          <!-- Quote -->
+          <p
+            class="text-base leading-relaxed"
+            [ngClass]="isDark ? 'text-slate-300' : 'text-slate-700'"
+          >
+            "{{ testimonial.quote }}"
+          </p>
+
+          <!-- Author -->
+          <div class="mt-6 flex items-center gap-4">
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 text-lg font-bold text-white"
+            >
+              {{ testimonial.author.charAt(0) }}
             </div>
-            <span class="rounded-full px-3 py-1 text-xs font-semibold"
-              [ngClass]="isDark ? 'border border-emerald-400/40 bg-emerald-500/20 text-emerald-100' : 'border border-emerald-200 bg-emerald-100 text-emerald-700'">
-              Low lift
-            </span>
+            <div>
+              <p class="font-semibold" [ngClass]="isDark ? 'text-white' : 'text-slate-900'">
+                {{ testimonial.author }}
+              </p>
+              <p class="text-sm" [ngClass]="isDark ? 'text-slate-400' : 'text-slate-600'">
+                {{ testimonial.role }} · {{ testimonial.location }}
+              </p>
+            </div>
           </div>
-          <div class="mt-6 space-y-4">
-            <article *ngFor="let step of timelineSteps" class="flex gap-3 rounded-2xl border p-3"
-              [ngClass]="isDark ? 'border-slate-800 bg-slate-900/70' : 'border-slate-200 bg-white'">
-              <div class="mt-1 h-3 w-3 rounded-full" [ngClass]="step.color"></div>
-              <div>
-                <p class="text-sm font-semibold">{{ step.title }}</p>
-                <p class="text-xs" [ngClass]="isDark ? 'text-slate-400' : 'text-slate-600'">
-                  {{ step.copy }}
-                </p>
-              </div>
-            </article>
+        </article>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="mx-auto max-w-7xl px-6 py-20">
+      <div
+        class="rounded-3xl p-12 text-center"
+        [ngClass]="
+          isDark
+            ? 'bg-gradient-to-br from-slate-900 to-slate-800 ring-1 ring-slate-700'
+            : 'bg-gradient-to-br from-cyan-50 to-purple-50 ring-1 ring-slate-200'
+        "
+      >
+        <div class="mx-auto max-w-3xl">
+          <!-- Badge -->
+          <div
+            class="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold"
+            [ngClass]="
+              isDark
+                ? 'bg-green-500/10 text-green-300 ring-1 ring-green-500/20'
+                : 'bg-green-50 text-green-700 ring-1 ring-green-200'
+            "
+          >
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            Simple, Transparent Pricing
           </div>
+
+          <h2
+            class="text-4xl font-bold sm:text-5xl"
+            [ngClass]="isDark ? 'text-white' : 'text-slate-900'"
+          >
+            Free Forever
+          </h2>
+
+          <p class="mt-6 text-xl" [ngClass]="isDark ? 'text-slate-300' : 'text-slate-600'">
+            Up to <span class="font-bold text-cyan-600">75 active students</span> at absolutely no
+            cost. Perfect for most independent teachers and small academies.
+          </p>
+
+          <div
+            class="mt-8 flex flex-wrap items-center justify-center gap-6 text-base"
+            [ngClass]="isDark ? 'text-slate-400' : 'text-slate-600'"
+          >
+            <div class="flex items-center gap-2">
+              <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span>All features included</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span>No hidden fees</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span>Cancel anytime</span>
+            </div>
+          </div>
+
+          <p class="mt-8 text-sm" [ngClass]="isDark ? 'text-slate-500' : 'text-slate-500'">
+            Need more than 75 students? Paid plans with additional features coming soon.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section id="final-cta" class="mx-auto max-w-7xl px-6 py-20">
+      <div
+        class="relative overflow-hidden rounded-3xl p-12 text-center sm:p-16"
+        [ngClass]="
+          isDark
+            ? 'bg-gradient-to-br from-cyan-600 to-purple-600'
+            : 'bg-gradient-to-br from-cyan-500 to-purple-500'
+        "
+      >
+        <!-- Background Pattern -->
+        <div class="pointer-events-none absolute inset-0 opacity-10">
+          <div
+            class="absolute inset-0"
+            style="
+              background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0);
+              background-size: 32px 32px;
+            "
+          ></div>
+        </div>
+
+        <div class="relative z-10 mx-auto max-w-3xl">
+          <h2 class="text-4xl font-bold text-white sm:text-5xl">Ready to Start Your Academy?</h2>
+          <p class="mt-6 text-xl text-white/90">
+            Join hundreds of teachers who've already launched their independent academies. No
+            technical skills required. No credit card needed. Just sign up and start teaching.
+          </p>
+
+          <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <a
+              routerLink="/login"
+              class="group inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-semibold shadow-xl transition-all hover:scale-105"
+              [ngClass]="
+                isDark ? 'text-slate-900 hover:bg-slate-50' : 'text-slate-900 hover:bg-slate-50'
+              "
+            >
+              Start Your Academy — It's Free
+              <svg
+                class="h-5 w-5 transition-transform group-hover:translate-x-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </a>
+          </div>
+
+          <p class="mt-6 text-sm text-white/80">
+            Questions? Email us at
+            <a href="mailto:support@sams.app" class="font-semibold underline hover:text-white"
+              >support@sams.app</a
+            >
+          </p>
         </div>
       </div>
     </section>
