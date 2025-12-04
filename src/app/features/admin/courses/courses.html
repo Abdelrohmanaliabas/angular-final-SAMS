@@ -1,53 +1,48 @@
 <section class="list-wrapper">
   <header class="list-header">
-    <h2>{{ i18n.t('courses.title') }}</h2>
-    <p class="muted">{{ i18n.t('courses.subtitle') }}</p>
+    <h2>Courses</h2>
+    <p class="muted">Available courses and their instructors</p>
   </header>
 
   <div class="toolbar">
-    <input [placeholder]="i18n.t('courses.search')" class="search" />
-    <button class="btn-primary" (click)="openForm()">{{ i18n.t('courses.add') }}</button>
+    <input placeholder="Search courses..." class="search" [(ngModel)]="searchTerm" />
+  </div>
+
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>Loading courses...</span>
   </div>
 
   <table class="list-table glass">
     <thead>
-      <tr><th>{{ i18n.t('course.title') }}</th><th>{{ i18n.t('table.center') }}</th><th>{{ i18n.t('table.teacher') }}</th><th>{{ i18n.t('table.status') }}</th><th>{{ i18n.t('table.actions') }}</th></tr>
+      <tr><th>Course title</th><th>Center</th><th>Teacher</th><th>Status</th><th>Actions</th></tr>
     </thead>
     <tbody>
-      <tr *ngFor="let c of courses">
-        <td>{{c.title}}</td>
-        <td>{{c.center}}</td>
-        <td>{{c.teacher}}</td>
-        <td>{{c.status}}</td>
+      <tr *ngFor="let c of filteredCourses">
+        <td>{{ c.title }}</td>
+        <td>{{ c.center }}</td>
+        <td>{{ c.teacher }}</td>
+        <td>{{ c.status }}</td>
         <td>
-          <button class="btn-simple" (click)="openForm(c)">{{ i18n.t('action.edit') }}</button>
-          <button class="btn-simple muted" (click)="delete(c)">{{ i18n.t('action.delete') }}</button>
+          <button class="btn-simple" (click)="openInfo(c)">Info</button>
         </td>
       </tr>
     </tbody>
   </table>
 </section>
 
-<!-- overlay form -->
-<div class="overlay" [class.open]="isFormOpen" (click)="closeForm()"></div>
-<div class="side-panel glass" [class.open]="isFormOpen" (click)="$event.stopPropagation()">
+<div class="overlay" [class.open]="infoOpen" (click)="closeInfo()"></div>
+<div class="side-panel glass" [class.open]="infoOpen" (click)="$event.stopPropagation()">
   <div class="panel-header">
-    <h3>{{ isEditMode ? i18n.t('action.edit') : i18n.t('courses.add') }}</h3>
-    <button class="close-btn" (click)="closeForm()">×</button>
+    <h3>Course info</h3>
+    <button class="close-btn" (click)="closeInfo()">X</button>
   </div>
-  <form class="panel-body" (ngSubmit)="save()">
-    <label class="label">{{ i18n.t('course.title') }}</label>
-    <input class="input" name="title" [(ngModel)]="formCourse.title" required />
-
-    <label class="label">{{ i18n.t('table.center') }}</label>
-    <input class="input" name="center" [(ngModel)]="formCourse.center" required />
-
-    <label class="label">{{ i18n.t('table.teacher') }}</label>
-    <input class="input" name="teacher" [(ngModel)]="formCourse.teacher" required />
-
-    <label class="label">{{ i18n.t('table.status') }}</label>
-    <input class="input" name="status" [(ngModel)]="formCourse.status" required />
-
-    <button type="submit" class="btn-primary full">{{ isEditMode ? i18n.t('action.edit') : i18n.t('courses.add') }}</button>
-  </form>
+  <div class="panel-body" *ngIf="selectedCourse">
+    <p><strong>Title:</strong> {{ selectedCourse.title }}</p>
+    <p><strong>Center:</strong> {{ selectedCourse.center || '-' }}</p>
+    <p><strong>Teacher:</strong> {{ selectedCourse.teacher || '-' }}</p>
+    <p><strong>Status:</strong> {{ selectedCourse.status }}</p>
+    <p><strong>Group ID:</strong> {{ selectedCourse.id }}</p>
+    <p><strong>Approval required:</strong> {{ selectedCourse.raw?.is_approval_required ? 'Yes' : 'No' }}</p>
+  </div>
 </div>
