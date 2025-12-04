@@ -11,6 +11,10 @@ import { AttendanceRecord } from '../models/attendance.model';
 export class StudentService {
   private api = inject(ApiService);
 
+  getHomeDashboard(): Observable<any> {
+    return this.api.get('/dashboard/student/home');
+  }
+
   getDashboardSummary(): Observable<any> {
     // Placeholder: Replace with actual API call
     // return this.api.get('/student/summary');

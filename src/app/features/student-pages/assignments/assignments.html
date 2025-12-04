@@ -1,18 +1,19 @@
-<div class="p-6 space-y-6">
-  <header>
-    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Assignments</h1>
-    <p class="text-slate-500 dark:text-slate-400">Track your upcoming and past assignments.</p>
+<div class="student-shell space-y-6">
+  <header class="space-y-2">
+    <p class="text-sm font-semibold text-[#0D9488] dark:text-[#34D399] uppercase tracking-wide">Tasks</p>
+    <h1 class="text-3xl font-bold text-[#0F172A] dark:text-[#F8FAFC]">Assignments</h1>
+    <p class="student-muted">Track your upcoming and past assignments.</p>
   </header>
 
   <div class="space-y-4">
     @for (assignment of assignments$ | async; track assignment.id) {
     <div
-      class="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      class="student-card lift p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div class="flex items-start gap-4">
         <div class="h-10 w-10 rounded-full flex items-center justify-center shrink-0" [ngClass]="{
-              'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400': assignment.status === 'pending',
-              'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400': assignment.status === 'submitted',
-              'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400': assignment.status === 'graded'
+              'bg-[#FEF3C7] text-[#D97706] border border-[#FCD34D]': assignment.status === 'pending',
+              'bg-[#D1FAE5] text-[#059669] border border-[#A7F3D0]': assignment.status === 'submitted',
+              'bg-[#DBEAFE] text-[#1D4ED8] border border-[#BFDBFE]': assignment.status === 'graded'
             }">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -20,22 +21,21 @@
           </svg>
         </div>
         <div>
-          <h3 class="font-semibold text-slate-900 dark:text-white">{{ assignment.title }}</h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400">Due: {{ assignment.dueDate | date:'mediumDate' }}</p>
+          <h3 class="font-semibold text-[#0F172A] dark:text-[#F8FAFC]">{{ assignment.title }}</h3>
+          <p class="text-sm student-muted">Due: {{ assignment.dueDate | date:'mediumDate' }}</p>
         </div>
       </div>
 
       <div class="flex items-center gap-3 self-end sm:self-auto">
         @if (assignment.status === 'graded') {
-        <span
-          class="px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+        <span class="student-badge info">
           Grade: {{ assignment.grade }}/100
         </span>
         }
-        <span class="px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wider" [ngClass]="{
-              'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300': assignment.status === 'pending',
-              'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300': assignment.status === 'submitted',
-              'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300': assignment.status === 'graded'
+        <span class="student-pill uppercase" [ngClass]="{
+              'warning': assignment.status === 'pending',
+              'teal': assignment.status === 'submitted',
+              'indigo': assignment.status === 'graded'
             }">
           {{ assignment.status }}
         </span>
@@ -43,15 +43,15 @@
     </div>
     } @empty {
     <div
-      class="py-12 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 border-dashed">
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-700/50 mb-4">
-        <svg class="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      class="student-card student-empty py-12 text-center">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F1F5F9] dark:bg-[#334155] mb-4">
+        <svg class="w-8 h-8 student-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
       </div>
-      <h3 class="text-lg font-medium text-slate-900 dark:text-white">No assignments</h3>
-      <p class="text-slate-500 dark:text-slate-400 mt-1">You're all caught up! No pending assignments.</p>
+      <h3 class="text-lg font-medium text-[#0F172A] dark:text-[#F8FAFC]">No assignments</h3>
+      <p class="student-muted mt-1">You're all caught up! No pending assignments.</p>
     </div>
     }
   </div>

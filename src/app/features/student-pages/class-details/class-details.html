@@ -1,10 +1,10 @@
-<div class="p-6 space-y-6" *ngIf="classDetails$ | async as classDetails">
+<div class="student-shell space-y-6" *ngIf="classDetails$ | async as classDetails">
   <!-- Header -->
-  <header class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm">
+  <header class="student-card p-6 lift">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">{{ classDetails.name }}</h1>
-        <p class="text-slate-500 dark:text-slate-400 flex items-center gap-2">
+        <h1 class="text-3xl font-bold text-[#0F172A] dark:text-[#F8FAFC] mb-2">{{ classDetails.name }}</h1>
+        <p class="student-muted flex items-center gap-2">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -14,10 +14,10 @@
       </div>
       <div class="flex flex-col items-end gap-2">
         <span
-          class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 text-sm font-medium">
+          class="student-pill indigo">
           {{ classDetails.subject }}
         </span>
-        <p class="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1">
+        <p class="text-sm student-muted flex items-center gap-1">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -26,21 +26,21 @@
         </p>
       </div>
     </div>
-    <p class="mt-4 text-slate-600 dark:text-slate-300">{{ classDetails.description }}</p>
+    <p class="mt-4 student-muted">{{ classDetails.description }}</p>
   </header>
 
   <!-- Class Schedule Calendar -->
   <div
-    class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
-    <div class="p-4 border-b border-slate-100 dark:border-slate-700">
-      <h2 class="text-lg font-bold text-slate-900 dark:text-white">Monthly Schedule</h2>
+    class="student-card overflow-hidden">
+    <div class="p-4 border-b border-[var(--student-border)]">
+      <h2 class="text-lg font-bold text-[#0F172A] dark:text-[#F8FAFC]">Monthly Schedule</h2>
     </div>
     @if (schedule$ | async; as schedule) {
     <div class="p-4">
       <!-- Weekday Headers -->
       <div class="grid grid-cols-7 gap-2 mb-2">
         @for (day of ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; track day) {
-        <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 py-2">{{ day }}</div>
+        <div class="text-center text-xs font-medium student-muted py-2">{{ day }}</div>
         }
       </div>
 
@@ -48,17 +48,16 @@
       <div class="grid grid-cols-7 gap-2">
         @for (day of getCalendarDays(); track day.date) {
         <div
-          class="aspect-square border border-slate-200 dark:border-slate-600 rounded-lg p-2 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
-          [class.bg-slate-50]="!day.isCurrentMonth" [class.dark:bg-slate-700/20]="!day.isCurrentMonth"
-          [class.border-indigo-500]="day.hasClass" [class.bg-indigo-50]="day.hasClass"
-          [class.dark:bg-indigo-900/20]="day.hasClass">
-          <div class="text-sm font-medium text-slate-900 dark:text-white" [class.text-slate-400]="!day.isCurrentMonth">
+          class="aspect-square border border-[var(--student-border)] rounded-lg p-2 hover:bg-[var(--student-elevated)] transition-colors"
+          [class.opacity-60]="!day.isCurrentMonth"
+          [ngClass]="day.hasClass ? ['bg-[#E0F2FE]', 'dark:bg-[#1E3A8A]', 'border-[#2563EB]'] : []">
+          <div class="text-sm font-medium text-[#0F172A] dark:text-[#F8FAFC]" [class.student-muted]="!day.isCurrentMonth">
             {{ day.dayNumber }}
           </div>
           @if (day.hasClass) {
           <div class="mt-1">
-            <div class="text-xs font-medium text-indigo-600 dark:text-indigo-400">{{ day.classTime }}</div>
-            <div class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ day.location }}</div>
+            <div class="text-xs font-semibold text-[#2563EB] dark:text-[#93C5FD]">{{ day.classTime }}</div>
+            <div class="text-xs student-muted truncate">{{ day.location }}</div>
           </div>
           }
         </div>
@@ -66,10 +65,10 @@
       </div>
 
       <!-- Legend -->
-      <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+      <div class="mt-4 pt-4 border-t border-[var(--student-border)]">
         <div class="flex items-center gap-2 text-sm">
-          <div class="w-4 h-4 rounded bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-500"></div>
-          <span class="text-slate-600 dark:text-slate-400">Class Day</span>
+          <div class="w-4 h-4 rounded bg-[#E0F2FE] dark:bg-[#1E3A8A] border border-[#2563EB]"></div>
+          <span class="student-muted">Class Day</span>
         </div>
       </div>
     </div>
@@ -78,13 +77,13 @@
 
   <!-- Lessons List -->
   <div class="space-y-4">
-    <h2 class="text-xl font-bold text-slate-900 dark:text-white">Lessons & Resources</h2>
+    <h2 class="text-xl font-bold text-[#0F172A] dark:text-[#F8FAFC]">Lessons & Resources</h2>
 
     @for (lesson of classDetails.lessons; track lesson.id) {
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 overflow-hidden">
-      <div class="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
-        <h3 class="font-semibold text-lg text-slate-900 dark:text-white">{{ lesson.title }}</h3>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ lesson.description }}</p>
+    <div class="student-card overflow-hidden">
+      <div class="p-4 border-b border-[var(--student-border)] bg-[var(--student-elevated)]">
+        <h3 class="font-semibold text-lg text-[#0F172A] dark:text-[#F8FAFC]">{{ lesson.title }}</h3>
+        <p class="text-sm student-muted mt-1">{{ lesson.description }}</p>
       </div>
 
       <div class="p-4 space-y-3">
@@ -92,7 +91,7 @@
         @for (resource of lesson.resources; track resource.id) {
         @if (resource.type === 'video') {
         <a [routerLink]="['/dashboard/video']" [queryParams]="{url: resource.url, title: resource.title}"
-          class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-600">
+          class="flex items-center gap-3 p-3 rounded-lg hover:bg-[var(--student-elevated)] transition-colors border border-transparent hover:border-[var(--student-border)]">
           <div
             class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,16 +102,16 @@
             </svg>
           </div>
           <div>
-            <h4 class="font-medium text-slate-900 dark:text-white">{{ resource.title }}</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Watch Video</p>
+            <h4 class="font-medium text-[#0F172A] dark:text-[#F8FAFC]">{{ resource.title }}</h4>
+            <p class="text-xs student-muted">Watch Video</p>
           </div>
         </a>
         } @else {
         <a [href]="resource.url" target="_blank"
-          class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-600">
+          class="flex items-center gap-3 p-3 rounded-lg hover:bg-[var(--student-elevated)] transition-colors border border-transparent hover:border-[var(--student-border)]">
           <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" [ngClass]="{
-                      'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400': resource.type === 'file',
-                      'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400': resource.type === 'link'
+                      'bg-[#DBEAFE] text-[#1D4ED8] dark:bg-[#1E3A8A] dark:text-[#BFDBFE]': resource.type === 'file',
+                      'bg-[#D1FAE5] text-[#059669] dark:bg-[#14532D] dark:text-[#A7F3D0]': resource.type === 'link'
                     }">
             @if (resource.type === 'file') {
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -127,20 +126,20 @@
             }
           </div>
           <div>
-            <h4 class="font-medium text-slate-900 dark:text-white">{{ resource.title }}</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400 capitalize">{{ resource.type }}</p>
+            <h4 class="font-medium text-[#0F172A] dark:text-[#F8FAFC]">{{ resource.title }}</h4>
+            <p class="text-xs student-muted capitalize">{{ resource.type }}</p>
           </div>
         </a>
         }
         }
         } @else {
-        <p class="text-sm text-slate-500 dark:text-slate-400 italic px-2">No resources available for this lesson.</p>
+        <p class="text-sm student-muted italic px-2">No resources available for this lesson.</p>
         }
       </div>
     </div>
     } @empty {
-    <div class="text-center py-12 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
-      <p class="text-slate-500 dark:text-slate-400">No lessons added to this class yet.</p>
+    <div class="text-center py-12 student-card student-empty">
+      <p class="student-muted">No lessons added to this class yet.</p>
     </div>
     }
   </div>
