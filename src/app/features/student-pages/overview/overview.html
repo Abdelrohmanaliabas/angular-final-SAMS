@@ -99,21 +99,24 @@
                     <div class="space-y-3">
                         @for (cls of classes; track cls.id) {
                         <div class="flex items-center justify-between p-3 rounded-xl bg-[#F1F5F9] dark:bg-[#334155] border border-[#E2E8F0] dark:border-[#334155]/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#14B8A6] dark:hover:border-[#0D9488]">
-                            <div class="flex items-center gap-3">
-                        <div
-                            class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-200 font-semibold">
-                            {{ (cls.title || cls.name || '').charAt(0) || 'C' }}
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-200 font-semibold">
+                                {{ (cls.title || cls.name || '').charAt(0) || 'C' }}
+                            </div>
+                            <div>
+                                <p class="font-medium text-[#0F172A] dark:text-[#F8FAFC]">{{ cls.title || cls.name }}</p>
+                                <p class="text-xs text-[#94A3B8] dark:text-[#CBD5E1]">
+                                    Group: {{ cls.group_id || '—' }} • Lesson : {{ cls.id || '—' }}
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="font-medium text-[#0F172A] dark:text-[#F8FAFC]">{{ cls.title || cls.name }}</p>
-                        </div>
+                        <span class="text-sm font-semibold text-[#0D9488] dark:text-[#34D399]">
+                            {{ (cls.scheduled_at || cls.scheduledAt) | date:'d/M/y, h:mm a' }}
+                        </span>
                     </div>
-                    <span class="text-sm font-semibold text-[#0D9488] dark:text-[#34D399]">
-                        {{ (cls.scheduled_at || cls.scheduledAt) | date:'d/M/y, h:mm a' }}
-                    </span>
+                    }
                 </div>
-                }
-            </div>
                     } @else {
                     <p class="text-sm text-[#94A3B8] dark:text-[#CBD5E1] text-center py-4">No classes scheduled for today or
                         tomorrow</p>
@@ -144,6 +147,9 @@
                                 <p class="font-medium text-[#0F172A] dark:text-[#F8FAFC]">{{ assignment.title }}</p>
                                 <p class="text-sm text-[#475569] dark:text-[#CBD5E1]">
                                     Max Score: {{ assignment.max_score || assignment.maxScore || 'N/A' }}
+                                </p>
+                                <p class="text-xs text-[#94A3B8] dark:text-[#CBD5E1]">
+                                    Group: {{ assignment.group_id || '—' }} • Center: {{ assignment.center_id || '—' }}
                                 </p>
                             </div>
                             <div class="text-right">
