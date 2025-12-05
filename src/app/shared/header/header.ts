@@ -5,6 +5,7 @@ import { ThemeService } from '../../core/services/theme.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { TokenStorageService } from '../../core/auth/token-storage.service';
 import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
+import { APP_CONFIG } from '../../core/config/app.config';
 
 @Component({
   selector: 'app-header',
@@ -26,6 +27,7 @@ export class Header implements OnInit {
   isMenuOpen = false;
   isUserMenuOpen = false;
 
+  readonly appName = APP_CONFIG.name;
   readonly navLinks = [
     { label: 'Home', route: '/home', fragment: 'hero' },
     { label: 'About Us', route: '/home', fragment: 'about' },

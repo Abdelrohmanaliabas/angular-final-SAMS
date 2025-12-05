@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './app.css'
 })
 export class App implements OnInit, OnDestroy {
-  protected readonly title = signal('final-angular-SAMS');
+  protected readonly title = signal('ClassSphere');
 
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
