@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-export type ToastTone = 'success' | 'error' | 'info' | 'warning';
+export type ToastTone = 'success' | 'error' | 'info' | 'warning' | 'danger';
 
 export interface UiToast {
   id: string;
@@ -14,6 +14,7 @@ export interface UiModal {
   icon?: ToastTone;
   title: string;
   message: string;
+  tone?: ToastTone;
   primaryText?: string;
   secondaryText?: string;
   onPrimary?: () => void;

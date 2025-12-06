@@ -1,0 +1,99 @@
+<section class="list-wrapper">
+  <header class="list-header">
+    <h2>{{ isCenterAdmin ? (activeRole === 'teacher' ? 'Teachers' : 'Assistants') : 'Teachers' }}</h2>
+    <p class="muted">
+      {{ isCenterAdmin ? 'Manage staff assigned to this center' : 'Teaching staff and their assigned centers' }}
+    </p>
+  </header>
+
+  <div class="toolbar">
+    <input placeholder="Search teachers..." class="search" [(ngModel)]="searchTerm" />
+    <div class="toolbar-actions" *ngIf="isCenterAdmin">
+      <div class="segment">
+        <button type="button" [class.active]="activeRole === 'teacher'" (click)="setRoleFilter('teacher')">Teachers</button>
+        <button type="button" [class.active]="activeRole === 'assistant'" (click)="setRoleFilter('assistant')">Assistants</button>
+      </div>
+      <button class="btn-primary" type="button" (click)="openCreate('teacher')" *ngIf="activeRole === 'teacher'">
+        Add Teacher
+      </button>
+      <button class="btn-primary" type="button" (click)="openCreate('assistant')" *ngIf="activeRole === 'assistant'">
+        Add Assistant
+      </button>
+    </div>
+  </div>
+
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>Loading teachers...</span>
+  </div>
+
+  <div class="cards-grid">
+    <div class="teacher-card glass" *ngFor="let t of filteredTeachers">
+      <div class="card-head">
+        <div class="avatar">{{ t.name ? t.name[0] : '?' }}</div>
+        <div>
+          <div class="name">{{ t.name }}</div>
+          <div class="muted">{{ t.email }}</div>
+        </div>
+      </div>
+      <div class="meta">
+        <span>Center: {{ t.center || '-' }}</span>
+        <span>Courses: {{ t.courses }}</span>
+        <span>Phone: {{ t.phone || '-' }}</span>
+      </div>
+      <div class="actions">
+        <button class="btn-simple" (click)="openInfo(t)">Info</button>
+        <button class="btn-simple" *ngIf="isCenterAdmin" (click)="openEdit(t)">Edit</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="overlay" [class.open]="panelOpen" (click)="closeInfo()"></div>
+<div class="side-panel glass" [class.open]="panelOpen" (click)="$event.stopPropagation()">
+  <div class="panel-header">
+    <h3>{{ panelTitle }}</h3>
+    <button class="close-btn" (click)="closeInfo()">X</button>
+  </div>
+  <div class="panel-body" *ngIf="panelMode === 'info' && selectedTeacher">
+    <p><strong>Name:</strong> {{ selectedTeacher.name }}</p>
+    <p><strong>Email:</strong> {{ selectedTeacher.email }}</p>
+    <p><strong>Center:</strong> {{ selectedTeacher.center || '-' }}</p>
+    <p><strong>Courses taught:</strong> {{ selectedTeacher.courses }}</p>
+    <p><strong>Phone:</strong> {{ selectedTeacher.phone || '-' }}</p>
+    <p><strong>User ID:</strong> {{ selectedTeacher.id }}</p>
+    <div class="panel-actions" *ngIf="isCenterAdmin">
+      <button class="btn-primary" type="button" (click)="openEdit(selectedTeacher)">Edit</button>
+      <button class="btn-danger" type="button" (click)="deleteSelected()" [disabled]="processing">Delete</button>
+    </div>
+  </div>
+
+  <div class="panel-body" *ngIf="panelMode !== 'info'">
+    <div class="field">
+      <label>Name</label>
+      <input type="text" [(ngModel)]="form.name" placeholder="Full name" />
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" [(ngModel)]="form.email" placeholder="Email address" />
+    </div>
+    <div class="field">
+      <label>Phone</label>
+      <input type="text" [(ngModel)]="form.phone" placeholder="Optional phone" />
+    </div>
+    <div class="panel-actions">
+      <button class="btn-primary" type="button" (click)="submitForm()" [disabled]="processing">
+        {{ panelMode === 'create' ? 'Create' : 'Save changes' }}
+      </button>
+      <button
+        class="btn-danger"
+        type="button"
+        *ngIf="panelMode === 'edit'"
+        (click)="deleteSelected()"
+        [disabled]="processing"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+</div>

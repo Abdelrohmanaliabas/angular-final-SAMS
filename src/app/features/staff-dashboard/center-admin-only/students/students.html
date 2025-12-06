@@ -1,0 +1,132 @@
+<section class="list-wrapper">
+  <header class="list-header">
+    <h2>Students</h2>
+    <p class="muted">Enrolled students and their centers</p>
+  </header>
+
+  <div class="toolbar">
+    <input placeholder="Search students..." class="search" [(ngModel)]="searchTerm" />
+    <div class="toolbar-actions" *ngIf="canAddMembers">
+      <button class="btn-primary" type="button" (click)="openCreateStudent()">Add Student</button>
+      <button class="btn-secondary" type="button" (click)="openCreateParent()">Add Parent</button>
+    </div>
+  </div>
+
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>Loading students...</span>
+  </div>
+
+  <table class="list-table glass">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Center</th>
+        <th>Groups</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let s of filteredStudents">
+        <td>
+          <div class="font-semibold">{{ s.name }}</div>
+          <small class="muted">{{ s.phone }}</small>
+        </td>
+        <td>{{ s.email }}</td>
+        <td>{{ s.center }}</td>
+        <td>
+          <span class="group-pill" *ngFor="let group of s.groups">{{ group }}</span>
+        </td>
+        <td>
+          <span class="status-pill" [class.active]="s.status === 'active'">{{ s.status }}</span>
+        </td>
+        <td>
+          <button class="btn-simple" (click)="openInfo(s)">Info</button>
+          <button class="btn-simple" *ngIf="canEditStudents" (click)="openEditStudent(s)">Edit</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="overlay" [class.open]="panelOpen" (click)="closeInfo()"></div>
+<div class="side-panel glass" [class.open]="panelOpen" (click)="$event.stopPropagation()">
+  <div class="panel-header">
+    <h3>{{ panelTitle }}</h3>
+    <button class="close-btn" (click)="closeInfo()">X</button>
+  </div>
+  <div class="panel-body" *ngIf="panelMode === 'info' && selectedStudent">
+    <p><strong>Name:</strong> {{ selectedStudent.name }}</p>
+    <p><strong>Email:</strong> {{ selectedStudent.email }}</p>
+    <p><strong>Center:</strong> {{ selectedStudent.center || '-' }}</p>
+    <p><strong>Groups:</strong> {{ selectedStudent.groups?.join(', ') || '—' }}</p>
+    <p><strong>Phone:</strong> {{ selectedStudent.phone || '—' }}</p>
+    <p><strong>Status:</strong> {{ selectedStudent.status }}</p>
+    <p><strong>User ID:</strong> {{ selectedStudent.id }}</p>
+    <div class="panel-actions" *ngIf="canEditStudents">
+      <button class="btn-primary" type="button" (click)="openEditStudent(selectedStudent)">Edit</button>
+      <button class="btn-danger" type="button" (click)="deleteStudent()" [disabled]="processing">Delete</button>
+    </div>
+  </div>
+
+  <div class="panel-body" *ngIf="panelMode === 'create-student' || panelMode === 'edit-student'">
+    <div class="field">
+      <label>Name</label>
+      <input type="text" [(ngModel)]="studentForm.name" placeholder="Full name" />
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" [(ngModel)]="studentForm.email" placeholder="Email address" />
+    </div>
+    <div class="field">
+      <label>Phone</label>
+      <input type="text" [(ngModel)]="studentForm.phone" placeholder="Optional phone" />
+    </div>
+    <div class="field" *ngIf="panelMode === 'create-student'">
+      <label>Group</label>
+      <select [(ngModel)]="studentForm.groupId">
+        <option *ngFor="let group of availableGroups" [value]="group.id">{{ group.name }}</option>
+      </select>
+    </div>
+    <div class="panel-actions">
+      <button class="btn-primary" type="button" (click)="submitStudent()" [disabled]="processing">
+        {{ panelMode === 'create-student' ? 'Create' : 'Save changes' }}
+      </button>
+      <button
+        class="btn-danger"
+        type="button"
+        *ngIf="panelMode === 'edit-student'"
+        (click)="deleteStudent()"
+        [disabled]="processing"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+
+  <div class="panel-body" *ngIf="panelMode === 'create-parent'">
+    <div class="field">
+      <label>Name</label>
+      <input type="text" [(ngModel)]="parentForm.name" placeholder="Full name" />
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" [(ngModel)]="parentForm.email" placeholder="Email address" />
+    </div>
+    <div class="field">
+      <label>Phone</label>
+      <input type="text" [(ngModel)]="parentForm.phone" placeholder="Optional phone" />
+    </div>
+    <div class="field">
+      <label>Linked student</label>
+      <select [(ngModel)]="parentForm.studentId">
+        <option *ngFor="let student of students" [value]="student.id">{{ student.name }}</option>
+      </select>
+    </div>
+    <div class="panel-actions">
+      <button class="btn-primary" type="button" (click)="submitParent()" [disabled]="processing">Create</button>
+    </div>
+  </div>
+</div>
