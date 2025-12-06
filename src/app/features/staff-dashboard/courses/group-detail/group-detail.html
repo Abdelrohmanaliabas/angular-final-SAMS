@@ -1,0 +1,153 @@
+<section class="group-wrapper" *ngIf="group; else loadingOrError">
+  <header class="group-header">
+    <div>
+      <p class="eyebrow">Class overview</p>
+      <h1>{{ group?.name }}</h1>
+      <p class="muted">{{ group?.description || 'No description provided.' }}</p>
+    </div>
+    <div class="header-actions" *ngIf="canManageGroup">
+      <button class="btn-primary" type="button" (click)="openLessonForm()">Add Lesson</button>
+      <button class="btn-secondary" type="button" (click)="openAttendanceForm()" [disabled]="!students.length">
+        Mark Attendance
+      </button>
+    </div>
+    <div class="meta-grid">
+      <div>
+        <p class="label">Subject</p>
+        <span>{{ group?.subject || 'General' }}</span>
+      </div>
+      <div>
+        <p class="label">Teacher</p>
+        <span>{{ group?.teacher?.name || 'Unassigned' }}</span>
+      </div>
+      <div>
+        <p class="label">Center</p>
+        <span>{{ group?.center?.name || 'N/A' }}</span>
+      </div>
+      <div>
+        <p class="label">Schedule</p>
+        <span>{{ scheduleLabel }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="grid-layout">
+    <section class="card">
+      <header class="card-header">
+        <h2>Students</h2>
+        <span class="counter">{{ students.length }}</span>
+      </header>
+      <div *ngIf="loadingStudents" class="placeholder">Loading students...</div>
+      <div *ngIf="!loadingStudents && !students.length" class="placeholder">No students assigned.</div>
+      <table *ngIf="students.length" class="plain-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let student of students">
+            <td>{{ student.name }}</td>
+            <td>{{ student.email }}</td>
+            <td><span class="status-pill" [class.active]="student.status === 'approved'">{{ student.status }}</span></td>
+            <td>{{ student.joined_at ? (student.joined_at | date:'mediumDate') : '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <header class="card-header">
+        <h2>Lessons</h2>
+        <span class="counter">{{ lessons.length }}</span>
+      </header>
+      <div *ngIf="loadingLessons" class="placeholder">Loading lessons...</div>
+      <div *ngIf="!loadingLessons && !lessons.length" class="placeholder">No lessons scheduled.</div>
+      <ul *ngIf="lessons.length" class="list">
+        <li *ngFor="let lesson of lessons">
+          <div>
+            <p class="title">{{ lesson.title }}</p>
+            <p class="muted">{{ lesson.scheduled_at ? (lesson.scheduled_at | date:'medium') : 'Not scheduled' }}</p>
+          </div>
+          <span class="small-badge">{{ lesson.resources_count }} resources</span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <header class="card-header">
+        <h2>Recent attendance</h2>
+      </header>
+      <div *ngIf="loadingAttendance" class="placeholder">Loading attendance...</div>
+      <div *ngIf="!loadingAttendance && !recentAttendance.length" class="placeholder">No attendance records yet.</div>
+      <ul *ngIf="recentAttendance.length" class="list">
+        <li *ngFor="let entry of recentAttendance">
+          <div>
+            <p class="title">{{ entry.student?.name || entry.student_id }}</p>
+            <p class="muted">{{ entry.date ? (entry.date | date:'mediumDate') : entry.created_at | date:'medium' }}</p>
+          </div>
+          <span class="status-pill" [class.active]="entry.status === 'present'" [class.late]="entry.status === 'late'">
+            {{ entry.status }}
+          </span>
+        </li>
+      </ul>
+    </section>
+  </div>
+</section>
+
+<ng-template #loadingOrError>
+  <div class="placeholder" *ngIf="loadingGroup">Loading group...</div>
+  <div class="placeholder" *ngIf="!loadingGroup">{{ errorMessage || 'Group not found.' }}</div>
+</ng-template>
+
+<div class="overlay" [class.open]="panelOpen" (click)="closePanel()"></div>
+<div class="side-panel glass" [class.open]="panelOpen" (click)="$event.stopPropagation()" *ngIf="panelMode">
+  <div class="panel-header">
+    <h3>{{ panelTitle }}</h3>
+    <button class="close-btn" type="button" (click)="closePanel()">X</button>
+  </div>
+  <div class="panel-body" *ngIf="panelMode === 'lesson'">
+    <div class="field">
+      <label>Title</label>
+      <input type="text" [(ngModel)]="lessonForm.title" placeholder="Lesson title" />
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <textarea [(ngModel)]="lessonForm.description" rows="3" placeholder="Optional description"></textarea>
+    </div>
+    <div class="field">
+      <label>Scheduled at</label>
+      <input type="datetime-local" [(ngModel)]="lessonForm.scheduled_at" />
+    </div>
+    <div class="panel-actions">
+      <button class="btn-primary" type="button" (click)="submitLesson()" [disabled]="processing">Create</button>
+    </div>
+  </div>
+
+  <div class="panel-body" *ngIf="panelMode === 'attendance'">
+    <div class="field">
+      <label>Date</label>
+      <input type="date" [(ngModel)]="attendanceDate" />
+    </div>
+    <div class="field list-field">
+      <label>Statuses</label>
+      <div class="attendance-row" *ngFor="let entry of attendanceEntries">
+        <span>{{ entry.name }}</span>
+        <select [(ngModel)]="entry.status">
+          <option value="present">Present</option>
+          <option value="absent">Absent</option>
+          <option value="late">Late</option>
+          <option value="excused">Excused</option>
+        </select>
+      </div>
+    </div>
+    <div class="panel-actions">
+      <button class="btn-primary" type="button" (click)="submitAttendance()" [disabled]="processing || !attendanceEntries.length">
+        Save attendance
+      </button>
+    </div>
+  </div>
+</div>

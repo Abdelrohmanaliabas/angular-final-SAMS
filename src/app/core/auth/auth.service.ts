@@ -90,4 +90,8 @@ export class AuthService {
         }
         return '/';
     }
+
+    user(): Observable<any> {
+        return this.apiService.get('/me');
+    }
 }
