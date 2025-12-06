@@ -19,9 +19,9 @@
     </thead>
     <tbody>
       <tr *ngFor="let c of filteredCourses">
-        <td class="strong">{{ c.title }}</td>
-        <td><span class="pill">{{ c.center || '-' }}</span></td>
-        <td>{{ c.teacher }}</td>
+        <td class="strong"><span class="truncate" title="{{ c.title }}">{{ c.title }}</span></td>
+        <td><span class="pill truncate" title="{{ c.center || '-' }}">{{ c.center || '-' }}</span></td>
+        <td><span class="pill truncate" title="{{ c.teacher || '-' }}">{{ c.teacher || '-' }}</span></td>
         <td><span class="pill" [ngClass]="c.status === 'Active' ? 'pill-success' : 'pill-muted'">{{ c.status }}</span></td>
         <td><span class="pill pill-ghost">{{ c.studentsCount }} students</span></td>
         <td>

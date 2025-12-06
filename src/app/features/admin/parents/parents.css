@@ -20,7 +20,7 @@
 .list-table { width: 100%; border-collapse: collapse; }
 .list-table th, .list-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border); }
 .list-table thead th { background: var(--glass); color: var(--muted); font-weight: 700; }
-.glass { background: rgba(255,255,255,0.8); border-radius: 12px; }
+.glass { background: var(--glass); border-radius: 12px; border: 1px solid var(--glass-border); }
 .btn-simple { background: var(--glass); border: 1px solid var(--glass-border); color: var(--text); cursor: pointer; padding: 0.45rem 0.8rem; border-radius: 0.75rem; }
 .pill { display: inline-flex; align-items: center; gap: 6px; padding: 0.35rem 0.7rem; border-radius: 999px; background: var(--glass); border: 1px solid var(--glass-border); font-size: 0.9rem; }
 .pill-success { background: #ecfdf3; color: #15803d; border-color: #bbf7d0; }
@@ -34,11 +34,11 @@
 .chip-subtitle { font-size: 0.85rem; font-weight: 700; margin: 0.4rem 0; }
 .child-courses ul { margin: 0.2rem 0 0; padding-left: 1.1rem; color: var(--muted); }
 .loading-overlay { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 10px; margin-bottom: 10px; }
-.spinner { width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.1); border-top-color: #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
-.spinner + span { color: #475569; font-size: 14px; }
+.spinner { width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+.spinner + span { color: var(--muted); font-size: 14px; }
 .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: opacity .2s ease; }
 .overlay.open { opacity: 1; pointer-events: all; }
-.side-panel { position: fixed; top: 0; right: -400px; width: min(420px, 90vw); height: 100vh; transition: right .25s ease; padding: 24px; box-shadow: -6px 0 24px rgba(0,0,0,0.1); overflow-y: auto; background: var(--card); border-left: 1px solid var(--glass-border); }
+.side-panel { position: fixed; top: 0; right: -400px; width: min(420px, 90vw); height: 100vh; transition: right .25s ease; padding: 24px; box-shadow: -6px 0 24px rgba(0,0,0,0.2); overflow-y: auto; background: var(--card); border-left: 1px solid var(--glass-border); }
 .side-panel.open { right: 0; }
 .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 700; }
 .close-btn { border: none; background: transparent; cursor: pointer; font-weight: bold; }
