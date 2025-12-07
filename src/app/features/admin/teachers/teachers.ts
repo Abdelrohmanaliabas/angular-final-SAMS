@@ -30,14 +30,15 @@ export class Teachers implements OnInit {
         const payload = res?.data ?? res;
         const items = payload?.data ?? payload ?? [];
         this.teachers = items.map((t: any) => {
-          const groups = t.taught_groups ?? t.taughtGroups ?? [];
+          const groups = t.groups ?? t.taught_groups ?? t.taughtGroups ?? [];
           const courseList: TeacherCourse[] = groups.map((g: any) => ({
             id: Number(g.id) || 0,
             name: g.name || '-',
             studentsCount: Number(g.students_count ?? g.studentsCount ?? g.students?.length ?? 0) || 0,
             center: g.center?.name || ''
           }));
-          const totalStudents = courseList.reduce((sum: number, c: TeacherCourse) => sum + (Number(c.studentsCount) || 0), 0);
+          const computedTotal = courseList.reduce((sum: number, c: TeacherCourse) => sum + (Number(c.studentsCount) || 0), 0);
+          const totalStudents = Number(t.total_students ?? t.totalStudents);
 
           return {
             id: t.id,
@@ -47,7 +48,9 @@ export class Teachers implements OnInit {
             courses: t.taught_groups_count ?? t.taughtGroups_count ?? courseList.length ?? 0,
             phone: t.phone || '',
             status: t.status || 'active',
-            totalStudents,
+            totalStudents: Number.isFinite(totalStudents) ? totalStudents : computedTotal,
+            pendingStudents: t.pending_students_count ?? t.pendingStudents_count ?? 0,
+            approvedStudents: t.approved_students_count ?? t.approvedStudents_count ?? 0,
             courseList,
             raw: t,
           };
@@ -98,6 +101,8 @@ type TeacherCard = {
   phone: string;
   status: string;
   totalStudents: number;
+  pendingStudents: number;
+  approvedStudents: number;
   courseList: TeacherCourse[];
   raw: any;
 };

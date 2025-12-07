@@ -29,6 +29,16 @@
         <span class="pill status-pill"
           [ngClass]="t.status === 'active' ? 'pill-success' : 'pill-muted'">{{ t.status }}</span>
       </div>
+      <!-- <div class="course-chips" *ngIf="t.courseList?.length">
+        <div class="course-chip" *ngFor="let c of t.courseList | slice:0:3">
+          <div class="chip-title">{{ c.name }}</div>
+          <div class="chip-meta">
+            <span *ngIf="c.center">{{ c.center }}</span>
+            <span class="dot"></span>
+            <span>{{ c.studentsCount }} students</span>
+          </div>
+        </div>
+      </div> -->
       <div class="actions">
         <button class="btn-simple" (click)="openInfo(t)">Info</button>
       </div>
@@ -58,7 +68,7 @@
     </div>
     <!-- <p><strong>Role tags:</strong> {{ selectedTeacher.raw?.roles?.map((r: any) => r?.name || r).join(', ') || selectedTeacher.raw?.role || 'teacher' }}</p> -->
     <p><strong>User ID:</strong> {{ selectedTeacher.id }}</p>
-    <div *ngIf="selectedTeacher.courseList?.length">
+    <div *ngIf="selectedTeacher.courseList.length">
       <p><strong>Courses:</strong></p>
       <div class="chips">
         <div class="chip" *ngFor="let c of selectedTeacher.courseList">
