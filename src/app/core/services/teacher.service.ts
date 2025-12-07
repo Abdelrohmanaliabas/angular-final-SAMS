@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { HttpHeaders, HttpParams } from '@angular/common/http';
 import { ApiService } from './api.service';
 
@@ -38,8 +39,8 @@ export class TeacherService {
   // Groups
   // ========================================
 
-  getGroups(): Observable<any> {
-    return this.api.get('/groups');
+  getGroups(page: number = 1): Observable<any> {
+    return this.api.get(`/teacher/groups?page=${page}`);
   }
 
   getGroup(id: number): Observable<any> {
@@ -62,8 +63,8 @@ export class TeacherService {
   // Group Students
   // ========================================
 
-  getGroupStudents(groupId: number): Observable<any> {
-    return this.api.get(`/groups/${groupId}/students`);
+  getGroupStudents(groupId: number, page: number = 1): Observable<any> {
+    return this.api.get(`/groups/${groupId}/students?page=${page}`);
   }
 
   addStudentToGroup(groupId: number, studentId: number): Observable<any> {
@@ -74,12 +75,19 @@ export class TeacherService {
   // Lessons
   // ========================================
 
-  getGroupLessons(groupId: number): Observable<any> {
-    return this.api.get(`/groups/${groupId}/lessons`);
+  getGroupLessons(groupId: number, page: number = 1): Observable<any> {
+    return this.api.get(`/groups/${groupId}/lessons?page=${page}`);
   }
 
   createLesson(groupId: number, data: any): Observable<any> {
     return this.api.post(`/groups/${groupId}/lessons`, data);
+  }
+
+  getLesson(groupId: number, lessonId: number): Observable<any> {
+    return this.api.get(`/lessons/${lessonId}`).pipe(
+      map((res: any) => res?.data ?? res),
+      catchError(() => of(null))
+    );
   }
 
   updateLesson(lessonId: number, data: any): Observable<any> {
@@ -88,6 +96,18 @@ export class TeacherService {
 
   deleteLesson(lessonId: number): Observable<any> {
     return this.api.delete(`/lessons/${lessonId}`);
+  }
+
+  createAssessment(lessonId: number, data: any): Observable<any> {
+    return this.api.post(`/lessons/${lessonId}/assessments`, data);
+  }
+
+  getAssessment(assessmentId: number): Observable<any> {
+    return this.api.get(`/assessments/${assessmentId}`);
+  }
+
+  saveAssessmentGrade(assessmentId: number, studentId: number, score: number, feedback?: string): Observable<any> {
+    return this.api.post(`/assessments/${assessmentId}/results`, { student_id: studentId, score, feedback });
   }
 
   // ========================================
@@ -106,8 +126,8 @@ export class TeacherService {
     return this.api.get('/center-admin/management/stats');
   }
 
-  getCenterGroups(): Observable<any> {
-    return this.api.get('/center-admin/groups');
+  getCenterGroups(page: number = 1): Observable<any> {
+    return this.api.get(`/center-admin/groups?page=${page}`);
   }
 
   createTeacherManagedGroup(data: any): Observable<any> {

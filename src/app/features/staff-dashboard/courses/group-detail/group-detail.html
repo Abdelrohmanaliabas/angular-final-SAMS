@@ -1,5 +1,5 @@
 <section
-  class="max-w-[1200px] mx-auto my-8 p-8 bg-[var(--card)] rounded-3xl border border-[var(--glass-border)] shadow-2xl text-[var(--text)] animate-[fadeIn_0.4s_ease-out] md:p-5 md:m-4"
+  class="max-w-[1200px] p-8 bg-[var(--card)] rounded-3xl border border-[var(--glass-border)] shadow-2xl text-[var(--text)] animate-[fadeIn_0.4s_ease-out] md:p-5 mx-auto"
   *ngIf="group; else loadingOrError">
   <header class="flex flex-col gap-6 mb-10 pb-8 border-b border-[var(--glass-border)]">
     <div>
@@ -13,11 +13,6 @@
       <button
         class="bg-gradient-to-br from-[var(--primary)] to-[#7c3aed] text-white rounded-full px-6 py-2.5 shadow-lg hover:-translate-y-0.5 hover:brightness-110 transition-all font-semibold md:w-full md:justify-center"
         type="button" (click)="openLessonForm()">Add Lesson</button>
-      <button
-        class="bg-[var(--glass)] text-[var(--text)] rounded-full px-6 py-2.5 border border-[var(--glass-border)] cursor-pointer font-semibold hover:bg-white/5 hover:border-[var(--primary)] transition-all md:w-full md:justify-center disabled:opacity-60 disabled:cursor-not-allowed"
-        type="button" (click)="openAttendanceForm()" [disabled]="!students.length">
-        Mark Attendance
-      </button>
     </div>
     <div class="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-6 mt-4 md:grid-cols-2 sm:grid-cols-1">
       <div
@@ -43,7 +38,7 @@
     </div>
   </header>
 
-  <div class="grid grid-cols-[repeat(auto-fit,minmax(350px,1fr))] gap-8 md:grid-cols-1">
+  <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
     <section
       class="border border-[var(--glass-border)] rounded-[1.25rem] bg-[var(--card)] shadow-sm p-6 min-h-[300px] flex flex-col overflow-x-auto">
       <header class="flex justify-between items-center mb-6 pb-4 border-b border-[var(--glass-border)]">
@@ -58,30 +53,64 @@
       <div *ngIf="!loadingStudents && !students.length"
         class="p-12 rounded-2xl bg-[var(--glass)] border-2 border-dashed border-[var(--glass-border)] text-[var(--muted)] text-center text-base">
         No students assigned.</div>
-      <table *ngIf="students.length"
-        class="w-full border-separate border-spacing-y-2 md:block md:overflow-x-auto md:whitespace-nowrap">
-        <thead>
-          <tr>
-            <th class="px-4 py-3 text-left text-sm uppercase tracking-wider text-[var(--muted)] font-semibold">Name</th>
-            <th class="px-4 py-3 text-left text-sm uppercase tracking-wider text-[var(--muted)] font-semibold">Email
-            </th>
-            <th class="px-4 py-3 text-left text-sm uppercase tracking-wider text-[var(--muted)] font-semibold">Joined
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let student of students">
-            <td
-              class="p-4 bg-[var(--glass)] border-y border-[var(--glass-border)] text-[var(--text)] text-[0.95rem] first:border-l first:rounded-l-xl first:font-medium">
-              {{ student.name }}</td>
-            <td class="p-4 bg-[var(--glass)] border-y border-[var(--glass-border)] text-[var(--text)] text-[0.95rem]">{{
-              student.email }}</td>
-            <td
-              class="p-4 bg-[var(--glass)] border-y border-[var(--glass-border)] text-[var(--text)] text-[0.95rem] last:border-r last:rounded-r-xl">
-              {{ student.joined_at ? (student.joined_at | date:'mediumDate') : '—' }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div *ngIf="students.length" class="hidden md:block">
+        <table class="w-full border-separate border-spacing-y-2">
+          <thead>
+            <tr>
+              <th class="px-4 py-3 text-left text-sm uppercase tracking-wider text-[var(--muted)] font-semibold">Name
+              </th>
+              <th class="px-4 py-3 text-left text-sm uppercase tracking-wider text-[var(--muted)] font-semibold">Email
+              </th>
+              <th class="px-4 py-3 text-left text-sm uppercase tracking-wider text-[var(--muted)] font-semibold">Joined
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let student of students">
+              <td
+                class="p-4 bg-[var(--glass)] border-y border-[var(--glass-border)] text-[var(--text)] text-[0.95rem] first:border-l first:rounded-l-xl first:font-medium">
+                {{ student.name }}</td>
+              <td class="p-4 bg-[var(--glass)] border-y border-[var(--glass-border)] text-[var(--text)] text-[0.95rem]">
+                {{ student.email }}</td>
+              <td
+                class="p-4 bg-[var(--glass)] border-y border-[var(--glass-border)] text-[var(--text)] text-[0.95rem] last:border-r last:rounded-r-xl">
+                {{ student.joined_at ? (student.joined_at | date:'mediumDate') : '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div *ngIf="students.length" class="flex flex-col gap-3 md:hidden">
+        <article *ngFor="let student of students"
+          class="p-4 bg-[var(--glass)] border border-[var(--glass-border)] rounded-xl text-[var(--text)]">
+          <div class="flex justify-between items-start gap-3">
+            <div>
+              <p class="font-semibold text-base m-0">{{ student.name }}</p>
+              <p class="text-sm text-[var(--muted)] break-words">{{ student.email }}</p>
+            </div>
+            <span class="text-xs uppercase tracking-wide text-[var(--muted)]">{{ student.status }}</span>
+          </div>
+          <div class="flex justify-between text-sm text-[var(--muted)] mt-3">
+            <span>Joined</span>
+            <span class="text-[var(--text)] font-medium">{{ student.joined_at ? (student.joined_at | date:'mediumDate')
+              : '—' }}</span>
+          </div>
+        </article>
+      </div>
+
+      <!-- Students Pagination -->
+      <div class="flex justify-center items-center gap-4 mt-4 text-sm"
+        *ngIf="studentsMeta && studentsMeta.last_page > 1">
+        <button (click)="changeStudentPage(studentsMeta.current_page - 1)" [disabled]="studentsMeta.current_page === 1"
+          class="px-3 py-1 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] hover:bg-[var(--primary)] hover:text-white disabled:opacity-50 disabled:hover:bg-[var(--glass)] disabled:hover:text-[var(--text)] transition-all">
+          Previous
+        </button>
+        <span class="text-[var(--muted)]">Page {{ studentsMeta.current_page }} of {{ studentsMeta.last_page }}</span>
+        <button (click)="changeStudentPage(studentsMeta.current_page + 1)"
+          [disabled]="studentsMeta.current_page === studentsMeta.last_page"
+          class="px-3 py-1 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] hover:bg-[var(--primary)] hover:text-white disabled:opacity-50 disabled:hover:bg-[var(--glass)] disabled:hover:text-[var(--text)] transition-all">
+          Next
+        </button>
+      </div>
     </section>
 
     <section
@@ -90,7 +119,7 @@
         <h2 class="text-xl font-bold m-0 text-[var(--text)]">Lessons</h2>
         <span
           class="px-3 py-1 rounded-full bg-[var(--glass)] border border-[var(--glass-border)] text-sm font-semibold text-[var(--primary)]">{{
-          lessons.length }}</span>
+          lessonsMeta?.total || lessons.length }}</span>
       </header>
       <div *ngIf="loadingLessons"
         class="p-12 rounded-2xl bg-[var(--glass)] border-2 border-dashed border-[var(--glass-border)] text-[var(--muted)] text-center text-base">
@@ -100,50 +129,40 @@
         No lessons scheduled.</div>
       <ul *ngIf="lessons.length" class="list-none m-0 p-0 flex flex-col gap-4">
         <li *ngFor="let lesson of lessons"
-          class="flex justify-between items-center p-4 bg-[var(--glass)] border border-[var(--glass-border)] rounded-xl transition-all hover:translate-x-1 hover:border-[var(--primary)]">
+          class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-4 bg-[var(--glass)] border border-[var(--glass-border)] rounded-xl transition-all hover:translate-x-1 hover:border-[var(--primary)]">
           <div>
             <p class="font-semibold m-0 text-base text-[var(--text)]">{{ lesson.title }}</p>
             <p class="text-[var(--muted)] text-[0.95rem]">{{ lesson.scheduled_at ? (lesson.scheduled_at | date:'medium')
               : 'Not scheduled' }}</p>
           </div>
-          <span
-            class="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-medium text-indigo-500">{{
-            lesson.resources_count }} resources</span>
+          <div class="flex flex-col gap-2 sm:items-end sm:text-right w-full sm:w-auto">
+            <span
+              class="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-medium text-indigo-500 self-start sm:self-end">{{
+              lesson.resources_count }} resources</span>
+            <button type="button"
+              class="bg-[var(--card)] border border-[var(--glass-border)] px-4 py-1.5 rounded-full text-sm font-semibold text-[var(--text)] hover:border-[var(--primary)] hover:-translate-y-0.5 transition-all"
+              (click)="viewLesson(lesson.id)">
+              Open lesson
+            </button>
+          </div>
         </li>
       </ul>
+
+      <!-- Lessons Pagination -->
+      <div class="flex justify-center items-center gap-4 mt-4 text-sm" *ngIf="lessonsMeta && lessonsMeta.last_page > 1">
+        <button (click)="changeLessonPage(lessonsMeta.current_page - 1)" [disabled]="lessonsMeta.current_page === 1"
+          class="px-3 py-1 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] hover:bg-[var(--primary)] hover:text-white disabled:opacity-50 disabled:hover:bg-[var(--glass)] disabled:hover:text-[var(--text)] transition-all">
+          Previous
+        </button>
+        <span class="text-[var(--muted)]">Page {{ lessonsMeta.current_page }} of {{ lessonsMeta.last_page }}</span>
+        <button (click)="changeLessonPage(lessonsMeta.current_page + 1)"
+          [disabled]="lessonsMeta.current_page === lessonsMeta.last_page"
+          class="px-3 py-1 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] hover:bg-[var(--primary)] hover:text-white disabled:opacity-50 disabled:hover:bg-[var(--glass)] disabled:hover:text-[var(--text)] transition-all">
+          Next
+        </button>
+      </div>
     </section>
 
-    <section
-      class="border border-[var(--glass-border)] rounded-[1.25rem] bg-[var(--card)] shadow-sm p-6 min-h-[300px] flex flex-col overflow-x-auto">
-      <header class="flex justify-between items-center mb-6 pb-4 border-b border-[var(--glass-border)]">
-        <h2 class="text-xl font-bold m-0 text-[var(--text)]">Recent attendance</h2>
-      </header>
-      <div *ngIf="loadingAttendance"
-        class="p-12 rounded-2xl bg-[var(--glass)] border-2 border-dashed border-[var(--glass-border)] text-[var(--muted)] text-center text-base">
-        Loading attendance...</div>
-      <div *ngIf="!loadingAttendance && !recentAttendance.length"
-        class="p-12 rounded-2xl bg-[var(--glass)] border-2 border-dashed border-[var(--glass-border)] text-[var(--muted)] text-center text-base">
-        No attendance records yet.</div>
-      <ul *ngIf="recentAttendance.length" class="list-none m-0 p-0 flex flex-col gap-4">
-        <li *ngFor="let entry of recentAttendance"
-          class="flex justify-between items-center p-4 bg-[var(--glass)] border border-[var(--glass-border)] rounded-xl transition-all hover:translate-x-1 hover:border-[var(--primary)]">
-          <div>
-            <p class="font-semibold m-0 text-base text-[var(--text)]">{{ entry.student?.name || entry.student_id }}</p>
-            <p class="text-[var(--muted)] text-[0.95rem]">{{ entry.date ? (entry.date | date:'mediumDate') :
-              entry.created_at | date:'medium' }}</p>
-          </div>
-          <span
-            class="inline-flex items-center justify-center px-3 py-1 rounded-full border border-transparent text-xs font-semibold capitalize"
-            [class.bg-emerald-500/10]="entry.status === 'present'" [class.text-emerald-500]="entry.status === 'present'"
-            [class.border-emerald-500/20]="entry.status === 'present'" [class.bg-amber-500/10]="entry.status === 'late'"
-            [class.text-amber-500]="entry.status === 'late'" [class.border-amber-500/20]="entry.status === 'late'"
-            [class.bg-red-500/10]="entry.status === 'absent'" [class.text-red-500]="entry.status === 'absent'"
-            [class.border-red-500/20]="entry.status === 'absent'">
-            {{ entry.status }}
-          </span>
-        </li>
-      </ul>
-    </section>
   </div>
 </section>
 
@@ -160,8 +179,9 @@
   class="fixed inset-0 bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200 z-[50] backdrop-blur-sm"
   [class.opacity-100]="panelOpen" [class.pointer-events-auto]="panelOpen" (click)="closePanel()"></div>
 <div
-  class="fixed inset-y-0 right-0 w-[min(420px,90vw)] bg-[var(--card)] border-l border-[var(--glass-border)] shadow-2xl translate-x-full transition-transform duration-300 p-6 flex flex-col gap-4 z-[70] h-screen md:w-full"
-  [class.translate-x-0]="panelOpen" (click)="$event.stopPropagation()" *ngIf="panelMode">
+  class="fixed inset-y-0 right-0 w-full md:w-[min(420px,90vw)] bg-[var(--card)] border-l border-[var(--glass-border)] shadow-2xl transition-transform duration-300 p-6 flex flex-col gap-4 z-[70] h-screen"
+  [class.translate-x-full]="!panelOpen" [class.translate-x-0]="panelOpen" (click)="$event.stopPropagation()"
+  *ngIf="panelMode">
   <div class="flex justify-between items-center mb-6 pb-4 border-b border-[var(--glass-border)]">
     <h3 class="m-0 text-xl font-bold">{{ panelTitle }}</h3>
     <button
@@ -196,38 +216,4 @@
     </div>
   </div>
 
-  <div class="flex flex-col gap-5 flex-1 overflow-y-auto pb-4" *ngIf="panelMode === 'attendance'">
-    <div class="block">
-      <label class="block mb-2 text-sm font-medium text-[var(--muted)]">Date</label>
-      <input
-        class="w-full px-4 py-3 rounded-xl border border-[var(--glass-border)] bg-white/5 text-[var(--text)] shadow-inner focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all text-[0.95rem]"
-        type="date" [(ngModel)]="attendanceDate" />
-    </div>
-    <div class="block">
-      <label class="block mb-2 text-sm font-medium text-[var(--muted)]">Students Status</label>
-      <div class="flex flex-col gap-3 max-h-[50vh] overflow-y-auto pr-2">
-        <div
-          class="flex justify-between items-center p-3 px-4 bg-white/5 border border-[var(--glass-border)] rounded-xl transition-colors hover:border-[var(--primary)] hover:bg-white/10"
-          *ngFor="let entry of attendanceEntries">
-          <span class="font-medium text-[0.95rem]">{{ entry.name }}</span>
-          <select
-            class="w-auto py-1.5 pl-3 pr-8 text-sm rounded-lg border border-[var(--glass-border)] bg-white/5 text-[var(--text)] shadow-inner focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20fill=%27none%27%20viewBox=%270%200%2024%2024%27%20stroke=%27%2394a3b8%27%3E%3Cpath%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27%20stroke-width=%272%27%20d=%27M19%209l-7%207-7-7%27%3E%3C/path%3E%3C/svg%3E')] bg-no-repeat bg-[right_0.5rem_center] bg-[length:1.2em] [&>option]:bg-slate-800 [&>option]:text-slate-50"
-            [(ngModel)]="entry.status">
-            <option value="present">Present</option>
-            <option value="absent">Absent</option>
-            <option value="late">Late</option>
-            <option value="excused">Excused</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div
-      class="mt-auto sticky bottom-0 pt-4 bg-gradient-to-t from-[var(--card)] via-[var(--card)] to-transparent border-t border-[var(--glass-border)] flex justify-end">
-      <button
-        class="bg-gradient-to-br from-[var(--primary)] to-[#7c3aed] text-white rounded-full px-6 py-2.5 shadow-lg hover:-translate-y-0.5 hover:brightness-110 transition-all font-semibold disabled:opacity-60 disabled:cursor-not-allowed disabled:grayscale-[0.5]"
-        type="button" (click)="submitAttendance()" [disabled]="processing || !attendanceEntries.length">
-        Save Attendance
-      </button>
-    </div>
-  </div>
 </div>
