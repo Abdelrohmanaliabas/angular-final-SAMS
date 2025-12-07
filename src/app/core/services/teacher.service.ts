@@ -101,6 +101,14 @@ export class TeacherService {
     return this.api.post(`/lessons/${lessonId}/assessments`, data);
   }
 
+  getAssessment(assessmentId: number): Observable<any> {
+    return this.api.get(`/assessments/${assessmentId}`);
+  }
+
+  saveAssessmentGrade(assessmentId: number, studentId: number, score: number, feedback?: string): Observable<any> {
+    return this.api.post(`/assessments/${assessmentId}/results`, { student_id: studentId, score, feedback });
+  }
+
   // ========================================
   // Attendance
   // ========================================

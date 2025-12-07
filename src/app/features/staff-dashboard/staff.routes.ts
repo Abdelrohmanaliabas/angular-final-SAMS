@@ -22,6 +22,7 @@ export const StaffRoutes: Routes = [
       { path: 'groups', component: StaffGroups },
       { path: 'groups/:id', component: StaffGroupDetail },
       { path: 'groups/:groupId/lessons/:lessonId', component: LessonDetailComponent },
+      { path: 'groups/:groupId/lessons/:lessonId/assessments/:assessmentId', loadComponent: () => import('./courses/assessment-detail/assessment-detail').then(m => m.AssessmentDetailComponent) },
       { path: 'staff', component: StaffTeamPage },
       { path: 'students', component: StaffStudentsPage },
       { path: 'setting', component: StaffSettingPage }

@@ -48,7 +48,8 @@ export class LessonDetailComponent implements OnInit {
   // Assessment Form
   assessmentForm = {
     title: '',
-    scheduled_at: ''
+    scheduled_at: '',
+    max_score: 100
   };
 
   constructor(
@@ -56,7 +57,8 @@ export class LessonDetailComponent implements OnInit {
     private router: Router,
     private staffService: TeacherService,
     private cdr: ChangeDetectorRef,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private feedback: FeedbackService
   ) { }
 
   ngOnInit(): void {
@@ -157,13 +159,6 @@ export class LessonDetailComponent implements OnInit {
       return;
     }
 
-    // Use the entries to calculate stats, assuming they reflect current state
-    // But wait, entries are initialized from lesson.attendances.
-    // If user changes them in sidebar but hasn't saved, stats shouldn't update?
-    // Or should they? Usually stats reflect saved state.
-    // Let's calculate from lesson.attendances directly to be safe, or from entries if we want real-time preview (but we only save on button click).
-    // Let's stick to saved state for the summary on main page.
-
     this.lesson.attendances.forEach((a: any) => {
       const status = a.status as keyof typeof this.attendanceStats;
       if (this.attendanceStats[status] !== undefined) {
@@ -189,14 +184,14 @@ export class LessonDetailComponent implements OnInit {
     this.staffService.markAttendance(this.groupId, payload).subscribe({
       next: () => {
         this.processing = false;
-        alert('Attendance saved successfully!');
+        this.feedback.showToast({ title: 'Success', message: 'Attendance saved successfully!', tone: 'success' });
         this.closePanel();
         this.loadData();
       },
       error: (err) => {
         this.processing = false;
         console.error('Failed to save attendance', err);
-        alert('Failed to save attendance.');
+        this.feedback.showToast({ title: 'Error', message: 'Failed to save attendance.', tone: 'error' });
         this.cdr.detectChanges();
       }
     });
@@ -239,13 +234,13 @@ export class LessonDetailComponent implements OnInit {
         this.processing = false;
         this.lesson = res.data; // Update local lesson
         this.updateSafeVideoUrl(this.lesson.video_url);
-        alert('Video URL updated successfully.');
+        this.feedback.showToast({ title: 'Success', message: 'Video URL updated successfully.', tone: 'success' });
         this.cdr.detectChanges();
       },
       error: (err) => {
         this.processing = false;
         console.error('Failed to update video URL', err);
-        alert('Failed to update video URL.');
+        this.feedback.showToast({ title: 'Error', message: 'Failed to update video URL.', tone: 'error' });
         this.cdr.detectChanges();
       }
     });
@@ -265,16 +260,16 @@ export class LessonDetailComponent implements OnInit {
     this.staffService.createAssessment(this.lessonId, this.assessmentForm).subscribe({
       next: () => {
         this.processing = false;
-        alert('Assessment created successfully!');
+        this.feedback.showToast({ title: 'Success', message: 'Assessment created successfully!', tone: 'success' });
         this.closePanel();
         this.loadData();
         // Reset form
-        this.assessmentForm = { title: '', scheduled_at: '' };
+        this.assessmentForm = { title: '', scheduled_at: '', max_score: 100 };
       },
       error: (err) => {
         this.processing = false;
         console.error('Failed to create assessment', err);
-        alert('Failed to create assessment.');
+        this.feedback.showToast({ title: 'Error', message: 'Failed to create assessment.', tone: 'error' });
         this.cdr.detectChanges();
       }
     });
@@ -303,5 +298,8 @@ export class LessonDetailComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/dashboard/staff/groups', this.groupId]);
+  }
+  viewAssessment(assessmentId: number): void {
+    this.router.navigate(['/dashboard/staff/groups', this.groupId, 'lessons', this.lessonId, 'assessments', assessmentId]);
   }
 }
