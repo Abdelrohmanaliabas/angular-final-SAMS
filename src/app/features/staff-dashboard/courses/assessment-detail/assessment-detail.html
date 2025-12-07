@@ -1,0 +1,76 @@
+<div class="max-w-[1000px] mx-auto p-8 bg-[var(--card)] rounded-3xl border border-[var(--glass-border)] shadow-2xl text-[var(--text)] animate-[fadeIn_0.4s_ease-out] md:p-5"
+    *ngIf="!loading && assessment; else loadingTpl">
+
+    <!-- Header -->
+    <header class="flex flex-col gap-4 mb-8 pb-6 border-b border-[var(--glass-border)]">
+        <button (click)="goBack()"
+            class="self-start flex items-center gap-2 text-[var(--muted)] hover:text-[var(--primary)] transition-colors text-sm font-medium mb-2">
+            ← Back to Lesson
+        </button>
+
+        <div>
+            <h1
+                class="text-3xl font-extrabold mb-2 bg-gradient-to-br from-[var(--text)] to-[var(--muted)] bg-clip-text text-transparent">
+                {{ assessment.title }}</h1>
+            <div class="flex gap-4 text-[var(--muted)] text-lg">
+                <span>{{ assessment.scheduled_at | date:'medium' }}</span>
+                <span>•</span>
+                <span class="font-semibold text-[var(--primary)]">Max Score: {{ assessment.max_score }}</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Grading Table -->
+    <section class="overflow-x-auto">
+        <table class="w-full border-collapse">
+            <thead>
+                <tr class="border-b border-[var(--glass-border)] text-left">
+                    <th class="p-4 font-semibold text-[var(--muted)]">Student</th>
+                    <th class="p-4 font-semibold text-[var(--muted)] w-[150px]">Score</th>
+                    <th class="p-4 font-semibold text-[var(--muted)]">Feedback (Optional)</th>
+                    <th class="p-4 font-semibold text-[var(--muted)] w-[100px]">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let student of students"
+                    class="border-b border-[var(--glass-border)] hover:bg-[var(--glass)] transition-colors">
+                    <td class="p-4 font-medium">{{ student.name }}</td>
+                    <td class="p-4">
+                        <input type="number" [(ngModel)]="student.score" (blur)="saveGrade(student)"
+                            [max]="assessment.max_score" min="0"
+                            class="w-full px-3 py-2 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-all text-center font-bold">
+                    </td>
+                    <td class="p-4">
+                        <input type="text" [(ngModel)]="student.feedback" (blur)="saveGrade(student)"
+                            placeholder="Add feedback..."
+                            class="w-full px-3 py-2 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-all text-sm">
+                    </td>
+                    <td class="p-4 text-center">
+                        <span *ngIf="savingStates[student.id] === 'saving'"
+                            class="text-[var(--muted)] text-xs animate-pulse">Saving...</span>
+                        <span *ngIf="savingStates[student.id] === 'saved'"
+                            class="text-green-500 text-xs font-bold">Saved</span>
+                        <span *ngIf="savingStates[student.id] === 'error'"
+                            class="text-red-500 text-xs font-bold">Error</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div *ngIf="!students.length" class="text-center p-8 text-[var(--muted)]">
+            No students found in this group.
+        </div>
+    </section>
+
+</div>
+
+<ng-template #loadingTpl>
+    <div class="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <div *ngIf="loading"
+            class="w-10 h-10 border-4 border-[var(--glass-border)] border-t-[var(--primary)] rounded-full animate-spin">
+        </div>
+        <p *ngIf="loading" class="text-[var(--muted)]">Loading assessment details...</p>
+        <p *ngIf="errorMessage" class="text-red-500 bg-red-500/10 px-6 py-4 rounded-xl border border-red-500/20">{{
+            errorMessage }}</p>
+    </div>
+</ng-template>

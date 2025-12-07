@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Subscription, combineLatest, forkJoin, of } from 'rxjs';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
+import { Subscription, combineLatest, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { TeacherService } from '../../../../core/services/teacher.service';
 import { TokenStorageService } from '../../../../core/auth/token-storage.service';
+import { FeedbackService } from '../../../../core/services/feedback.service';
 
 interface StaffGroup {
   id: number;
@@ -17,6 +18,13 @@ interface StaffGroup {
   schedule_days?: string[] | null;
   schedule_time?: string | null;
   sessions_count?: number | null;
+}
+
+interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  total: number;
+  per_page: number;
 }
 
 @Component({
@@ -32,30 +40,31 @@ export class StaffGroupDetail implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private staffService: TeacherService,
     private tokenStorage: TokenStorageService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router,
+    private feedback: FeedbackService
   ) { }
 
   group: StaffGroup | null = null;
   students: any[] = [];
   lessons: any[] = [];
-  recentAttendance: any[] = [];
 
   loadingGroup = false;
   loadingStudents = false;
   loadingLessons = false;
-  loadingAttendance = false;
   errorMessage = '';
 
   private routeSub?: Subscription;
   private groupId!: number;
   private roles: string[] = [];
-  private attendanceDateFilter: string | null = null;
   panelOpen = false;
-  panelMode: 'lesson' | 'attendance' | null = null;
+  panelMode: 'lesson' | null = null;
   processing = false;
   lessonForm = { title: '', description: '', scheduled_at: '' };
-  attendanceDate = '';
-  attendanceEntries: Array<{ student_id: number; name: string; status: 'present' | 'absent' | 'late' | 'excused' }> = [];
+
+  // Pagination
+  studentsMeta: PaginationMeta | null = null;
+  lessonsMeta: PaginationMeta | null = null;
 
   ngOnInit(): void {
     this.roles = this.tokenStorage.getUser()?.roles ?? [];
@@ -67,7 +76,6 @@ export class StaffGroupDetail implements OnInit, OnDestroy {
           return;
         }
         this.groupId = id;
-        this.attendanceDateFilter = queryParams.get('date');
         this.loadGroupData();
       }
     );
@@ -99,9 +107,6 @@ export class StaffGroupDetail implements OnInit, OnDestroy {
     if (this.panelMode === 'lesson') {
       return 'Add Lesson';
     }
-    if (this.panelMode === 'attendance') {
-      return 'Mark Attendance';
-    }
     return '';
   }
 
@@ -116,16 +121,11 @@ export class StaffGroupDetail implements OnInit, OnDestroy {
     this.panelOpen = true;
   }
 
-  openAttendanceForm(): void {
-    if (!this.canManageGroup) return;
-    this.attendanceDate = new Date().toISOString().slice(0, 10);
-    this.attendanceEntries = this.students.map((student) => ({
-      student_id: student.id,
-      name: student.name,
-      status: 'present'
-    }));
-    this.panelMode = 'attendance';
-    this.panelOpen = true;
+  viewLesson(lessonId: number): void {
+    if (!this.groupId || !lessonId) {
+      return;
+    }
+    this.router.navigate(['/dashboard/staff/groups', this.groupId, 'lessons', lessonId]);
   }
 
   closePanel(): void {
@@ -146,33 +146,13 @@ export class StaffGroupDetail implements OnInit, OnDestroy {
     }).subscribe({
       next: () => {
         this.closePanel();
-        this.loadLessonsAndAttendance();
+        this.feedback.showToast({ title: 'Success', message: 'Lesson created successfully!', tone: 'success' });
+        this.loadLessons();
       },
       error: () => {
         this.processing = false;
-      }
-    });
-  }
-
-  submitAttendance(): void {
-    if (!this.groupId || this.processing || !this.attendanceDate || !this.attendanceEntries.length) {
-      return;
-    }
-    this.processing = true;
-    const entries = this.attendanceEntries.map((entry) => ({
-      student_id: entry.student_id,
-      status: entry.status
-    }));
-    this.staffService.markAttendance(this.groupId, {
-      date: this.attendanceDate,
-      entries
-    }).subscribe({
-      next: () => {
-        this.closePanel();
-        this.loadLessonsAndAttendance();
-      },
-      error: () => {
-        this.processing = false;
+        this.feedback.showToast({ title: 'Error', message: 'Failed to create lesson.', tone: 'error' });
+        this.cdr.detectChanges();
       }
     });
   }
@@ -181,7 +161,7 @@ export class StaffGroupDetail implements OnInit, OnDestroy {
     this.errorMessage = '';
     this.loadGroup();
     this.loadStudents();
-    this.loadLessonsAndAttendance();
+    this.loadLessons();
   }
 
   private loadGroup(): void {
@@ -202,26 +182,37 @@ export class StaffGroupDetail implements OnInit, OnDestroy {
     });
   }
 
-  private loadStudents(): void {
+  loadStudents(page = 1): void {
     this.loadingStudents = true;
-    this.staffService.getGroupStudents(this.groupId).subscribe({
+    this.staffService.getGroupStudents(this.groupId, page).subscribe({
       next: (res) => {
         const payload = res?.data ?? res;
-        // The API returns { approved: { data: [...] }, pending: [] }
-        let studentsList = payload.approved || payload.data?.approved || [];
+        // The API returns { approved: { data: [...], current_page: ... }, pending: [] }
+        // Or if wrapped in success: { data: { approved: ... } }
 
-        // Handle pagination structure
-        if (studentsList.data && Array.isArray(studentsList.data)) {
-          studentsList = studentsList.data;
+        let approvedData = payload.approved || payload.data?.approved;
+
+        if (approvedData) {
+          this.studentsMeta = {
+            current_page: approvedData.current_page,
+            last_page: approvedData.last_page,
+            total: approvedData.total,
+            per_page: approvedData.per_page
+          };
+
+          const studentsList = approvedData.data || [];
+          this.students = studentsList.map((student: any) => ({
+            id: student.id,
+            name: student.name,
+            email: student.email,
+            status: student.pivot?.status ?? 'approved',
+            joined_at: student.pivot?.joined_at
+          }));
+        } else {
+          this.students = [];
+          this.studentsMeta = null;
         }
 
-        this.students = (Array.isArray(studentsList) ? studentsList : []).map((student: any) => ({
-          id: student.id,
-          name: student.name,
-          email: student.email,
-          status: student.pivot?.status ?? 'approved',
-          joined_at: student.pivot?.joined_at
-        }));
         this.loadingStudents = false;
         this.cdr.detectChanges(); // Force update
       },
@@ -234,63 +225,66 @@ export class StaffGroupDetail implements OnInit, OnDestroy {
     });
   }
 
-  private loadLessonsAndAttendance(): void {
+  loadLessons(page = 1): void {
     this.loadingLessons = true;
-    this.loadingAttendance = true;
-
-    forkJoin({
-      lessons: this.staffService.getGroupLessons(this.groupId).pipe(catchError((err) => {
-        console.error('Failed to load lessons:', err);
-        return of([]);
-      })),
-      attendance: this.staffService
-        .getGroupAttendance(this.groupId, this.attendanceDateFilter || undefined)
-        .pipe(catchError((err) => {
-          console.error('Failed to load attendance:', err);
+    this.staffService
+      .getGroupLessons(this.groupId, page)
+      .pipe(
+        catchError((err) => {
+          console.error('Failed to load lessons:', err);
           return of([]);
-        }))
-    }).subscribe({
-      next: ({ lessons, attendance }) => {
-        const lessonPayload = lessons?.data ?? lessons;
-        this.lessons = this.unwrapCollection(lessonPayload).map((lesson: any) => ({
-          id: lesson.id,
-          title: lesson.title,
-          scheduled_at: lesson.scheduled_at,
-          resources_count: lesson.resources_count ?? lesson.resources?.length ?? 0
-        }));
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          // LessonResource collection usually returns { data: [...], meta: { ... } }
+          // But if wrapped in success: { data: { data: [...], meta: ... } } ?
+          // Let's assume standard Laravel Resource response structure
+          // If res is the full response body
 
-        const attendancePayload = attendance?.data ?? attendance;
-        this.recentAttendance = this.unwrapCollection(attendancePayload)
-          .sort(
-            (a: any, b: any) =>
-              new Date(b.date ?? b.created_at).getTime() - new Date(a.date ?? a.created_at).getTime()
-          )
-          .slice(0, 8);
+          const data = res.data || res; // Outer wrapper
 
-        this.loadingLessons = false;
-        this.loadingAttendance = false;
-        this.cdr.detectChanges(); // Force update
-      },
-      error: (err) => {
-        console.error('Failed to load lessons/attendance:', err);
-        this.loadingLessons = false;
-        this.loadingAttendance = false;
-        this.cdr.detectChanges(); // Force update
-      }
-    });
+          // Check for pagination meta
+          const meta = res.meta || (res.data && res.data.meta);
+          if (meta) {
+            this.lessonsMeta = {
+              current_page: meta.current_page,
+              last_page: meta.last_page,
+              total: meta.total,
+              per_page: meta.per_page
+            };
+          } else {
+            // Fallback if meta is missing (e.g. not paginated or different structure)
+            this.lessonsMeta = null;
+          }
+
+          const lessonsList = Array.isArray(data) ? data : (data.data || []);
+
+          this.lessons = lessonsList.map((lesson: any) => ({
+            id: lesson.id,
+            title: lesson.title,
+            scheduled_at: lesson.scheduled_at,
+            resources_count: lesson.resources_count ?? lesson.resources?.length ?? 0
+          }));
+
+          this.loadingLessons = false;
+          this.cdr.detectChanges(); // Force update
+        },
+        error: () => {
+          this.loadingLessons = false;
+          this.cdr.detectChanges(); // Force update
+        }
+      });
   }
 
-  private unwrapCollection(payload: any): any[] {
-    if (!payload) {
-      return [];
-    }
-    if (Array.isArray(payload)) {
-      return payload;
-    }
-    if (Array.isArray(payload.data)) {
-      return payload.data;
-    }
-    return Array.isArray(payload.items) ? payload.items : [];
+  changeStudentPage(page: number): void {
+    if (page < 1 || (this.studentsMeta && page > this.studentsMeta.last_page)) return;
+    this.loadStudents(page);
+  }
+
+  changeLessonPage(page: number): void {
+    if (page < 1 || (this.lessonsMeta && page > this.lessonsMeta.last_page)) return;
+    this.loadLessons(page);
   }
 
   private defaultDateTime(): string {
