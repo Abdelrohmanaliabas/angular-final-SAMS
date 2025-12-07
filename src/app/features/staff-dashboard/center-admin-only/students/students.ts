@@ -372,6 +372,7 @@ export class Students implements OnInit {
       },
       error: (err) => {
         this.processing = false;
+        this.closeInfo();
         this.saveError = this.extractErrorMessage(err, 'Unable to save student.');
         this.feedback.showToast({
           title: 'Save failed',
@@ -414,6 +415,7 @@ export class Students implements OnInit {
       },
       error: (err) => {
         this.processing = false;
+        this.closeInfo();
         this.saveError = this.extractErrorMessage(err, 'Unable to save parent.');
         this.feedback.showToast({
           title: 'Save failed',

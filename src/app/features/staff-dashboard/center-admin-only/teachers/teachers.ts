@@ -321,6 +321,7 @@ export class Teachers implements OnInit {
           });
         },
         error: (err) => {
+          this.closeInfo();
           this.saveError = this.extractErrorMessage(err, 'Unable to save staff member.');
           this.feedback.showToast({
             title: 'Save failed',
