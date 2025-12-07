@@ -1,0 +1,234 @@
+<div class="max-w-[1000px] mx-auto p-8 bg-[var(--card)] rounded-3xl border border-[var(--glass-border)] shadow-2xl text-[var(--text)] animate-[fadeIn_0.4s_ease-out] md:p-5" *ngIf="!loading && lesson; else loadingTpl">
+  
+  <!-- Header -->
+  <header class="flex flex-col gap-4 mb-8 pb-6 border-b border-[var(--glass-border)]">
+    <button (click)="goBack()" class="self-start flex items-center gap-2 text-[var(--muted)] hover:text-[var(--primary)] transition-colors text-sm font-medium mb-2">
+      ← Back to Group
+    </button>
+    
+    <div class="flex justify-between items-start md:flex-col md:gap-4">
+      <div>
+        <h1 class="text-3xl font-extrabold mb-2 bg-gradient-to-br from-[var(--text)] to-[var(--muted)] bg-clip-text text-transparent">{{ lesson.title }}</h1>
+        <p class="text-[var(--muted)] text-lg">{{ lesson.scheduled_at ? (lesson.scheduled_at | date:'medium') : 'Not scheduled' }}</p>
+      </div>
+      
+      <div class="flex gap-3">
+        <button (click)="openAttendancePanel()" class="bg-gradient-to-br from-[var(--primary)] to-[#7c3aed] text-white rounded-full px-6 py-2.5 shadow-lg hover:-translate-y-0.5 hover:brightness-110 transition-all font-semibold">
+          Take Attendance
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="lesson.description" class="mt-4 p-4 bg-[var(--glass)] rounded-xl border border-[var(--glass-border)]">
+      <p class="text-[var(--text)] leading-relaxed">{{ lesson.description }}</p>
+    </div>
+  </header>
+
+  <!-- Video Section -->
+  <section class="mb-8">
+    <h2 class="text-xl font-bold mb-4">Lesson Video</h2>
+    
+    <div class="flex gap-2 mb-4">
+        <input type="text" [(ngModel)]="videoUrlInput" placeholder="Paste YouTube Link here..." 
+            class="flex-1 px-4 py-2 rounded-xl border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-all">
+        <button (click)="saveVideoUrl()" [disabled]="processing"
+            class="bg-[var(--card)] border border-[var(--glass-border)] px-6 py-2 rounded-xl font-semibold hover:bg-[var(--glass)] transition-all disabled:opacity-50">
+            {{ processing ? 'Saving...' : 'Save Video' }}
+        </button>
+    </div>
+
+    <div *ngIf="safeVideoUrl" class="aspect-video w-full rounded-2xl overflow-hidden border border-[var(--glass-border)] shadow-lg bg-black">
+        <iframe [src]="safeVideoUrl" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full h-full"></iframe>
+    </div>
+    <div *ngIf="!safeVideoUrl && lesson.video_url" class="p-8 text-center text-[var(--muted)] bg-[var(--glass)] rounded-2xl border border-[var(--glass-border)]">
+        Invalid Video URL
+    </div>
+    <div *ngIf="!safeVideoUrl && !lesson.video_url" class="p-12 text-center text-[var(--muted)] bg-[var(--glass)] rounded-2xl border border-[var(--glass-border)] border-dashed">
+        No video added yet.
+    </div>
+  </section>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Attendance Summary -->
+      <section class="border border-[var(--glass-border)] rounded-[1.25rem] bg-[var(--card)] shadow-sm p-6">
+        <h2 class="text-xl font-bold mb-4">Attendance Summary</h2>
+        <div class="flex flex-col gap-4">
+            <div class="flex justify-between items-center p-4 bg-[var(--glass)] rounded-xl border border-[var(--glass-border)]">
+                <span class="text-[var(--muted)]">Total Students</span>
+                <span class="font-bold text-lg">{{ students.length }}</span>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3">
+                <div class="p-3 bg-green-500/10 border border-green-500/20 rounded-xl flex flex-col items-center">
+                    <span class="text-green-500 font-bold text-xl">{{ attendanceStats.present }}</span>
+                    <span class="text-xs text-[var(--muted)] uppercase tracking-wider">Present</span>
+                </div>
+                <div class="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex flex-col items-center">
+                    <span class="text-red-500 font-bold text-xl">{{ attendanceStats.absent }}</span>
+                    <span class="text-xs text-[var(--muted)] uppercase tracking-wider">Absent</span>
+                </div>
+                <div class="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex flex-col items-center">
+                    <span class="text-yellow-500 font-bold text-xl">{{ attendanceStats.late }}</span>
+                    <span class="text-xs text-[var(--muted)] uppercase tracking-wider">Late</span>
+                </div>
+                <div class="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl flex flex-col items-center">
+                    <span class="text-blue-500 font-bold text-xl">{{ attendanceStats.excused }}</span>
+                    <span class="text-xs text-[var(--muted)] uppercase tracking-wider">Excused</span>
+                </div>
+            </div>
+
+             <div class="p-4 bg-[var(--glass)] rounded-xl border border-[var(--glass-border)] text-center mt-2">
+                 <p class="text-[var(--muted)] mb-2">Status</p>
+                 <p class="font-semibold text-[var(--primary)]" *ngIf="lesson.attendances?.length">Recorded</p>
+                 <p class="font-semibold text-[var(--muted)]" *ngIf="!lesson.attendances?.length">Not Recorded</p>
+             </div>
+        </div>
+      </section>
+
+      <!-- Assessments Section -->
+      <section class="border border-[var(--glass-border)] rounded-[1.25rem] bg-[var(--card)] shadow-sm p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold m-0">Assessments</h2>
+            <button (click)="openAssessmentPanel()" class="text-sm bg-[var(--glass)] border border-[var(--glass-border)] px-3 py-1.5 rounded-lg hover:bg-[var(--primary)] hover:text-white transition-all">
+                + Add
+            </button>
+        </div>
+        
+        <div *ngIf="!lesson.assessments?.length" class="text-center p-8 text-[var(--muted)] border border-dashed border-[var(--glass-border)] rounded-xl">
+            No assessments linked.
+        </div>
+        <ul *ngIf="lesson.assessments?.length" class="flex flex-col gap-3">
+            <li *ngFor="let exam of lesson.assessments" class="p-4 bg-[var(--glass)] border border-[var(--glass-border)] rounded-xl flex justify-between items-center">
+                <div>
+                    <p class="font-semibold">{{ exam.title }}</p>
+                    <p class="text-xs text-[var(--muted)]">Scheduled: {{ exam.scheduled_at | date:'medium' }}</p>
+                </div>
+                <span class="text-xs px-2 py-1 rounded font-medium" 
+                    [ngClass]="{
+                        'bg-green-500/10 text-green-500': getAssessmentStatus(exam.scheduled_at) === 'Completed',
+                        'bg-blue-500/10 text-blue-500': getAssessmentStatus(exam.scheduled_at) === 'Upcoming'
+                    }">
+                    {{ getAssessmentStatus(exam.scheduled_at) }}
+                </span>
+            </li>
+        </ul>
+      </section>
+  </div>
+
+</div>
+
+<ng-template #loadingTpl>
+  <div class="flex flex-col items-center justify-center min-h-[400px] gap-4">
+    <div *ngIf="loading" class="w-10 h-10 border-4 border-[var(--glass-border)] border-t-[var(--primary)] rounded-full animate-spin"></div>
+    <p *ngIf="loading" class="text-[var(--muted)]">Loading lesson details...</p>
+    <p *ngIf="errorMessage" class="text-red-500 bg-red-500/10 px-6 py-4 rounded-xl border border-red-500/20">{{ errorMessage }}</p>
+  </div>
+</ng-template>
+
+<!-- Sidebar Overlay -->
+<div
+  class="fixed inset-0 bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200 z-[50] backdrop-blur-sm"
+  [class.opacity-100]="panelOpen" [class.pointer-events-auto]="panelOpen" (click)="closePanel()"></div>
+
+<!-- Sidebar Content -->
+<div
+  class="fixed inset-y-0 right-0 w-full md:w-[min(420px,90vw)] bg-[var(--card)] border-l border-[var(--glass-border)] shadow-2xl transition-transform duration-300 p-6 flex flex-col gap-4 z-[70] h-screen "
+  [class.translate-x-full]="!panelOpen" [class.translate-x-0]="panelOpen" (click)="$event.stopPropagation()" *ngIf="panelMode">
+  
+  <div class="flex justify-between items-center mb-6 pb-4 border-b border-[var(--glass-border)]">
+    <h3 class="m-0 text-xl font-bold">{{ panelTitle }}</h3>
+    <button
+      class="border-none bg-white/5 w-8 h-8 rounded-full flex items-center justify-center text-base cursor-pointer text-[var(--text)] transition-all hover:bg-white/10"
+      type="button" (click)="closePanel()">X</button>
+  </div>
+
+  <!-- Attendance Form in Sidebar -->
+  <div class="flex flex-col gap-5 flex-1 overflow-y-auto pb-4" *ngIf="panelMode === 'attendance'">
+    <div class="flex items-center gap-2 mb-4">
+        <span class="text-sm text-[var(--muted)] font-medium">Date:</span>
+        <input type="date" [value]="attendanceDate" disabled class="px-3 py-1.5 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--muted)] opacity-70 cursor-not-allowed font-medium w-full">
+    </div>
+
+    <div class="flex flex-col gap-3">
+        <article *ngFor="let entry of attendanceEntries"
+          class="rounded-xl border border-[var(--glass-border)] bg-[var(--card)]/40 p-4 flex flex-col gap-3">
+          <div class="flex justify-between items-center">
+            <p class="font-semibold text-[var(--text)] m-0">{{ entry.name }}</p>
+          </div>
+          
+          <!-- Colored Status Buttons -->
+          <div class="grid grid-cols-4 gap-2">
+            <button type="button" (click)="entry.status = 'present'"
+                class="px-2 py-1.5 rounded-lg text-xs font-medium transition-all border"
+                [ngClass]="{
+                    'bg-green-500 text-white border-green-500': entry.status === 'present',
+                    'bg-transparent text-[var(--muted)] border-[var(--glass-border)] hover:border-green-500/50': entry.status !== 'present'
+                }">
+                Present
+            </button>
+            <button type="button" (click)="entry.status = 'absent'"
+                class="px-2 py-1.5 rounded-lg text-xs font-medium transition-all border"
+                [ngClass]="{
+                    'bg-red-500 text-white border-red-500': entry.status === 'absent',
+                    'bg-transparent text-[var(--muted)] border-[var(--glass-border)] hover:border-red-500/50': entry.status !== 'absent'
+                }">
+                Absent
+            </button>
+            <button type="button" (click)="entry.status = 'late'"
+                class="px-2 py-1.5 rounded-lg text-xs font-medium transition-all border"
+                [ngClass]="{
+                    'bg-yellow-500 text-white border-yellow-500': entry.status === 'late',
+                    'bg-transparent text-[var(--muted)] border-[var(--glass-border)] hover:border-yellow-500/50': entry.status !== 'late'
+                }">
+                Late
+            </button>
+            <button type="button" (click)="entry.status = 'excused'"
+                class="px-2 py-1.5 rounded-lg text-xs font-medium transition-all border"
+                [ngClass]="{
+                    'bg-blue-500 text-white border-blue-500': entry.status === 'excused',
+                    'bg-transparent text-[var(--muted)] border-[var(--glass-border)] hover:border-blue-500/50': entry.status !== 'excused'
+                }">
+                Excused
+            </button>
+          </div>
+
+        </article>
+        <div *ngIf="!attendanceEntries.length" class="text-center text-[var(--muted)] py-8">
+            No students found.
+        </div>
+    </div>
+
+    <div class="mt-auto sticky bottom-0 pt-4 bg-gradient-to-t from-[var(--card)] via-[var(--card)] to-transparent border-t border-[var(--glass-border)] flex justify-end">
+      <button
+        class="bg-gradient-to-br from-[var(--primary)] to-[#7c3aed] text-white rounded-full px-6 py-2.5 shadow-lg hover:-translate-y-0.5 hover:brightness-110 transition-all font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+        type="button" (click)="saveAttendance()" [disabled]="processing || !attendanceEntries.length">
+        {{ processing ? 'Saving...' : 'Save Attendance' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Assessment Form in Sidebar -->
+  <div class="flex flex-col gap-5 flex-1 overflow-y-auto pb-4" *ngIf="panelMode === 'assessment'">
+    <div class="block">
+      <label class="block mb-2 text-sm font-medium text-[var(--muted)]">Title</label>
+      <input
+        class="w-full px-4 py-3 rounded-xl border border-[var(--glass-border)] bg-white/5 text-[var(--text)] shadow-inner focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all text-[0.95rem]"
+        type="text" [(ngModel)]="assessmentForm.title" placeholder="Exam Title" />
+    </div>
+    <div class="block">
+      <label class="block mb-2 text-sm font-medium text-[var(--muted)]">Scheduled at</label>
+      <input
+        class="w-full px-4 py-3 rounded-xl border border-[var(--glass-border)] bg-white/5 text-[var(--text)] shadow-inner focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all text-[0.95rem]"
+        type="datetime-local" [(ngModel)]="assessmentForm.scheduled_at" />
+    </div>
+
+    <div class="mt-auto sticky bottom-0 pt-4 bg-gradient-to-t from-[var(--card)] via-[var(--card)] to-transparent border-t border-[var(--glass-border)] flex justify-end">
+      <button
+        class="bg-gradient-to-br from-[var(--primary)] to-[#7c3aed] text-white rounded-full px-6 py-2.5 shadow-lg hover:-translate-y-0.5 hover:brightness-110 transition-all font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+        type="button" (click)="saveAssessment()" [disabled]="processing || !assessmentForm.title || !assessmentForm.scheduled_at">
+        {{ processing ? 'Creating...' : 'Create Assessment' }}
+      </button>
+    </div>
+  </div>
+
+</div>

@@ -67,11 +67,14 @@ export class StaffGroups implements OnInit {
     return this.roles.some((role) => role === 'teacher' || role === 'assistant' || role === 'center_admin');
   }
 
-  private loadGroups(): void {
+  // Pagination
+  meta: any = null;
+
+  private loadGroups(page: number = 1): void {
     this.loading = true;
 
     if (this.isCenterAdmin && !this.centerAccessUnavailable) {
-      this.staffService.getCenterGroups().subscribe({
+      this.staffService.getCenterGroups(page).subscribe({
         next: (res) => {
           this.groups = this.mapGroups(res);
           this.finishLoading();
@@ -79,7 +82,7 @@ export class StaffGroups implements OnInit {
         error: (error: HttpErrorResponse) => {
           if (error?.status === 404) {
             this.centerAccessUnavailable = true;
-            this.loadTeacherGroups();
+            this.loadTeacherGroups(page);
           } else {
             this.finishLoading();
           }
@@ -88,11 +91,11 @@ export class StaffGroups implements OnInit {
       return;
     }
 
-    this.loadTeacherGroups();
+    this.loadTeacherGroups(page);
   }
 
-  private loadTeacherGroups(): void {
-    this.staffService.getGroups().subscribe({
+  private loadTeacherGroups(page: number = 1): void {
+    this.staffService.getGroups(page).subscribe({
       next: (res) => {
         this.groups = this.mapGroups(res);
         this.finishLoading();
@@ -101,11 +104,32 @@ export class StaffGroups implements OnInit {
     });
   }
 
+  changePage(page: number): void {
+    if (page < 1 || (this.meta && page > this.meta.last_page)) return;
+    this.loadGroups(page);
+  }
+
   private mapGroups(response: any): StaffGroupRow[] {
-    const payload = response?.data ?? response ?? [];
+    const payload = response?.data ?? response; // The paginator object or wrapper
+    
+    // If payload is the paginator (has current_page), use it for meta
+    if (payload && payload.current_page) {
+        this.meta = {
+            current_page: payload.current_page,
+            last_page: payload.last_page,
+            total: payload.total,
+            per_page: payload.per_page
+        };
+    } else if (payload.meta) {
+        // Sometimes meta is separate
+        this.meta = payload.meta;
+    } else {
+        this.meta = null;
+    }
+
     const items = payload?.data ?? payload ?? [];
 
-    return items.map((g: any) => ({
+    return Array.isArray(items) ? items.map((g: any) => ({
       id: g.id,
       title: g.name,
       subject: g.subject ?? 'General',
@@ -115,7 +139,7 @@ export class StaffGroups implements OnInit {
       schedule: this.formatSchedule(g),
       studentsCount: g.students_count ?? g.students?.length ?? undefined,
       raw: g
-    }));
+    })) : [];
   }
 
   private formatSchedule(group: any): string {
