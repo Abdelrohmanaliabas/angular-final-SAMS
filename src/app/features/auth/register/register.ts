@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -11,10 +11,16 @@ import { ThemeService } from '../../../core/services/theme.service';
   selector: 'app-register',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './register.html'
+  templateUrl: './register.html',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class Register {
+export class Register implements OnInit {
   registerForm: FormGroup;
+  passwordVisibility = {
+    password: false,
+    confirm: false
+  };
+  shouldLoadAnimation = false;
 
   constructor(
     private fb: FormBuilder,
@@ -38,12 +44,25 @@ export class Register {
     }, { validators: this.passwordMatchValidator });
   }
 
+  ngOnInit(): void {
+    this.updateAnimationState();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.updateAnimationState();
+  }
+
   onSwitch(mode: string) {
     this.router.navigate(['/' + mode]);
   }
 
   onGoogleLogin() {
     window.location.href = 'http://localhost:8000/auth/google';
+  }
+
+  togglePasswordVisibility(field: 'password' | 'confirm') {
+    this.passwordVisibility[field] = !this.passwordVisibility[field];
   }
 
   passwordMatchValidator(control: AbstractControl) {
@@ -77,24 +96,33 @@ export class Register {
       phone,
       center_name: finalCenterName
     }).subscribe({
-      next: () => {
-        // Auto-login after successful registration
+      next: (response) => {
+        this.loadingService.hide();
+
+        // New accounts require approval - redirect to pending page
+        if (response.requires_approval || response.user?.approval_status === 'pending') {
+          this.feedback.showToast({
+            tone: 'success',
+            title: 'Registration Successful!',
+            message: 'Your account is pending admin approval.'
+          });
+          this.router.navigate(['/pending-approval']);
+          return;
+        }
+
+        // Fallback: if somehow approved immediately, auto-login
         this.authService.login({ email, password }).subscribe({
-          next: (response) => {
-            this.loadingService.hide();
+          next: (loginResponse) => {
             this.feedback.showToast({
               tone: 'success',
               title: 'Welcome!',
               message: 'Account created and signed in successfully.'
             });
 
-            // Redirect based on role
-            const redirectUrl = this.authService.getDashboardUrl(response.user?.roles || []);
+            const redirectUrl = this.authService.getDashboardUrl(loginResponse.user?.roles || []);
             this.router.navigate([redirectUrl]);
           },
-          error: (loginErr) => {
-            this.loadingService.hide();
-            // Fallback if login fails but register succeeded (unlikely but possible)
+          error: () => {
             this.feedback.openModal({
               icon: 'info',
               title: 'Account created',
@@ -122,5 +150,13 @@ export class Register {
       return fallback;
     }
     return typeof message === 'string' ? message : JSON.stringify(message);
+  }
+
+  private updateAnimationState() {
+    if (typeof window === 'undefined') {
+      this.shouldLoadAnimation = false;
+      return;
+    }
+    this.shouldLoadAnimation = window.innerWidth >= 768;
   }
 }
