@@ -1,1 +1,35 @@
-<p>not-found works!</p>
+<div class="not-found">
+  <div class="not-found__glow not-found__glow--one"></div>
+  <div class="not-found__glow not-found__glow--two"></div>
+
+  <div class="not-found__content">
+    <div class="not-found__message">
+      <p class="eyebrow">Error 404</p>
+      <h1>
+        We can't find the page you're looking for
+      </h1>
+      <p class="lead">
+        It might have been removed, renamed, or maybe the link you followed is broken. Let's get you
+        back on track.
+      </p>
+
+      <div class="actions">
+        <a routerLink="/home" class="btn primary">Back to Home</a>
+        <button type="button" class="btn ghost" (click)="goBack()">Go Back</button>
+      </div>
+
+      <p class="hint">
+        Or <a routerLink="/login">sign in</a> to continue where you left off.
+      </p>
+    </div>
+
+    <div class="not-found__visual" aria-hidden="true">
+      <div class="orbit orbit--outer"></div>
+      <div class="orbit orbit--middle"></div>
+      <div class="orbit orbit--inner"></div>
+      <div class="planet">
+        <span>404</span>
+      </div>
+    </div>
+  </div>
+</div>
