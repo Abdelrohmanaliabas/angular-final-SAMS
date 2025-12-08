@@ -5,7 +5,6 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { FeedbackService } from '../../../core/services/feedback.service';
-import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -22,8 +21,7 @@ export class ForgotPassword {
     private authService: AuthService,
     private router: Router,
     private loadingService: LoadingService,
-    private feedback: FeedbackService,
-    public themeService: ThemeService
+    private feedback: FeedbackService
   ) {
     this.forgotPasswordForm = this.fb.group({
       email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]]

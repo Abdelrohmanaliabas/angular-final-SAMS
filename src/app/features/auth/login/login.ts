@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -11,10 +11,13 @@ import { ThemeService } from '../../../core/services/theme.service';
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './login.html'
+  templateUrl: './login.html',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class Login implements OnInit {
   loginForm: FormGroup;
+  showPassword = false;
+  shouldLoadAnimation = false;
 
   constructor(
     private fb: FormBuilder,
@@ -33,12 +36,18 @@ export class Login implements OnInit {
   }
 
   ngOnInit(): void {
+    this.updateAnimationState();
     this.route.queryParams.subscribe(params => {
       const exchangeToken = params['exchange_token'];
       if (exchangeToken) {
         this.handleExchangeToken(exchangeToken);
       }
     });
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.updateAnimationState();
   }
 
   private handleExchangeToken(token: string) {
@@ -67,12 +76,24 @@ export class Login implements OnInit {
     });
   }
 
-  onSwitch(mode: string) {
-    this.router.navigate(['/' + mode]);
+  private updateAnimationState() {
+    if (typeof window === 'undefined') {
+      this.shouldLoadAnimation = false;
+      return;
+    }
+    this.shouldLoadAnimation = window.innerWidth >= 768;
+  }
+
+  onSwitch(mode: string, params?: Record<string, any>) {
+    this.router.navigate(['/' + mode], { queryParams: params });
   }
 
   onGoogleLogin() {
     window.location.href = 'http://localhost:8000/auth/google';
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
   onSubmit() {
