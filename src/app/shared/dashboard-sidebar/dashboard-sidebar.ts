@@ -50,9 +50,9 @@ export class DashboardSidebar {
 
   private staffMenuItems: MenuItem[] = [
     { label: 'Dashboard', route: '/dashboard/staff/overview', icon: 'dashboard', exact: true },
-    { label: 'Groups', route: '/dashboard/staff/groups', icon: 'groups', exact: true },
-    { label: 'Team', route: '/dashboard/staff/staff', icon: 'team', exact: true },
-    { label: 'Students', route: '/dashboard/staff/students', icon: 'students', exact: true },
+    { label: 'Groups', route: '/dashboard/staff/groups', icon: 'groups', exact: false },
+    { label: 'Team', route: '/dashboard/staff/staff', icon: 'team', exact: false },
+    { label: 'Students', route: '/dashboard/staff/students', icon: 'students', exact: false },
   ];
 
   get settingsRoute(): string {
