@@ -114,8 +114,11 @@
 
 </section>
 
-<div class="fixed inset-0 bg-black/20 opacity-0 pointer-events-none transition-opacity duration-200 z-60"
-  [class.opacity-100]="panelOpen" [class.pointer-events-auto]="panelOpen" (click)="closeInfo()"></div>
+<div
+  *ngIf="panelOpen"
+  class="fixed inset-0 bg-black/30 opacity-100 pointer-events-auto transition-opacity duration-200 z-60"
+  (click)="closeInfo()">
+</div>
 <div
   class="fixed inset-y-0 right-0 w-full md:w-[min(420px,90vw)] bg-(--card) border-l border-(--glass-border) shadow-2xl transition-transform duration-300 p-5 flex flex-col gap-4 z-70"
   [class.translate-x-full]="!panelOpen" [class.translate-x-0]="panelOpen" (click)="$event.stopPropagation()">

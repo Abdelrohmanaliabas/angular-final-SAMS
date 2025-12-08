@@ -130,6 +130,8 @@
   background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 68%, white));
   color: white;
   border: none;
+  /* padding: 0.5rem 1rem; */
+  margin-right: 5px;
 }
 
 .btn-ghost {
@@ -183,6 +185,7 @@ html:not(.rtl) body {
 /* Utility buttons */
 .btn-simple {
   transition: transform 120ms ease, border-color 120ms ease;
+  margin-right: 5px;
 }
 
 .btn-simple:hover {
