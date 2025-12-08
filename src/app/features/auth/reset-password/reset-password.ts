@@ -1,7 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { FeedbackService } from '../../../core/services/feedback.service';
@@ -12,16 +12,22 @@ import { FeedbackService } from '../../../core/services/feedback.service';
     imports: [CommonModule, ReactiveFormsModule],
     templateUrl: './reset-password.html'
 })
-export class ResetPassword {
-    @Input() resetContext: { token: string | null; email: string | null } | null = null;
+export class ResetPassword implements OnInit {
+    resetContext: { token: string | null; email: string | null } | null = null;
     resetPasswordForm: FormGroup;
+    passwordVisibility = {
+        password: false,
+        confirm: false
+    };
+    contextLoading = signal(true);
 
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,
         private router: Router,
         private loadingService: LoadingService,
-        private feedback: FeedbackService
+        private feedback: FeedbackService,
+        private route: ActivatedRoute
     ) {
         this.resetPasswordForm = this.fb.group({
             password: ['', [
@@ -33,8 +39,48 @@ export class ResetPassword {
         }, { validators: this.passwordMatchValidator });
     }
 
+    ngOnInit(): void {
+        const params = this.route.snapshot.queryParamMap;
+        const token = params.get('token');
+        const email = params.get('email');
+        const code = params.get('code');
+
+        if (token && email) {
+            this.resetContext = { token, email };
+            this.contextLoading.set(false);
+            return;
+        }
+
+        if (code) {
+            this.authService.validateResetCode(code).subscribe({
+                next: (response) => {
+                    const data = response?.data ?? response;
+                    if (data?.token && data?.email) {
+                        this.resetContext = { token: data.token, email: data.email };
+                    }
+                    this.contextLoading.set(false);
+                },
+                error: (err) => {
+                    this.contextLoading.set(false);
+                    this.feedback.showToast({
+                        tone: 'error',
+                        title: 'Invalid link',
+                        message: this.extractMessage(err, 'Reset link expired')
+                    });
+                }
+            });
+            return;
+        }
+
+        this.contextLoading.set(false);
+    }
+
     onSwitch(mode: string) {
         this.router.navigate(['/' + mode]);
+    }
+
+    togglePasswordVisibility(field: 'password' | 'confirm') {
+        this.passwordVisibility[field] = !this.passwordVisibility[field];
     }
 
     passwordMatchValidator(control: AbstractControl) {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -11,10 +11,13 @@ import { ThemeService } from '../../../core/services/theme.service';
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './login.html'
+  templateUrl: './login.html',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class Login implements OnInit {
   loginForm: FormGroup;
+  showPassword = false;
+  shouldLoadAnimation = false;
 
   constructor(
     private fb: FormBuilder,
@@ -33,6 +36,7 @@ export class Login implements OnInit {
   }
 
   ngOnInit(): void {
+    this.updateAnimationState();
     this.route.queryParams.subscribe(params => {
       const exchangeToken = params['exchange_token'];
       if (exchangeToken) {
@@ -41,11 +45,32 @@ export class Login implements OnInit {
     });
   }
 
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.updateAnimationState();
+  }
+
   private handleExchangeToken(token: string) {
     this.loadingService.show();
+
+    // Check if this is a new user registration (pending flag from URL)
+    const isPending = this.route.snapshot.queryParamMap.get('pending') === '1';
+
     this.authService.exchangeToken(token, true).subscribe({
       next: (response) => {
         this.loadingService.hide();
+
+        // If new user (from Google registration), they need approval
+        if (isPending || response.user?.approval_status === 'pending') {
+          this.feedback.showToast({
+            tone: 'info',
+            title: 'Account Created',
+            message: 'Your account is pending admin approval.'
+          });
+          this.router.navigate(['/pending-approval']);
+          return;
+        }
+
         this.feedback.showToast({
           tone: 'success',
           title: 'Welcome back!',
@@ -67,12 +92,24 @@ export class Login implements OnInit {
     });
   }
 
-  onSwitch(mode: string) {
-    this.router.navigate(['/' + mode]);
+  private updateAnimationState() {
+    if (typeof window === 'undefined') {
+      this.shouldLoadAnimation = false;
+      return;
+    }
+    this.shouldLoadAnimation = window.innerWidth >= 768;
+  }
+
+  onSwitch(mode: string, params?: Record<string, any>) {
+    this.router.navigate(['/' + mode], { queryParams: params });
   }
 
   onGoogleLogin() {
     window.location.href = 'http://localhost:8000/auth/google';
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
   onSubmit() {
@@ -91,6 +128,18 @@ export class Login implements OnInit {
     this.authService.login({ email, password }, rememberMe).subscribe({
       next: (response) => {
         this.loadingService.hide();
+
+        // Check if account is pending approval
+        if (response.approval_status === 'pending') {
+          this.feedback.showToast({
+            tone: 'info',
+            title: 'Account Pending',
+            message: 'Your account is awaiting admin approval.'
+          });
+          this.router.navigate(['/pending-approval']);
+          return;
+        }
+
         this.feedback.showToast({
           tone: 'success',
           title: 'Welcome back!',

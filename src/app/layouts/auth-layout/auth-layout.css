@@ -1,44 +1,64 @@
-#background {
-    position: fixed;
-    inset: 0;
-    background-image: url('/assets/bg.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    z-index: -1;
-}
-
 .auth-wrapper {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 1rem;
-    position: relative;
+    padding: clamp(0.5rem, 3vw, 2.5rem);
+    background: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.15), transparent 45%),
+        radial-gradient(circle at 90% 10%, rgba(14, 165, 233, 0.15), transparent 42%),
+        radial-gradient(circle at 50% 90%, rgba(147, 51, 234, 0.08), transparent 50%),
+        var(--bg);
+    overflow: hidden;
+}
+
+.auth-wrapper::before,
+.auth-wrapper::after {
+    content: '';
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent 65%);
+    filter: blur(20px);
+    opacity: 0.6;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+}
+
+.auth-wrapper::before {
+    top: -120px;
+    left: -120px;
+}
+
+.auth-wrapper::after {
+    bottom: -160px;
+    right: -120px;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.2), transparent 65%);
 }
 
 .dark-toggle {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: transparent;
-    border: none;
-    font-size: 1.5rem;
-    color: var(--icon-color, #555);
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    border: 1px solid var(--glass-border);
+    background: var(--card-strong);
+    box-shadow: var(--shadow-soft);
+    color: var(--text);
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.dark-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-strong);
 }
 
 .dark .dark-toggle {
-    color: #ddd;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --card-bg: #1a1a1a;
-        --icon-color: #ddd;
-    }
-
-    .auth-card {
-        color: #fafafa;
-    }
+    background: var(--card);
 }

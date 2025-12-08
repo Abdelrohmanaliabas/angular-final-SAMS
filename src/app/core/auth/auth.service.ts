@@ -49,6 +49,10 @@ export class AuthService {
         return this.apiService.post('/auth/reset-password', data);
     }
 
+    validateResetCode(code: string): Observable<any> {
+        return this.apiService.post('/auth/validate-reset-code', { code });
+    }
+
     loginWithGoogle(token: string, remember = false): Observable<any> {
         this.tokenStorage.seedToken(token, remember);
         // Manually attach header to ensure it's sent immediately after seeding
@@ -69,8 +73,14 @@ export class AuthService {
     }
 
     // New method: verify email activation code
-    verifyEmail(code: string): Observable<any> {
-        return this.apiService.post('/auth/verify-email', { code });
+    verifyEmail(code: string, remember = false): Observable<any> {
+        return this.apiService.post('/auth/verify-email', { code }).pipe(
+            tap((data: any) => {
+                if (data?.token && data?.user) {
+                    this.tokenStorage.persistAuthResponse(data.token, data.user, remember);
+                }
+            })
+        );
     }
 
     // Existing method to send verification email (if needed)

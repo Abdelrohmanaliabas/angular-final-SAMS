@@ -37,6 +37,7 @@ export class Setting implements OnInit, OnDestroy {
   loading = false;
   private themeSub?: Subscription;
   password = { new: '', confirm: '' };
+  passwordVisibility = { new: false, confirm: false };
 
   constructor(
     private themeService: ThemeService,
@@ -113,6 +114,7 @@ export class Setting implements OnInit, OnDestroy {
     this.api.put(`/users/${this.user.id}`, { password: this.password.new }).subscribe({
       next: () => {
         this.password = { new: '', confirm: '' };
+        this.passwordVisibility = { new: false, confirm: false };
       },
       error: () => {},
       complete: () => {
@@ -120,6 +122,10 @@ export class Setting implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  togglePasswordVisibility(field: 'new' | 'confirm') {
+    this.passwordVisibility[field] = !this.passwordVisibility[field];
   }
 
   onAvatarSelected(event: any) {
