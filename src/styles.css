@@ -34,6 +34,18 @@
   --student-warning: #f59e0b;
   --student-danger: #ef4444;
   --student-info: #3b82f6;
+
+  /* Dashboard specific - using existing palette */
+  --dashboard-sidebar-bg: var(--card-strong);
+  --dashboard-sidebar-border: var(--glass-border);
+  --dashboard-nav-bg: var(--card-strong);
+  --dashboard-content-bg: var(--bg);
+  --dashboard-link-text: var(--text);
+  --dashboard-link-muted: var(--muted);
+  --dashboard-link-hover-bg: var(--panel);
+  --dashboard-link-hover-border: rgba(59, 130, 246, 0.2);
+  --dashboard-link-active-bg: linear-gradient(135deg, #06b6d4, #8b5cf6);
+  --dashboard-link-active-shadow: 0 8px 20px rgba(6, 182, 212, 0.35);
 }
 
 .dark {
@@ -71,6 +83,18 @@
   --student-warning: #d97706;
   --student-danger: #dc2626;
   --student-info: #2563eb;
+
+  /* Dashboard specific - dark mode */
+  --dashboard-sidebar-bg: #0f1729;
+  --dashboard-sidebar-border: var(--glass-border);
+  --dashboard-nav-bg: #0f1729;
+  --dashboard-content-bg: var(--bg);
+  --dashboard-link-text: var(--text);
+  --dashboard-link-muted: var(--muted);
+  --dashboard-link-hover-bg: #1e293b;
+  --dashboard-link-hover-border: rgba(96, 165, 250, 0.25);
+  --dashboard-link-active-bg: linear-gradient(135deg, #22d3ee, #a78bfa);
+  --dashboard-link-active-shadow: 0 8px 20px rgba(34, 211, 238, 0.25);
 }
 
 /* Component helpers (use throughout app) */
