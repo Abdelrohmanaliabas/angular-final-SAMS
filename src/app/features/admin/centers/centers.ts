@@ -4,6 +4,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
 import { HttpParams } from '@angular/common/http';
 import { PaginationComponent } from '../../../shared/ui/pagination/pagination';
+import { FeedbackService } from '../../../core/services/feedback.service';
 
 @Component({
   selector: 'app-admin-centers',
@@ -13,7 +14,11 @@ import { PaginationComponent } from '../../../shared/ui/pagination/pagination';
   styleUrl: './centers.css',
 })
 export class Centers implements OnInit {
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private api: ApiService,
+    private cdr: ChangeDetectorRef,
+    private feedback: FeedbackService
+  ) {}
 
   centers: any[] = [];
   loading = false;
@@ -68,7 +73,7 @@ export class Centers implements OnInit {
         this.perPage = pagination.per_page ?? this.perPage;
         this.total = pagination.total ?? this.centers.length;
         this.lastPage = pagination.last_page ?? this.lastPage ?? 1;
-        
+
         this.cdr.detectChanges();
       },
       error: () => { this.loading = false; this.cdr.detectChanges(); },
@@ -123,14 +128,45 @@ export class Centers implements OnInit {
     };
 
     if (this.isEditMode && this.currentId !== null) {
-      this.api.put<any>(`/centers/${this.currentId}`, payload).subscribe(() => {
-        this.loadCenters();
-        this.closeForm();
+      this.api.put<any>(`/centers/${this.currentId}`, payload).subscribe({
+        next: () => {
+          this.feedback.showToast({
+            title: 'Center updated',
+            message: `"${this.formCenter.name}" has been updated.`,
+            tone: 'success'
+          });
+          this.loadCenters();
+          this.closeForm();
+        },
+        error: () => {
+          this.closeForm();
+          this.feedback.showToast({
+            title: 'Update failed',
+            message: 'Could not update the center. Please try again.',
+            tone: 'error'
+          });
+          this.cdr.detectChanges();
+        }
       });
     } else {
-      this.api.post<any>('/centers', payload).subscribe(() => {
-        this.loadCenters();
-        this.closeForm();
+      this.api.post<any>('/centers', payload).subscribe({
+        next: () => {
+          this.feedback.showToast({
+            title: 'Center created',
+            message: `"${this.formCenter.name}" has been added.`,
+            tone: 'success'
+          });
+          this.loadCenters();
+          this.closeForm();
+        },
+        error: () => {
+          this.feedback.showToast({
+            title: 'Create failed',
+            message: 'Could not create the center. Please try again.',
+            tone: 'error'
+          });
+          this.cdr.detectChanges();
+        }
       });
     }
   }
@@ -142,8 +178,35 @@ export class Centers implements OnInit {
       return;
     }
 
-    this.api.delete(`/centers/${found.id}`).subscribe(() => {
-      this.loadCenters(); // Reload to update pagination
+    this.feedback.openModal({
+      icon: 'warning',
+      title: 'Delete Center?',
+      message: `Are you sure you want to delete "${found.name}"? This action cannot be undone.`,
+      primaryText: 'Delete',
+      secondaryText: 'Cancel',
+      onPrimary: () => {
+        this.loading = true;
+        this.api.delete(`/centers/${found.id}`).subscribe({
+          next: () => {
+            this.feedback.showToast({
+              title: 'Center deleted',
+              message: `"${found.name}" has been removed.`,
+              tone: 'success'
+            });
+            this.loadCenters(); // Reload to update pagination
+          },
+          error: () => {
+            this.loading = false;
+            this.feedback.showToast({
+              title: 'Delete failed',
+              message: 'Could not delete the center. Please try again.',
+              tone: 'error'
+            });
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      onSecondary: () => this.feedback.closeModal()
     });
   }
 

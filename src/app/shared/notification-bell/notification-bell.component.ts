@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotificationService, Notification } from '../../core/services/notification.service';
 import { Subject, takeUntil } from 'rxjs';
@@ -14,7 +14,9 @@ import { ThemeService } from '../../core/services/theme.service';
 export class NotificationBellComponent implements OnInit, OnDestroy {
   private notificationService = inject(NotificationService);
   private themeService = inject(ThemeService);
+  private cdr = inject(ChangeDetectorRef);
   private destroy$ = new Subject<void>();
+  private viewDestroyed = false;
 
   isDropdownOpen = false;
   unreadCount = this.notificationService.getCurrentUnreadCount();
@@ -24,23 +26,22 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     this.notificationService.unreadCount$
       .pipe(takeUntil(this.destroy$))
       .subscribe(count => {
-        setTimeout(() => {
-          if (this.destroy$.closed) return;
-          this.unreadCount = count;
-        });
+        if (this.destroy$.closed) return;
+        this.unreadCount = count;
+        this.detectChanges();
       });
 
     this.notificationService.notifications$
       .pipe(takeUntil(this.destroy$))
       .subscribe(notifications => {
-        setTimeout(() => {
-          if (this.destroy$.closed) return;
-          this.notifications = notifications;
-        });
+        if (this.destroy$.closed) return;
+        this.notifications = notifications;
+        this.detectChanges();
       });
   }
 
   ngOnDestroy(): void {
+    this.viewDestroyed = true;
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -67,6 +68,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
       next: () => {
         notification.read_at = new Date().toISOString();
         this.notificationService.loadUnreadCount();
+        this.detectChanges();
       },
       error: (error) => {
         console.error('Error marking notification as read:', error);
@@ -83,6 +85,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           }
         });
         this.notificationService.loadUnreadCount();
+        this.detectChanges();
       },
       error: (error) => {
         console.error('Error marking all as read:', error);
@@ -112,5 +115,10 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
     if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
     return date.toLocaleDateString('en-US');
+  }
+
+  private detectChanges(): void {
+    if (this.viewDestroyed) return;
+    this.cdr.detectChanges();
   }
 }
