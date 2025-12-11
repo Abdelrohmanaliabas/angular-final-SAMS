@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { AiService } from '../../core/services/ai.service';
 
 @Component({
@@ -14,7 +14,7 @@ export class AiInsightsCardComponent implements OnInit {
   error = '';
   insights = '';
 
-  constructor(private ai: AiService) {}
+  constructor(private ai: AiService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadInsights();
@@ -23,14 +23,17 @@ export class AiInsightsCardComponent implements OnInit {
   loadInsights(): void {
     this.loading = true;
     this.error = '';
+
     this.ai.getInsights().subscribe({
       next: (res) => {
-        this.insights = res.insights || '';
-        this.loading = false;
+this.insights = res.insights || '';
+      this.loading = false;
+      this.cdr.detectChanges();
       },
       error: () => {
-        this.error = 'Failed to fetch AI insights. Please try again.';
-        this.loading = false;
+this.error = 'Failed to fetch AI insights. Please try again.';
+      this.loading = false;
+      this.cdr.detectChanges();
       }
     });
   }

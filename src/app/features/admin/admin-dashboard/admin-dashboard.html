@@ -9,7 +9,7 @@
       <p class="text-slate-600 dark:text-slate-300">Snapshot of centers, courses, teachers, students, and payments</p>
       <div class="flex flex-wrap gap-2">
         <button routerLink="/dashboard/admin/centers"
-          class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-fuchsia-500 to-indigo-500 text-white font-semibold shadow-lg shadow-fuchsia-500/30 hover:-translate-y-0.5 transition">View
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-linear-to-r from-fuchsia-500 to-indigo-500 text-white font-semibold shadow-lg shadow-fuchsia-500/30 hover:-translate-y-0.5 transition">View
           centers</button>
         <button routerLink="/dashboard/admin/courses"
           class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-slate-200 bg-white text-slate-800 shadow-sm hover:-translate-y-0.5 transition dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">View
@@ -56,7 +56,7 @@
       <p class="text-sm text-slate-500 dark:text-slate-400">Paid: {{ stats.paidCenters }} | Unpaid:
         {{ stats.unpaidCenters }}</p>
       <div class="mt-3 w-full h-2 rounded-full bg-slate-200 overflow-hidden dark:bg-slate-800">
-        <span class="block h-full rounded-full bg-gradient-to-r from-indigo-500 to-blue-500"
+        <span class="block h-full rounded-full bg-linear-to-r from-indigo-500 to-blue-500"
           [style.width.%]="(stats.paidCenters + stats.unpaidCenters) ? (stats.paidCenters / (stats.paidCenters + stats.unpaidCenters)) * 100 : 0"></span>
       </div>
     </article>
@@ -73,7 +73,7 @@
       <div class="text-3xl font-extrabold text-slate-900 dark:text-white">{{ stats.courses }}</div>
       <p class="text-sm text-slate-500 dark:text-slate-400">Active: {{ stats.activeCourses }}</p>
       <div class="mt-3 w-full h-2 rounded-full bg-slate-200 overflow-hidden dark:bg-slate-800">
-        <span class="block h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-400"
+        <span class="block h-full rounded-full bg-linear-to-r from-emerald-400 to-teal-400"
           [style.width.%]="stats.courses ? (stats.activeCourses / stats.courses) * 100 : 0"></span>
       </div>
     </article>
@@ -90,7 +90,7 @@
       <div class="text-3xl font-extrabold text-slate-900 dark:text-white">{{ stats.teachers }}</div>
       <p class="text-sm text-slate-500 dark:text-slate-400">Online: {{ stats.onlineTeachers }}</p>
       <div class="mt-3 w-full h-2 rounded-full bg-slate-200 overflow-hidden dark:bg-slate-800">
-        <span class="block h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-400"
+        <span class="block h-full rounded-full bg-linear-to-r from-amber-400 to-orange-400"
           [style.width.%]="stats.teachers ? (stats.onlineTeachers / stats.teachers) * 100 : 0"></span>
       </div>
     </article>
@@ -107,7 +107,7 @@
       <div class="text-3xl font-extrabold text-slate-900 dark:text-white">{{ stats.students }}</div>
       <p class="text-sm text-slate-500 dark:text-slate-400">Attendance today: {{ stats.attendanceToday }}</p>
       <div class="mt-3 w-full h-2 rounded-full bg-slate-200 overflow-hidden dark:bg-slate-800">
-        <span class="block h-full rounded-full bg-gradient-to-r from-rose-400 to-pink-400"
+        <span class="block h-full rounded-full bg-linear-to-r from-rose-400 to-pink-400"
           [style.width.%]="stats.students ? (stats.attendanceToday / stats.students) * 100 : 0"></span>
       </div>
     </article>
@@ -127,7 +127,7 @@
     <ul class="divide-y divide-slate-200 dark:divide-slate-800" *ngIf="recent.length; else emptyActivity">
       <li *ngFor="let item of recent" class="flex flex-col sm:flex-row sm:items-center justify-between py-3 gap-2">
         <div class="flex items-center gap-3 text-slate-800 dark:text-slate-200">
-          <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 shadow"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-linear-to-r from-indigo-500 to-blue-500 shadow"></span>
           <span>{{ item.title || item.titleKey || 'Activity' }}</span>
         </div>
         <span class="text-sm text-slate-500 dark:text-slate-400">{{ item.time }}</span>

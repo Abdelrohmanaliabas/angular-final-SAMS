@@ -6,8 +6,8 @@
     </div>
   </div>
 
-  <div class="ai-chat__messages">
-    <div *ngFor="let msg of messages" class="message" [class.is-ai]="msg.role === 'ai'">
+  <div class="ai-chat__messages" #messagesContainer>
+    <div *ngFor="let msg of messages" class="message dark:bg-slate-800!" [class.is-ai]="msg.role === 'ai'">
       <span class="badge" *ngIf="msg.role === 'ai'">AI</span>
       <span class="content">{{ msg.content }}</span>
     </div>
