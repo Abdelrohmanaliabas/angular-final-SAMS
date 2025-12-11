@@ -22,7 +22,6 @@
       <thead>
         <tr>
           <th>Name</th>
-          <th>City</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>
@@ -32,10 +31,8 @@
           <td>
             <div class="stack">
               <span class="strong">{{ c.name }}</span>
-              <span class="muted">{{ c.phone }}</span>
             </div>
           </td>
-          <td><span class="badge badge-neutral">{{ c.city || '-' }}</span></td>
           <td><span class="badge" [ngClass]="c.paid ? 'badge-success' : 'badge-neutral'">{{ c.paid ? 'Active' :
               'Inactive' }}</span></td>
           <td>
@@ -62,13 +59,8 @@
   </div>
   <form class="panel-body" (ngSubmit)="save()">
     <label class="dashboard-label">Center Name</label>
-    <input class="dashboard-input" name="name" [(ngModel)]="formCenter.name" required />
-
-    <label class="dashboard-label">Subdomain (City)</label>
-    <input class="dashboard-input" name="city" [(ngModel)]="formCenter.city" required />
-
-    <label class="dashboard-label">Owner Phone</label>
-    <input class="dashboard-input" name="phone" [(ngModel)]="formCenter.phone" required />
+    <input class="dashboard-input" [class.input-error]="formErrors.name" name="name" [(ngModel)]="formCenter.name" required />
+    <p class="form-error" *ngIf="formErrors.name">{{ formErrors.name }}</p>
 
     <label class="dashboard-label">Status</label>
     <select class="dashboard-select" name="paid" [(ngModel)]="formCenter.paid">
@@ -89,8 +81,6 @@
   </div>
   <div class="panel-body" *ngIf="selectedCenter">
     <p><strong>Name:</strong> {{ selectedCenter.name }}</p>
-    <p><strong>City:</strong> {{ selectedCenter.city }}</p>
-    <p><strong>Phone:</strong> {{ selectedCenter.phone }}</p>
     <p><strong>Status:</strong> {{ selectedCenter.paid ? 'Active' : 'Inactive' }}</p>
     <p><strong>ID:</strong> {{ selectedCenter.id }}</p>
     <div *ngIf="selectedCenter.courses?.length">
