@@ -180,6 +180,17 @@
 
 .btn-primary.full { width: 100%; text-align: center; }
 
+.input-error {
+  border-color: #f87171 !important;
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.35);
+}
+
+.form-error {
+  color: #f87171;
+  font-size: 0.85rem;
+  margin: -0.25rem 0 0.4rem;
+}
+
 @media(max-width:640px) {
   .list-table th, .list-table td { padding: 0.6rem; }
   .toolbar { flex-direction: column; align-items: stretch; }

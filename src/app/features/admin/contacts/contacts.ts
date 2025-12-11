@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
 import { finalize, map } from 'rxjs/operators';
 import { HttpParams } from '@angular/common/http';
@@ -22,6 +22,7 @@ interface Contact {
 })
 export class Contacts implements OnInit {
   private readonly apiService = inject(ApiService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   contacts: Contact[] = [];
   isLoading = true;
@@ -40,6 +41,7 @@ export class Contacts implements OnInit {
   loadContacts(page = this.page): void {
     this.isLoading = true;
     this.errorMessage = '';
+    this.cdr.detectChanges();
 
     const params = new HttpParams()
       .set('page', page)
@@ -50,6 +52,7 @@ export class Contacts implements OnInit {
       .pipe(
         finalize(() => {
           this.isLoading = false;
+          this.cdr.detectChanges();
         })
       )
       .subscribe({
@@ -63,9 +66,11 @@ export class Contacts implements OnInit {
           this.perPage = pagination.per_page ?? this.perPage;
           this.total = pagination.total ?? this.contacts.length;
           this.lastPage = pagination.last_page ?? this.lastPage ?? 1;
+          this.cdr.detectChanges();
         },
         error: (error) => {
           this.errorMessage = error.error?.message || 'Failed to load contacts';
+          this.cdr.detectChanges();
         },
       });
   }
