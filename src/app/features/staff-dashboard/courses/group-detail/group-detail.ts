@@ -64,6 +64,10 @@ export class StaffGroupDetail implements OnInit, OnDestroy {
   lessonErrors = { title: '', description: '', scheduled_at: '' };
   lessonError = '';
 
+  // Student Side Panel
+  selectedStudent: any = null;
+  studentPanelOpen = false;
+
   // Pagination
   studentsMeta: PaginationMeta | null = null;
   lessonsMeta: PaginationMeta | null = null;
@@ -130,6 +134,48 @@ export class StaffGroupDetail implements OnInit, OnDestroy {
       return;
     }
     this.router.navigate(['/dashboard/staff/groups', this.groupId, 'lessons', lessonId]);
+  }
+
+  // Student Management
+  openStudentPanel(student: any): void {
+    this.selectedStudent = student;
+    this.studentPanelOpen = true;
+  }
+
+  closeStudentPanel(): void {
+    this.studentPanelOpen = false;
+    this.selectedStudent = null;
+  }
+
+  removeStudentFromGroup(): void {
+    if (!this.selectedStudent || !this.groupId || !this.canManageGroup) return;
+
+    this.feedback.openModal({
+      icon: 'warning',
+      title: 'Remove Student?',
+      message: `Are you sure you want to remove ${this.selectedStudent.name} from this group? This action cannot be undone.`,
+      primaryText: 'Remove',
+      secondaryText: 'Cancel',
+      tone: 'danger',
+      onPrimary: () => {
+        this.processing = true;
+        this.staffService.removeStudentFromGroup(this.groupId, this.selectedStudent.id).subscribe({
+          next: () => {
+            this.processing = false;
+            this.feedback.showToast({ title: 'Success', message: 'Student removed from group.', tone: 'success' });
+            this.closeStudentPanel();
+            this.loadStudents(this.studentsMeta?.current_page || 1);
+          },
+          error: (err) => {
+            this.processing = false;
+            console.error('Failed to remove student', err);
+            this.feedback.showToast({ title: 'Error', message: 'Failed to remove student.', tone: 'error' });
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      onSecondary: () => this.feedback.closeModal()
+    });
   }
 
   closePanel(): void {
