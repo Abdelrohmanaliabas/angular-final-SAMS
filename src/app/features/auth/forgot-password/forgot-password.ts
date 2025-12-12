@@ -1,15 +1,16 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { FeedbackService } from '../../../core/services/feedback.service';
+import { ThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ThemeToggleComponent],
   templateUrl: './forgot-password.html'
 })
 export class ForgotPassword {

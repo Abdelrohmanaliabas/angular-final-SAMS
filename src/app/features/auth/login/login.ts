@@ -1,16 +1,17 @@
 import { Component, HostListener, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { FeedbackService } from '../../../core/services/feedback.service';
 import { ThemeService } from '../../../core/services/theme.service';
+import { ThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ThemeToggleComponent],
   templateUrl: './login.html',
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

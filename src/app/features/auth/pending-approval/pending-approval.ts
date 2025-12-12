@@ -1,15 +1,16 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { TokenStorageService } from '../../../core/auth/token-storage.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { FeedbackService } from '../../../core/services/feedback.service';
+import { ThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle';
 
 @Component({
   selector: 'app-pending-approval',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule, ThemeToggleComponent],
   templateUrl: './pending-approval.html'
 })
 export class PendingApproval implements OnInit {
@@ -23,7 +24,7 @@ export class PendingApproval implements OnInit {
     private router: Router,
     private loadingService: LoadingService,
     private feedback: FeedbackService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const user = this.tokenStorage.getUser();
@@ -54,7 +55,7 @@ export class PendingApproval implements OnInit {
         this.checking.set(false);
 
         const user = response.data || response;
-        
+
         // Update stored user
         this.tokenStorage.updateStoredUser(user);
 
@@ -64,7 +65,7 @@ export class PendingApproval implements OnInit {
             title: 'Approved!',
             message: 'Your account has been approved. Redirecting...'
           });
-          
+
           const redirectUrl = this.authService.getDashboardUrl(user.roles || []);
           setTimeout(() => this.router.navigate([redirectUrl]), 1000);
         } else if (user.approval_status === 'rejected') {

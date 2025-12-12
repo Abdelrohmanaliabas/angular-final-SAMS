@@ -1,16 +1,17 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { FeedbackService } from '../../../core/services/feedback.service';
 import { ThemeService } from '../../../core/services/theme.service';
+import { ThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ThemeToggleComponent],
   templateUrl: './register.html',
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

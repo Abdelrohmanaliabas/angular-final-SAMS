@@ -5,12 +5,13 @@ import { ThemeService } from '../../core/services/theme.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { TokenStorageService } from '../../core/auth/token-storage.service';
 import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
+import { ThemeToggleComponent } from '../ui/theme-toggle/theme-toggle';
 import { APP_CONFIG } from '../../core/config/app.config';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, NotificationBellComponent],
+  imports: [CommonModule, RouterModule, NotificationBellComponent, ThemeToggleComponent],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
