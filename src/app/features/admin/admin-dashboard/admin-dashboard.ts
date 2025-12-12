@@ -1,21 +1,21 @@
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { HttpParams } from '@angular/common/http';
 import { AiChatWidgetComponent } from '../../ai-chat-widget/ai-chat-widget.component';
 import { AiInsightsCardComponent } from '../../ai-insights-card';
-import { PaginationComponent } from '../../../shared/ui/pagination/pagination';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, AiChatWidgetComponent, AiInsightsCardComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, RouterModule, AiChatWidgetComponent, AiInsightsCardComponent],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
 export class AdminDashboard implements OnInit {
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef) {}
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef) { }
 
   stats = {
     centers: 0,
@@ -52,10 +52,19 @@ export class AdminDashboard implements OnInit {
       next: (res) => {
         const payload = res?.data ?? res;
         this.stats = { ...this.stats, ...(payload?.stats ?? {}) };
-        
+
         // Handle recent activity with pagination
-        const recentData = payload?.recent ?? [];
-        this.recent = (Array.isArray(recentData?.data) ? recentData.data : recentData).map((item: any) => ({
+        const recentData = payload?.recent ?? {};
+
+        // Extract the activity items - could be in data array or directly
+        let activityItems: any[] = [];
+        if (Array.isArray(recentData)) {
+          activityItems = recentData;
+        } else if (Array.isArray(recentData?.data)) {
+          activityItems = recentData.data;
+        }
+
+        this.recent = activityItems.map((item: any) => ({
           title: item.name || item.titleKey || 'Activity',
           titleKey: item.titleKey,
           time: item.created_at
@@ -63,13 +72,11 @@ export class AdminDashboard implements OnInit {
             : item.time || '',
         }));
 
-        // Update pagination from response
-        const pagination = recentData?.meta ?? payload?.recentMeta ?? {};
-        this.page = pagination.current_page ?? page;
-        this.perPage = pagination.per_page ?? this.perPage;
-        this.total = pagination.total ?? this.recent.length;
-        this.lastPage = pagination.last_page ?? (Math.ceil(this.total / this.perPage) || 1);
-
+        // Update pagination - read directly from recent object (new structure)
+        this.page = recentData.current_page ?? page;
+        this.perPage = recentData.per_page ?? this.perPage;
+        this.total = recentData.total ?? this.recent.length;
+        this.lastPage = recentData.last_page ?? (Math.ceil(this.total / this.perPage) || 1);
 
         this.cdr.detectChanges();
       },

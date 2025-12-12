@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, NgZone, OnInit, signal } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
 import { FeedbackService } from '../../../core/services/feedback.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { HttpParams } from '@angular/common/http';
-import { PaginationComponent } from '../../../shared/ui/pagination/pagination';
+
 
 interface PendingCenter {
   id: number;
@@ -20,7 +20,7 @@ interface PendingCenter {
 @Component({
   selector: 'app-pending-centers',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './pending-centers.html',
   styleUrl: './pending-centers.css',
 })
@@ -28,7 +28,8 @@ export class PendingCenters implements OnInit {
   constructor(
     private api: ApiService,
     private feedback: FeedbackService,
-    private loading: LoadingService
+    private loading: LoadingService,
+    private zone: NgZone
   ) { }
 
   pendingCenters = signal<PendingCenter[]>([]);
@@ -59,36 +60,40 @@ export class PendingCenters implements OnInit {
 
     this.api.get<any>('/admin/pending-centers', params).subscribe({
       next: (res) => {
-        const payload = res?.data ?? res;
-        const items = payload?.data ?? payload ?? [];
+        this.zone.run(() => {
+          const payload = res?.data ?? res;
+          const items = payload?.data ?? payload ?? [];
 
-        const centers = items.map((user: any) => ({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone || '—',
-          centerName: user.owned_center?.name || user.center?.name || '—',
-          createdAt: user.created_at,
-          raw: user,
-        }));
+          const centers = items.map((user: any) => ({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone || '—',
+            centerName: user.owned_center?.name || user.center?.name || '—',
+            createdAt: user.created_at,
+            raw: user,
+          }));
 
-        this.pendingCenters.set(centers);
+          this.pendingCenters.set(centers);
 
-        const pagination = res?.meta?.pagination ?? payload?.meta ?? {};
-        this.page = pagination.current_page ?? page;
-        this.perPage = pagination.per_page ?? this.perPage;
-        this.total = pagination.total ?? this.pendingCenters().length;
-        this.lastPage = pagination.last_page ?? this.lastPage ?? 1;
+          const pagination = res?.meta?.pagination ?? payload?.meta ?? {};
+          this.page = pagination.current_page ?? page;
+          this.perPage = pagination.per_page ?? this.perPage;
+          this.total = pagination.total ?? this.pendingCenters().length;
+          this.lastPage = pagination.last_page ?? this.lastPage ?? 1;
 
-        this.isLoading.set(false);
+          this.isLoading.set(false);
+        });
       },
       error: () => {
-        this.feedback.showToast({
-          tone: 'error',
-          title: 'Error',
-          message: 'Failed to load pending centers.'
+        this.zone.run(() => {
+          this.feedback.showToast({
+            tone: 'error',
+            title: 'Error',
+            message: 'Failed to load pending centers.'
+          });
+          this.isLoading.set(false);
         });
-        this.isLoading.set(false);
       }
     });
   }

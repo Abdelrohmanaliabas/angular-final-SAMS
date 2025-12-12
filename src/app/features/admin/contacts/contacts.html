@@ -1,67 +1,91 @@
-<section class="list-wrapper">
-  <header class="list-header">
-    <h2>Contact Messages</h2>
-    <p class="muted">Messages received from the contact form</p>
+<section
+  class="max-w-[1100px] mx-auto my-6 p-5 max-[400px]:p-3 bg-[var(--card)] rounded-2xl border border-[var(--glass-border)] shadow-[0_18px_40px_rgba(0,0,0,0.08)] backdrop-blur-xl text-[var(--text)]">
+  <header class="mb-4">
+    <h2 class="text-2xl font-bold">Contacts</h2>
+    <p class="text-[var(--muted)] text-sm">View messages from users</p>
   </header>
 
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-state">
-    <div class="spinner"></div>
-    <p>Loading messages...</p>
+  <div class="flex items-center gap-2.5 p-3 bg-[var(--glass)] border border-[var(--glass-border)] rounded-xl mb-2"
+    *ngIf="isLoading">
+    <div class="w-[18px] h-[18px] border-[3px] border-black/10 border-t-[var(--primary)] rounded-full animate-spin">
+    </div>
+    <span>Loading messages...</span>
   </div>
 
-  <!-- Error State -->
-  <div *ngIf="errorMessage && !isLoading" class="error-state">
-    <p>{{ errorMessage }}</p>
-    <button class="btn-primary" (click)="loadContacts()">Try Again</button>
+  <div class="p-4 text-center text-red-500 bg-red-50 border border-red-200 rounded-xl mb-4" *ngIf="errorMessage">
+    {{ errorMessage }}
   </div>
 
-  <!-- Empty State -->
-  <div *ngIf="!isLoading && !errorMessage && contacts.length === 0" class="empty-state">
-    <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-    </svg>
-    <p>No contact messages yet</p>
+  <div class="flex flex-col items-center justify-center py-12 text-center text-[var(--muted)]"
+    *ngIf="!isLoading && contacts.length === 0 && !errorMessage">
+    <div class="text-4xl mb-4 text-indigo-500">✉️</div>
+    <h3 class="text-lg font-bold text-[var(--text)] mb-2">No Messages</h3>
+    <p>You haven't received any messages yet.</p>
   </div>
 
-  <!-- Contacts Table -->
-  <div *ngIf="!isLoading && !errorMessage && contacts.length > 0" class="table-container">
-    <table class="contacts-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Subject</th>
-          <th>Message</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let contact of contacts">
-          <td class="name-cell">{{ contact.name }}</td>
-          <td class="email-cell">
-            <a [href]="'mailto:' + contact.email">{{ contact.email }}</a>
-          </td>
-          <td class="subject-cell">{{ contact.subject || '—' }}</td>
-          <td class="message-cell">
-            <div class="message-preview" [title]="contact.message">
-              {{ contact.message }}
-            </div>
-          </td>
-          <td class="date-cell">{{ formatDate(contact.created_at) }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <table
+    class="w-full border-collapse mt-2.5 bg-[var(--card)] border border-[var(--glass-border)] rounded-xl overflow-hidden shadow-sm max-[1200px]:block max-[1200px]:bg-transparent max-[1200px]:border-none max-[1200px]:shadow-none"
+    *ngIf="!isLoading && contacts.length > 0">
+    <thead class="max-[1200px]:hidden">
+      <tr>
+        <th class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+          Name</th>
+        <th class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+          Email</th>
+        <th class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+          Subject</th>
+        <th class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+          Message</th>
+        <th class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+          Date</th>
+      </tr>
+    </thead>
+    <tbody
+      class="max-[1200px]:grid max-[1200px]:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] max-[1200px]:gap-4 max-[1200px]:w-full">
+      <tr *ngFor="let c of contacts"
+        class="max-[1200px]:flex max-[1200px]:flex-col max-[1200px]:bg-[var(--card)] max-[1200px]:border max-[1200px]:border-[var(--glass-border)] max-[1200px]:rounded-2xl max-[1200px]:p-4 max-[400px]:p-3 max-[1200px]:shadow-sm max-[1200px]:h-full">
+        <td
+          class="p-3 border-b border-[var(--glass-border)] align-middle font-bold text-[var(--text)] max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+          data-label="Name">
+          <span class="font-bold text-[var(--text)]">{{ c.name }}</span>
+        </td>
+        <td
+          class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+          data-label="Email">
+          <span class="text-[var(--text)] text-sm">{{ c.email }}</span>
+        </td>
+        <td
+          class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+          data-label="Subject">
+          <span class="text-[var(--text)] font-medium">{{ c.subject || '-' }}</span>
+        </td>
+        <td
+          class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+          data-label="Message">
+          <p class="text-[var(--text)] text-sm line-clamp-2 max-w-[300px] max-[1200px]:max-w-full"
+            title="{{ c.message }}">{{ c.message }}</p>
+        </td>
+        <td
+          class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+          data-label="Date">
+          <span class="text-sm text-[var(--muted)]">{{ formatDate(c.created_at) }}</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
-  <!-- Pagination -->
-  <div class="pagination" *ngIf="lastPage > 1 || total">
-    <div class="muted small">Showing {{ rangeStart }} - {{ rangeEnd }} of {{ total }}</div>
-    <div class="page-controls">
-      <button class="btn-simple" [disabled]="page === 1" (click)="changePage(page - 1)">Prev</button>
-      <span class="page-indicator">Page {{ page }} / {{ lastPage }}</span>
-      <button class="btn-simple" [disabled]="page === lastPage" (click)="changePage(page + 1)">Next</button>
+  <div
+    class="max-w-[1100px] mx-auto flex justify-between items-center mt-4 gap-3 bg-[var(--glass)] border border-[var(--glass-border)] p-2.5 rounded-xl max-[450px]:flex-col max-[450px]:items-center"
+    *ngIf="lastPage > 1 || total">
+    <div class="text-[var(--muted)] text-sm">Showing {{ rangeStart }} - {{ rangeEnd }} of {{ total }}</div>
+    <div class="inline-flex items-center gap-2.5">
+      <button
+        class="bg-[var(--glass)] border border-[var(--glass-border)] px-3.5 py-1.5 rounded-full cursor-pointer text-[var(--text)] shadow-sm hover:-translate-y-px hover:bg-purple-500/10 hover:border-purple-500/30 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+        [disabled]="page === 1" (click)="changePage(page - 1)">Prev</button>
+      <span class="font-bold">Page {{ page }} / {{ lastPage }}</span>
+      <button
+        class="bg-[var(--glass)] border border-[var(--glass-border)] px-3.5 py-1.5 rounded-full cursor-pointer text-[var(--text)] shadow-sm hover:-translate-y-px hover:bg-purple-500/10 hover:border-purple-500/30 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+        [disabled]="page === lastPage" (click)="changePage(page + 1)">Next</button>
     </div>
   </div>
 </section>

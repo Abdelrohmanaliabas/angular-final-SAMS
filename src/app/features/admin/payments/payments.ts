@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-admin-payments',
@@ -10,6 +10,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrl: './payments.css',
 })
 export class Payments implements OnInit {
+  constructor(private cdr: ChangeDetectorRef, private zone: NgZone) {}
   filter: 'all' | 'paid' | 'unpaid' = 'all';
 
   centers = [
