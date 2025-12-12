@@ -137,6 +137,28 @@
         <span class="text-[var(--muted)] text-sm block mb-1">User ID</span>
         <span class="text-[var(--text)] font-mono">{{ selectedStudent.id }}</span>
       </div>
+
+      <!-- Parent Information -->
+      <div class="p-3 border border-[var(--glass-border)] rounded-xl bg-[var(--glass)]"
+        *ngIf="selectedStudent.parents && selectedStudent.parents.length > 0">
+        <span class="text-[var(--muted)] text-sm block mb-2">Parent / Guardian</span>
+        <div *ngFor="let parent of selectedStudent.parents" class="mb-2 last:mb-0">
+          <div class="flex flex-col gap-1">
+            <span class="text-[var(--text)] font-semibold">{{ parent.name }}</span>
+            <span class="text-[var(--muted)] text-sm break-all">{{ parent.email }}</span>
+            <span class="text-[var(--muted)] text-sm" *ngIf="parent.phone">{{ parent.phone }}</span>
+            <span
+              class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs w-fit capitalize">
+              {{ parent.relationship || 'Parent' }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="p-3 border border-[var(--glass-border)] rounded-xl bg-[var(--glass)]"
+        *ngIf="!selectedStudent.parents || selectedStudent.parents.length === 0">
+        <span class="text-[var(--muted)] text-sm block mb-1">Parent / Guardian</span>
+        <span class="text-[var(--muted)] italic">No parent linked</span>
+      </div>
     </div>
 
     <div class="flex gap-3 mt-4" *ngIf="canEditStudents">
@@ -246,7 +268,8 @@
         student</label>
       <input
         class="px-3 py-2.5 rounded-xl border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-colors mb-2"
-        type="text" placeholder="Filter students..." [(ngModel)]="studentFilter" />
+        type="text" placeholder="Filter students..." [ngModel]="studentFilter"
+        (ngModelChange)="onStudentFilterChange($event)" />
       <select
         class="px-3 py-2.5 rounded-xl border border-[var(--glass-border)] bg-[var(--card)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-colors"
         [(ngModel)]="parentForm.studentId" (ngModelChange)="onParentInputChange()"

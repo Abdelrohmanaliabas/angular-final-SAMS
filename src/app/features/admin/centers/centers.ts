@@ -110,17 +110,13 @@ export class Centers implements OnInit {
             id: c.id,
             name: c.name,
             paid: !!c.is_active,
-            ownerName: c.admin?.name || c.owner?.name || '',
-            ownerEmail: c.admin?.email || c.owner?.email || '',
-            ownerPhone: c.admin?.phone || c.owner?.phone || '',
+            ownerName: c.owner?.name || '',
+            ownerEmail: c.owner?.email || '',
+            ownerPhone: c.owner?.phone || '',
             city: c.city || '',
             address: c.address || '',
-            courses: (c.groups || []).map((g: any) => ({
-              id: g.id,
-              name: g.name,
-              teacher: g.teacher?.name || '',
-              studentsCount: g.students_count ?? g.studentsCount ?? 0,
-            })),
+            courses: [], // Groups are not loaded in list view, only count is available
+            groupsCount: c.groups_count || 0,
             raw: c,
           }));
 
@@ -288,7 +284,7 @@ export class Centers implements OnInit {
           const items = payload?.data ?? payload ?? [];
           this.pendingCenters.set(items.map((item: any) => ({
             id: item.id,
-            centerName: item.center_name || item.centerName || item.name || '',
+            centerName: item.center?.name || item.center_name || item.centerName || item.name || '',
             ownerName: item.name || item.ownerName || '',
             email: item.email || '',
             phone: item.phone || '',
@@ -346,7 +342,7 @@ export class Centers implements OnInit {
 
   doApprove(center: PendingCenter) {
     this.loadingService.show();
-    this.api.post(`/admin/pending-centers/${center.id}/approve`, {}).subscribe({
+    this.api.post(`/admin/centers/${center.id}/approve`, {}).subscribe({
       next: () => {
         this.loadingService.hide();
         this.feedback.showToast({ title: 'Approved', message: `"${center.centerName}" has been approved.`, tone: 'success' });
@@ -375,7 +371,7 @@ export class Centers implements OnInit {
   confirmReject() {
     if (!this.rejectingCenter) return;
     this.loadingService.show();
-    this.api.post(`/admin/pending-centers/${this.rejectingCenter.id}/reject`, { reason: this.rejectReason }).subscribe({
+    this.api.post(`/admin/centers/${this.rejectingCenter.id}/reject`, { reason: this.rejectReason }).subscribe({
       next: () => {
         this.loadingService.hide();
         this.feedback.showToast({ title: 'Rejected', message: `"${this.rejectingCenter?.centerName}" has been rejected.`, tone: 'info' });

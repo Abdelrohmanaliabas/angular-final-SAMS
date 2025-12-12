@@ -51,6 +51,14 @@ export class Teachers implements OnInit {
     return this.roles.includes('center_admin');
   }
 
+  get isAssistant(): boolean {
+    return this.roles.includes('assistant');
+  }
+
+  get canViewRoleToggle(): boolean {
+    return this.isCenterAdmin || this.isAssistant;
+  }
+
   get panelTitle(): string {
     if (this.panelMode === 'create') {
       return this.form.role === 'teacher' ? 'Add Teacher' : 'Add Assistant';
@@ -115,7 +123,11 @@ export class Teachers implements OnInit {
   }
 
   private loadDirectoryTeachers(): void {
-    this.staffService.getTeachers().subscribe({
+    const params: Record<string, string | number> = { role: this.activeRole };
+    if (this.searchTerm.trim()) {
+      params['search'] = this.searchTerm.trim();
+    }
+    this.staffService.getTeachers(params).subscribe({
       next: (res) => {
         const payload = res?.data ?? res;
         const items = this.unwrapCollection(payload);
@@ -123,7 +135,7 @@ export class Teachers implements OnInit {
           id: t.id,
           name: t.name,
           email: t.email,
-          center: t.taught_groups?.[0]?.center?.name || t.center?.name || '',
+          center: t.center?.name || t.taught_groups?.[0]?.center?.name || '',
           courses: t.taught_groups_count ?? t.taughtGroups_count ?? t.taught_groups?.length ?? 0,
           phone: t.phone || '',
           raw: t,

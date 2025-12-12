@@ -44,6 +44,7 @@ export class Students implements OnInit {
   centerGroupsUnavailable = false;
   groupFilter = '';
   studentFilter = '';
+  searchedStudents: any[] = [];
 
   ngOnInit(): void {
     this.roles = this.tokenStorage.getUser()?.roles ?? [];
@@ -77,6 +78,7 @@ export class Students implements OnInit {
             status: student.status ?? 'active',
             phone: student.phone ?? '',
             groups: [],
+            parents: student.parents ?? [],
             raw: student
           }));
           this.finishLoading();
@@ -96,7 +98,7 @@ export class Students implements OnInit {
   }
 
   private loadTeacherStudents(): void {
-    this.staffService.getGroups().subscribe({
+    this.staffService.getGroups(1, { per_page: 100 }).subscribe({
       next: (res) => {
         const payload = res?.data ?? res;
         const groups = this.unwrapCollection(payload);
@@ -116,7 +118,7 @@ export class Students implements OnInit {
             const aggregated = new Map<number, any>();
 
             results.forEach((result, index) => {
-              const students = this.unwrapCollection(result);
+              const students = this.extractStudentsFromGroupResponse(result);
               const group = groups[index];
 
               students.forEach((student: any) => {
@@ -136,6 +138,7 @@ export class Students implements OnInit {
                     status: 'active',
                     phone: student.phone ?? '',
                     groups: [groupName],
+                    parents: student.parents ?? [],
                     raw: student
                   });
                 }
@@ -169,6 +172,28 @@ export class Students implements OnInit {
     }
 
     return Array.isArray(collection.items) ? collection.items : [];
+  }
+
+  private extractStudentsFromGroupResponse(response: any): any[] {
+    const payload = response?.data ?? response;
+    if (!payload) {
+      return [];
+    }
+    if (Array.isArray(payload)) {
+      return payload;
+    }
+
+    const approved = payload?.approved ?? payload;
+    const approvedArray = approved?.data ?? approved?.items ?? (Array.isArray(approved) ? approved : null);
+    if (Array.isArray(approvedArray)) {
+      return approvedArray;
+    }
+
+    if (Array.isArray(payload?.data)) {
+      return payload.data;
+    }
+
+    return Array.isArray(payload?.items) ? payload.items : [];
   }
 
   get filteredStudents(): any[] {
@@ -307,6 +332,9 @@ export class Students implements OnInit {
   }
 
   get filteredStudentsForSelect(): any[] {
+    if (this.isCenterAdmin) {
+      return this.searchedStudents;
+    }
     const q = this.studentFilter.trim().toLowerCase();
     if (!q) return this.students;
     return this.students.filter((s) =>
@@ -315,10 +343,11 @@ export class Students implements OnInit {
   }
 
   private loadGroupsForForms(): void {
+    const params = { per_page: 100 };
     const source$ =
       this.isCenterAdmin && !this.centerGroupsUnavailable
-        ? this.staffService.getCenterGroups()
-        : this.staffService.getGroups();
+        ? this.staffService.getCenterGroups(1, params)
+        : this.staffService.getGroups(1, params);
 
     source$.subscribe({
       next: (res) => {
@@ -349,10 +378,43 @@ export class Students implements OnInit {
 
   openCreateParent(): void {
     this.studentFilter = '';
-    this.parentForm = { name: '', email: '', phone: '', studentId: this.filteredStudentsForSelect[0]?.id ?? '' };
+    this.parentForm = { name: '', email: '', phone: '', studentId: '' };
     this.parentErrors = { name: '', email: '', phone: '', studentId: '' };
     this.panelMode = 'create-parent';
     this.panelOpen = true;
+
+    if (this.isCenterAdmin) {
+      this.searchedStudents = this.students.slice(0, 50); // Initial list
+    }
+  }
+
+  onStudentFilterChange(value: string): void {
+    this.studentFilter = value;
+    if (this.isCenterAdmin) {
+      this.searchStudents(value);
+    }
+  }
+
+  private searchStudents(query: string): void {
+    this.staffService.getMembers({ role: 'student', search: query, per_page: 20 }).subscribe({
+      next: (res) => {
+        const payload = res?.data ?? res;
+        const collection = payload?.students ?? [];
+        const items = this.unwrapCollection(collection);
+        this.searchedStudents = items.map((student: any) => ({
+          id: student.id,
+          name: student.name,
+          email: student.email,
+          center: payload?.center?.name ?? student.center?.name ?? '',
+          status: student.status ?? 'active',
+          phone: student.phone ?? '',
+          groups: [],
+          parents: student.parents ?? [],
+          raw: student
+        }));
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   openEditStudent(student: any): void {

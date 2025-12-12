@@ -1,7 +1,8 @@
 <section
   class="max-w-[1100px] mx-auto my-6 p-5 max-[400px]:p-3 bg-[var(--card)] rounded-2xl border border-[var(--glass-border)] shadow-[0_18px_40px_rgba(0,0,0,0.08)] backdrop-blur-xl text-[var(--text)]">
   <header class="mb-4">
-    <h2 class="text-2xl font-bold">{{ isCenterAdmin ? (activeRole === 'teacher' ? 'Teachers' : 'Assistants') : 'Teachers' }}</h2>
+    <h2 class="text-2xl font-bold">{{ isCenterAdmin ? (activeRole === 'teacher' ? 'Teachers' : 'Assistants') :
+      'Teachers' }}</h2>
     <p class="text-[var(--muted)] text-sm">
       {{ isCenterAdmin ? 'Manage staff assigned to this center' : 'Teaching staff and their assigned centers' }}
     </p>
@@ -12,32 +13,34 @@
       <input placeholder="Search teachers..."
         class="px-3 py-2 rounded-lg border border-[var(--glass-border)] w-[260px] bg-[var(--glass)] text-[var(--text)] max-[640px]:w-full focus:outline-none focus:border-[var(--primary)] transition-colors"
         [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)" />
-      
-      <div class="flex items-center gap-2 max-[640px]:justify-between max-[640px]:flex-col max-[640px]:items-stretch gap-3" *ngIf="isCenterAdmin">
+
+      <div
+        class="flex items-center gap-2 max-[640px]:justify-between max-[640px]:flex-col max-[640px]:items-stretch gap-3"
+        *ngIf="canViewRoleToggle">
         <!-- Role Toggle -->
-        <div class="flex bg-[var(--glass)] p-1 rounded-lg border border-[var(--glass-border)] max-[640px]:w-full max-[640px]:justify-between">
-          <button type="button" 
+        <div
+          class="flex bg-[var(--glass)] p-1 rounded-lg border border-[var(--glass-border)] max-[640px]:w-full max-[640px]:justify-between">
+          <button type="button"
             class="px-3 py-1.5 rounded-md text-sm font-medium transition-all flex-1 text-center justify-center"
-            [class.bg-[var(--card)]]="activeRole === 'teacher'"
-            [class.shadow-sm]="activeRole === 'teacher'"
-            [class.text-[var(--text)]]="activeRole === 'teacher'"
-            [class.text-[var(--muted)]]="activeRole !== 'teacher'"
+            [class.bg-[var(--card)]]="activeRole === 'teacher'" [class.shadow-sm]="activeRole === 'teacher'"
+            [class.text-[var(--text)]]="activeRole === 'teacher'" [class.text-[var(--muted)]]="activeRole !== 'teacher'"
             (click)="setRoleFilter('teacher')">Teachers</button>
-          <button type="button" 
+          <button type="button"
             class="px-3 py-1.5 rounded-md text-sm font-medium transition-all flex-1 text-center justify-center"
-            [class.bg-[var(--card)]]="activeRole === 'assistant'"
-            [class.shadow-sm]="activeRole === 'assistant'"
+            [class.bg-[var(--card)]]="activeRole === 'assistant'" [class.shadow-sm]="activeRole === 'assistant'"
             [class.text-[var(--text)]]="activeRole === 'assistant'"
             [class.text-[var(--muted)]]="activeRole !== 'assistant'"
             (click)="setRoleFilter('assistant')">Assistants</button>
         </div>
 
-        <button class="btn-primary px-4 py-2 rounded-full text-sm font-medium shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-center justify-center" 
-          type="button" (click)="openCreate('teacher')" *ngIf="activeRole === 'teacher'">
+        <button
+          class="btn-primary px-4 py-2 rounded-full text-sm font-medium shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-center justify-center"
+          type="button" (click)="openCreate('teacher')" *ngIf="isCenterAdmin && activeRole === 'teacher'">
           <i class="fa-solid fa-plus mr-2"></i>Add Teacher
         </button>
-        <button class="btn-primary px-4 py-2 rounded-full text-sm font-medium shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-center justify-center" 
-          type="button" (click)="openCreate('assistant')" *ngIf="activeRole === 'assistant'">
+        <button
+          class="btn-primary px-4 py-2 rounded-full text-sm font-medium shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 text-center justify-center"
+          type="button" (click)="openCreate('assistant')" *ngIf="isCenterAdmin && activeRole === 'assistant'">
           <i class="fa-solid fa-plus mr-2"></i>Add Assistant
         </button>
       </div>
@@ -83,7 +86,8 @@
         <td
           class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
           data-label="Role">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--glass)] border border-[var(--glass-border)] text-sm capitalize">
+          <span
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--glass)] border border-[var(--glass-border)] text-sm capitalize">
             {{ activeRole }}
           </span>
         </td>
@@ -95,7 +99,8 @@
         <td
           class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
           data-label="Stats">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--glass)] border border-[var(--glass-border)] text-sm">
+          <span
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--glass)] border border-[var(--glass-border)] text-sm">
             {{ t.courses }} courses
           </span>
         </td>
@@ -132,7 +137,7 @@
     <button
       class="bg-[var(--glass)] border border-[var(--glass-border)] px-3.5 py-1.5 rounded-full cursor-pointer text-[var(--text)] shadow-sm hover:-translate-y-px hover:bg-purple-500/10 hover:border-purple-500/30 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
       [disabled]="page <= 1" (click)="goToPage(page - 1)">Prev</button>
-    
+
     <div class="flex items-center gap-1">
       <span class="font-bold text-sm">Page {{ page }} / {{ totalPages }}</span>
     </div>
@@ -149,10 +154,11 @@
 <div
   class="fixed inset-y-0 right-0 w-[min(420px,90vw)] max-[640px]:w-full bg-[var(--card)] border-l border-[var(--glass-border)] shadow-[-8px_0_24px_rgba(0,0,0,0.18)] transition-transform duration-300 p-5 flex flex-col gap-3.5 z-[999]"
   [ngClass]="panelOpen ? 'translate-x-0' : 'translate-x-full'" (click)="$event.stopPropagation()">
-  
+
   <div class="flex justify-between items-center font-bold">
     <h3>{{ panelTitle }}</h3>
-    <button class="border-none bg-transparent text-2xl cursor-pointer text-[var(--text)] hover:text-[var(--primary)] transition-colors"
+    <button
+      class="border-none bg-transparent text-2xl cursor-pointer text-[var(--text)] hover:text-[var(--primary)] transition-colors"
       (click)="closeInfo()">X</button>
   </div>
 
@@ -183,23 +189,28 @@
     </div>
 
     <p class="text-xs text-red-500 mt-2" *ngIf="saveError">{{ saveError }}</p>
-    
+
     <div class="flex gap-3 mt-4" *ngIf="isCenterAdmin">
-      <button class="flex-1 btn-primary py-2.5 rounded-xl font-medium shadow-lg shadow-blue-500/20" type="button" (click)="openEdit(selectedTeacher)">Edit</button>
-      <button class="flex-1 bg-red-500/10 text-red-500 border border-red-500/20 py-2.5 rounded-xl font-medium hover:bg-red-500/20 transition-colors" type="button" (click)="deleteSelected()" [disabled]="processing">Delete</button>
+      <button class="flex-1 btn-primary py-2.5 rounded-xl font-medium shadow-lg shadow-blue-500/20" type="button"
+        (click)="openEdit(selectedTeacher)">Edit</button>
+      <button
+        class="flex-1 bg-red-500/10 text-red-500 border border-red-500/20 py-2.5 rounded-xl font-medium hover:bg-red-500/20 transition-colors"
+        type="button" (click)="deleteSelected()" [disabled]="processing">Delete</button>
     </div>
   </div>
 
   <!-- Create/Edit Mode -->
   <div class="flex flex-col gap-4 overflow-y-auto" *ngIf="panelMode !== 'info'">
     <p class="text-sm text-[var(--muted)]">Fields marked with <span class="text-red-500">*</span> are required.</p>
-    <p class="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-bold" *ngIf="saveError">{{ saveError }}</p>
-    
+    <p class="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-bold" *ngIf="saveError">{{
+      saveError }}</p>
+
     <div class="flex flex-col gap-1.5">
       <label class="text-sm font-medium text-[var(--text)]"><span class="text-red-500 mr-1">*</span>Name</label>
-      <input list="staff-name-suggestions" class="px-3 py-2.5 rounded-xl border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-colors" 
-        type="text" [(ngModel)]="form.name" placeholder="Full name"
-        (ngModelChange)="onFormChange()" [class.border-red-500]="formErrors.name" />
+      <input list="staff-name-suggestions"
+        class="px-3 py-2.5 rounded-xl border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-colors"
+        type="text" [(ngModel)]="form.name" placeholder="Full name" (ngModelChange)="onFormChange()"
+        [class.border-red-500]="formErrors.name" />
       <p class="text-xs text-red-500" *ngIf="formErrors.name">{{ formErrors.name }}</p>
       <datalist id="staff-name-suggestions">
         <option *ngFor="let name of staffNames" [value]="name"></option>
@@ -208,51 +219,45 @@
 
     <div class="flex flex-col gap-1.5">
       <label class="text-sm font-medium text-[var(--text)]"><span class="text-red-500 mr-1">*</span>Email</label>
-      <input class="px-3 py-2.5 rounded-xl border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-colors" 
-        type="email" [(ngModel)]="form.email" placeholder="Email address"
-        (ngModelChange)="onFormChange()" [class.border-red-500]="formErrors.email" />
+      <input
+        class="px-3 py-2.5 rounded-xl border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-colors"
+        type="email" [(ngModel)]="form.email" placeholder="Email address" (ngModelChange)="onFormChange()"
+        [class.border-red-500]="formErrors.email" />
       <p class="text-xs text-red-500" *ngIf="formErrors.email">{{ formErrors.email }}</p>
     </div>
 
     <div class="flex flex-col gap-1.5">
       <label class="text-sm font-medium text-[var(--text)]">Phone</label>
-      <input class="px-3 py-2.5 rounded-xl border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-colors" 
-        type="text" [(ngModel)]="form.phone" placeholder="Optional phone"
-        (ngModelChange)="onFormChange()" [class.border-red-500]="formErrors.phone" />
+      <input
+        class="px-3 py-2.5 rounded-xl border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-colors"
+        type="text" [(ngModel)]="form.phone" placeholder="Optional phone" (ngModelChange)="onFormChange()"
+        [class.border-red-500]="formErrors.phone" />
       <p class="text-xs text-red-500" *ngIf="formErrors.phone">{{ formErrors.phone }}</p>
     </div>
 
     <div class="flex flex-col gap-1.5" *ngIf="panelMode === 'create'">
       <label class="text-sm font-medium text-[var(--text)]">Role</label>
       <div class="flex bg-[var(--glass)] p-1 rounded-lg border border-[var(--glass-border)]">
-        <button type="button" 
-          class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-all"
-          [class.bg-[var(--card)]]="form.role === 'teacher'"
-          [class.shadow-sm]="form.role === 'teacher'"
-          [class.text-[var(--text)]]="form.role === 'teacher'"
-          [class.text-[var(--muted)]]="form.role !== 'teacher'"
+        <button type="button" class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-all"
+          [class.bg-[var(--card)]]="form.role === 'teacher'" [class.shadow-sm]="form.role === 'teacher'"
+          [class.text-[var(--text)]]="form.role === 'teacher'" [class.text-[var(--muted)]]="form.role !== 'teacher'"
           (click)="form.role = 'teacher'">Teacher</button>
-        <button type="button" 
-          class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-all"
-          [class.bg-[var(--card)]]="form.role === 'assistant'"
-          [class.shadow-sm]="form.role === 'assistant'"
-          [class.text-[var(--text)]]="form.role === 'assistant'"
-          [class.text-[var(--muted)]]="form.role !== 'assistant'"
+        <button type="button" class="flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-all"
+          [class.bg-[var(--card)]]="form.role === 'assistant'" [class.shadow-sm]="form.role === 'assistant'"
+          [class.text-[var(--text)]]="form.role === 'assistant'" [class.text-[var(--muted)]]="form.role !== 'assistant'"
           (click)="form.role = 'assistant'">Assistant</button>
       </div>
     </div>
 
-    <div class="mt-auto pt-4 flex flex-col gap-3 sticky bottom-0 bg-[var(--card)] border-t border-[var(--glass-border)]">
-      <button class="btn-primary w-full py-2.5 rounded-xl font-medium shadow-lg shadow-blue-500/20" type="button" (click)="submitForm()" [disabled]="processing || !canSubmitForm">
+    <div
+      class="mt-auto pt-4 flex flex-col gap-3 sticky bottom-0 bg-[var(--card)] border-t border-[var(--glass-border)]">
+      <button class="btn-primary w-full py-2.5 rounded-xl font-medium shadow-lg shadow-blue-500/20" type="button"
+        (click)="submitForm()" [disabled]="processing || !canSubmitForm">
         {{ panelMode === 'create' ? 'Create' : 'Save changes' }}
       </button>
       <button
         class="w-full bg-red-500/10 text-red-500 border border-red-500/20 py-2.5 rounded-xl font-medium hover:bg-red-500/20 transition-colors"
-        type="button"
-        *ngIf="panelMode === 'edit'"
-        (click)="deleteSelected()"
-        [disabled]="processing"
-      >
+        type="button" *ngIf="panelMode === 'edit'" (click)="deleteSelected()" [disabled]="processing">
         Delete
       </button>
     </div>
