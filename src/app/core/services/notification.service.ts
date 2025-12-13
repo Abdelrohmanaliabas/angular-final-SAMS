@@ -46,7 +46,7 @@ export class NotificationService {
 
   private pollingSubscription: any = null;
 
-  constructor() {}
+  constructor() { }
 
   initialize(): void {
     const user = this.tokenStorage.getUser();
@@ -140,7 +140,8 @@ export class NotificationService {
   loadUnreadCount(): void {
     this.apiService.get<any>('/notifications/unread-count').subscribe({
       next: (response) => {
-        this.unreadCountSubject.next(response.count || 0);
+        const payload = response.data ?? response;
+        this.unreadCountSubject.next(payload.count || 0);
       },
       error: (error) => {
         console.error('Error loading unread count:', error);

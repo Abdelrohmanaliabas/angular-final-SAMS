@@ -100,8 +100,8 @@
                             Approve
                         </button>
                         <button
-                            class="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--glass)] border border-red-200 text-red-500 font-medium hover:bg-red-50 transition-colors shadow-sm"
-                            (click)="openRejectModal(center)">
+                            class="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--glass)] border border-red-200 text-red-500 font-medium hover:bg-red-50 transition-colors shadow-sm cursor-pointer relative z-10"
+                            (click)="openRejectModal(center); $event.stopPropagation()">
                             Reject
                         </button>
                     </div>
@@ -129,8 +129,8 @@
 </div>
 
 <!-- Reject Modal -->
-<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4" *ngIf="rejectModalOpen()">
-    <div class="bg-[var(--card)] rounded-2xl w-full max-w-[480px] shadow-xl overflow-hidden">
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4" *ngIf="rejectModalOpen()">
+    <div class="bg-[var(--card)] rounded-2xl w-full max-w-[480px] shadow-xl overflow-hidden relative z-[10000]">
         <div class="flex items-center justify-between p-5 border-b border-[var(--glass-border)]">
             <h2 class="text-lg font-bold text-red-500 flex items-center gap-2 m-0">
                 Reject Center

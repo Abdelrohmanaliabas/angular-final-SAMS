@@ -184,7 +184,7 @@ export class PendingCenters implements OnInit {
         this.feedback.showToast({
           tone: 'success',
           title: 'Rejected',
-          message: 'Center registration has been rejected.'
+          message: 'Center registration rejected and data removed.'
         });
         this.closeRejectModal();
         this.loadPendingCenters();

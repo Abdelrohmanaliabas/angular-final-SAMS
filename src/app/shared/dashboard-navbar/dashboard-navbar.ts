@@ -1,15 +1,16 @@
 import { Component, EventEmitter, Output, HostListener } from '@angular/core';
-import { CommonModule, AsyncPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { Router } from '@angular/router';
 import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
+import { ThemeToggleComponent } from '../ui/theme-toggle/theme-toggle';
 
 @Component({
     selector: 'app-dashboard-navbar',
     standalone: true,
-    imports: [CommonModule, RouterModule, AsyncPipe, NotificationBellComponent],
+  imports: [CommonModule, RouterModule, NotificationBellComponent, ThemeToggleComponent],
     templateUrl: './dashboard-navbar.html',
     styleUrl: './dashboard-navbar.css',
 })

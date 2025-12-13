@@ -51,6 +51,12 @@ export class LessonDetailComponent implements OnInit {
     scheduled_at: '',
     max_score: 100
   };
+  assessmentError = '';
+  assessmentFormErrors = {
+    title: '',
+    scheduled_at: '',
+    max_score: ''
+  };
 
   lessonForm = {
     title: '',
@@ -58,6 +64,11 @@ export class LessonDetailComponent implements OnInit {
     description: ''
   };
   lessonError = '';
+  lessonFormErrors = {
+    title: '',
+    scheduled_at: '',
+    description: ''
+  };
 
   constructor(
     private route: ActivatedRoute,
@@ -347,7 +358,37 @@ export class LessonDetailComponent implements OnInit {
   }
 
   saveAssessment(): void {
-    if (this.processing || !this.assessmentForm.title || !this.assessmentForm.scheduled_at) return;
+    if (this.processing) return;
+
+    // Reset errors
+    this.assessmentError = '';
+    this.assessmentFormErrors = { title: '', scheduled_at: '', max_score: '' };
+
+    let isValid = true;
+
+    if (!this.assessmentForm.title?.trim()) {
+      this.assessmentFormErrors.title = 'Title is required.';
+      isValid = false;
+    }
+
+    if (!this.assessmentForm.scheduled_at) {
+      this.assessmentFormErrors.scheduled_at = 'Scheduled date is required.';
+      isValid = false;
+    } else if (!this.isScheduleValid(this.assessmentForm.scheduled_at)) {
+      this.assessmentFormErrors.scheduled_at = 'Date must be in the future.';
+      isValid = false;
+    }
+
+    if (this.assessmentForm.max_score < 1) {
+      this.assessmentFormErrors.max_score = 'Max score must be at least 1.';
+      isValid = false;
+    }
+
+    if (!isValid) {
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.processing = true;
 
     const request$ = this.selectedAssessment
@@ -368,6 +409,7 @@ export class LessonDetailComponent implements OnInit {
       error: (err) => {
         this.processing = false;
         console.error('Failed to save assessment', err);
+        this.assessmentError = err?.error?.message || 'Failed to save assessment.';
         this.feedback.showToast({ title: 'Error', message: 'Failed to save assessment.', tone: 'error' });
         this.cdr.detectChanges();
       }
@@ -376,23 +418,40 @@ export class LessonDetailComponent implements OnInit {
 
   saveLesson(): void {
     if (this.processing) return;
+
+    // Reset errors
+    this.lessonError = '';
+    this.lessonFormErrors = { title: '', scheduled_at: '', description: '' };
+
     const title = this.lessonForm.title?.trim() ?? '';
     const description = this.lessonForm.description?.trim() ?? '';
     const scheduledAt = this.lessonForm.scheduled_at;
 
-    if (!title || !description || !scheduledAt) {
-      this.lessonError = 'Title, description, and schedule are required.';
+    let isValid = true;
+
+    if (!title) {
+      this.lessonFormErrors.title = 'Title is required.';
+      isValid = false;
+    }
+
+    if (!description) {
+      this.lessonFormErrors.description = 'Description is required.';
+      isValid = false;
+    }
+
+    if (!scheduledAt) {
+      this.lessonFormErrors.scheduled_at = 'Schedule is required.';
+      isValid = false;
+    } else if (!this.isScheduleValid(scheduledAt)) {
+      this.lessonFormErrors.scheduled_at = 'Please choose a date/time that is today or later.';
+      isValid = false;
+    }
+
+    if (!isValid) {
       this.cdr.detectChanges();
       return;
     }
 
-    if (!this.isScheduleValid(scheduledAt)) {
-      this.lessonError = 'Please choose a date/time that is today or later.';
-      this.cdr.detectChanges();
-      return;
-    }
-
-    this.lessonError = '';
     this.processing = true;
 
     const payload = {
@@ -411,6 +470,7 @@ export class LessonDetailComponent implements OnInit {
       error: (err) => {
         this.processing = false;
         console.error('Failed to update lesson', err);
+        this.lessonError = err?.error?.message || 'Failed to update lesson.';
         this.feedback.showToast({ title: 'Error', message: 'Failed to update lesson.', tone: 'error' });
         this.cdr.detectChanges();
       }

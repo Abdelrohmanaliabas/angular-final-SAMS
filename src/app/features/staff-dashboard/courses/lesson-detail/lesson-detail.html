@@ -259,31 +259,41 @@
 
   <!-- Assessment Form in Sidebar -->
   <div class="flex flex-col gap-5 flex-1 overflow-y-auto pb-4" *ngIf="panelMode === 'assessment'">
+    <p class="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-bold"
+      *ngIf="assessmentError">{{ assessmentError }}</p>
+
     <div class="block">
       <label class="block mb-2 text-sm font-medium text-[var(--muted)]">Title</label>
       <input
         class="w-full px-4 py-3 rounded-xl border border-[var(--glass-border)] bg-white/5 text-[var(--text)] shadow-inner focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all text-[0.95rem]"
-        type="text" [(ngModel)]="assessmentForm.title" placeholder="Exam Title" />
+        type="text" [(ngModel)]="assessmentForm.title" placeholder="Exam Title"
+        [class.border-red-500]="assessmentFormErrors.title" />
+      <p class="text-xs text-red-500 mt-1" *ngIf="assessmentFormErrors.title">{{ assessmentFormErrors.title }}</p>
     </div>
     <div class="block">
       <label class="block mb-2 text-sm font-medium text-[var(--muted)]">Scheduled at</label>
       <input
         class="w-full px-4 py-3 rounded-xl border border-[var(--glass-border)] bg-white/5 text-[var(--text)] shadow-inner focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all text-[0.95rem]"
-        type="datetime-local" [(ngModel)]="assessmentForm.scheduled_at" />
+        type="datetime-local" [(ngModel)]="assessmentForm.scheduled_at"
+        [class.border-red-500]="assessmentFormErrors.scheduled_at" />
+      <p class="text-xs text-red-500 mt-1" *ngIf="assessmentFormErrors.scheduled_at">{{
+        assessmentFormErrors.scheduled_at }}</p>
     </div>
     <div class="block">
       <label class="block mb-2 text-sm font-medium text-[var(--muted)]">Max Score</label>
       <input
         class="w-full px-4 py-3 rounded-xl border border-[var(--glass-border)] bg-white/5 text-[var(--text)] shadow-inner focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all text-[0.95rem]"
-        type="number" min="1" [(ngModel)]="assessmentForm.max_score" />
+        type="number" min="1" [(ngModel)]="assessmentForm.max_score"
+        [class.border-red-500]="assessmentFormErrors.max_score" />
+      <p class="text-xs text-red-500 mt-1" *ngIf="assessmentFormErrors.max_score">{{ assessmentFormErrors.max_score }}
+      </p>
     </div>
 
     <div
       class="mt-auto sticky bottom-0 pt-4 bg-gradient-to-t from-[var(--card)] via-[var(--card)] to-transparent border-t border-[var(--glass-border)] flex justify-end">
       <button
         class="bg-gradient-to-br from-[var(--primary)] to-[#7c3aed] text-white rounded-full px-6 py-2.5 shadow-lg hover:-translate-y-0.5 hover:brightness-110 transition-all font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
-        type="button" (click)="saveAssessment()"
-        [disabled]="processing || !assessmentForm.title || !assessmentForm.scheduled_at">
+        type="button" (click)="saveAssessment()" [disabled]="processing">
         {{ processing ? 'Creating...' : 'Create Assessment' }}
       </button>
     </div>
@@ -291,34 +301,42 @@
 
   <!-- Edit Lesson Form in Sidebar -->
   <div class="flex flex-col gap-5 flex-1 overflow-y-auto pb-4" *ngIf="panelMode === 'edit-lesson'">
+    <p class="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-bold" *ngIf="lessonError">
+      {{ lessonError }}</p>
+
     <div class="block">
       <label class="block mb-2 text-sm font-medium text-[var(--muted)]">Title <span
           class="text-red-500">*</span></label>
       <input
         class="w-full px-4 py-3 rounded-xl border border-[var(--glass-border)] bg-white/5 text-[var(--text)] shadow-inner focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all text-[0.95rem]"
-        type="text" [(ngModel)]="lessonForm.title" placeholder="Lesson Title" />
+        type="text" [(ngModel)]="lessonForm.title" placeholder="Lesson Title"
+        [class.border-red-500]="lessonFormErrors.title" />
+      <p class="text-xs text-red-500 mt-1" *ngIf="lessonFormErrors.title">{{ lessonFormErrors.title }}</p>
     </div>
     <div class="block">
       <label class="block mb-2 text-sm font-medium text-[var(--muted)]">Scheduled at <span
           class="text-red-500">*</span></label>
       <input
         class="w-full px-4 py-3 rounded-xl border border-[var(--glass-border)] bg-white/5 text-[var(--text)] shadow-inner focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all text-[0.95rem]"
-        type="datetime-local" [(ngModel)]="lessonForm.scheduled_at" [min]="minDateTime" />
+        type="datetime-local" [(ngModel)]="lessonForm.scheduled_at" [min]="minDateTime"
+        [class.border-red-500]="lessonFormErrors.scheduled_at" />
+      <p class="text-xs text-red-500 mt-1" *ngIf="lessonFormErrors.scheduled_at">{{ lessonFormErrors.scheduled_at }}</p>
     </div>
     <div class="block">
       <label class="block mb-2 text-sm font-medium text-[var(--muted)]">Description <span
           class="text-red-500">*</span></label>
       <textarea
         class="w-full px-4 py-3 rounded-xl border border-[var(--glass-border)] bg-white/5 text-[var(--text)] shadow-inner focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all text-[0.95rem] min-h-[100px]"
-        [(ngModel)]="lessonForm.description" placeholder="Lesson Description"></textarea>
+        [(ngModel)]="lessonForm.description" placeholder="Lesson Description"
+        [class.border-red-500]="lessonFormErrors.description"></textarea>
+      <p class="text-xs text-red-500 mt-1" *ngIf="lessonFormErrors.description">{{ lessonFormErrors.description }}</p>
     </div>
-    <p class="text-sm text-red-500 m-0" *ngIf="lessonError">{{ lessonError }}</p>
 
     <div
       class="mt-auto sticky bottom-0 pt-4 bg-gradient-to-t from-[var(--card)] via-[var(--card)] to-transparent border-t border-[var(--glass-border)] flex justify-end">
       <button
         class="bg-gradient-to-br from-[var(--primary)] to-[#7c3aed] text-white rounded-full px-6 py-2.5 shadow-lg hover:-translate-y-0.5 hover:brightness-110 transition-all font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
-        type="button" (click)="saveLesson()" [disabled]="processing || !lessonFormValid">
+        type="button" (click)="saveLesson()" [disabled]="processing">
         {{ processing ? 'Saving...' : 'Save Changes' }}
       </button>
     </div>

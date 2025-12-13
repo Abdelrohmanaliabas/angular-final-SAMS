@@ -5,126 +5,142 @@
       md:rounded-3xl rounded-none
       transition-all duration-[700ms]">
 
-    <!-- Navigation Buttons -->
-    <div class="absolute top-4 left-4 flex items-center gap-2 justify-between">
-      <a routerLink="/"
-         class="w-10 h-10 rounded-full bg-[var(--glass)] border border-[var(--glass-border)] flex items-center justify-center text-[var(--text)] hover:bg-purple-500/10 hover:border-purple-500/30 transition-all duration-200 shadow-sm"
-         title="Back to Home">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-      </a>
-    </div>
-    <div class="absolute top-4 right-4 flex items-center gap-2 justify-between">
-        <app-theme-toggle></app-theme-toggle>
-    </div>
+  <!-- Navigation Buttons -->
+  <div class="absolute top-4 left-4 flex items-center gap-2 justify-between">
+    <a routerLink="/"
+      class="w-10 h-10 rounded-full bg-[var(--glass)] border border-[var(--glass-border)] flex items-center justify-center text-[var(--text)] hover:bg-purple-500/10 hover:border-purple-500/30 transition-all duration-200 shadow-sm"
+      title="Back to Home">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7" />
+      </svg>
+    </a>
+  </div>
+  <div class="absolute top-4 right-4 flex items-center gap-2 justify-between">
+    <app-theme-toggle></app-theme-toggle>
+  </div>
 
-    <div class="w-full max-w-xl mx-auto">
+  <div class="w-full max-w-xl mx-auto">
 
-        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
-            <h2 class="text-2xl font-semibold text-center mb-6">Create an account</h2>
+      <h2 class="text-2xl font-semibold text-center mb-6">Create an account</h2>
 
-            <!-- Google Button -->
-            <button type="button" (click)="onGoogleLogin()"
-                class="auth-google w-full flex items-center justify-center gap-2 cursor-pointer mb-4">
-                <i class="fa-brands fa-google text-red-500"></i>
-                Create with Google
-            </button>
+      <!-- Google Button -->
+      <button type="button" (click)="onGoogleLogin()"
+        class="auth-google w-full flex items-center justify-center gap-2 cursor-pointer mb-4">
+        <i class="fa-brands fa-google text-red-500"></i>
+        Create with Google
+      </button>
 
-            <div class="auth-divider">
-                <span>Or</span>
-            </div>
+      <div class="auth-divider">
+        <span>Or</span>
+      </div>
 
-            <!-- Full Name -->
-            <label class="text-sm font-medium mb-1 block">Full Name</label>
-            <input formControlName="fullName" class="auth-input mb-1" />
-            <div class="auth-error mt-1"
-                *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.invalid">
-                <span *ngIf="registerForm.get('fullName')?.errors?.['required']">Full Name is required.</span>
-                <span *ngIf="registerForm.get('fullName')?.errors?.['minlength']">Full Name is too short.</span>
-                <span *ngIf="registerForm.get('fullName')?.errors?.['maxlength']">Full Name is too long.</span>
-            </div>
+      <!-- Full Name -->
+      <label class="text-sm font-medium mb-1 block">Full Name</label>
+      <input formControlName="fullName" class="auth-input mb-1" />
+      <div class="auth-error mt-1"
+        *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.invalid">
+        <span *ngIf="registerForm.get('fullName')?.errors?.['required']">Full Name is required.</span>
+        <span *ngIf="registerForm.get('fullName')?.errors?.['minlength']">Full Name is too short.</span>
+        <span *ngIf="registerForm.get('fullName')?.errors?.['maxlength']">Full Name is too long.</span>
+      </div>
 
-            <!-- Email -->
-            <label class="text-sm font-medium mt-3 mb-1 block">Email Address</label>
-            <input formControlName="email" class="auth-input mb-1" />
-            <div class="auth-error mt-1"
-                *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
-                <span *ngIf="registerForm.get('email')?.errors?.['required']">Email is required.</span>
-                <span *ngIf="registerForm.get('email')?.errors?.['email']">Enter a valid email.</span>
-                <span *ngIf="registerForm.get('email')?.errors?.['maxlength']">Email is too long.</span>
-            </div>
+      <!-- Email -->
+      <label class="text-sm font-medium mt-3 mb-1 block">Email Address</label>
+      <input formControlName="email" class="auth-input mb-1" />
+      <div class="auth-error mt-1" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
+        <span *ngIf="registerForm.get('email')?.errors?.['required']">Email is required.</span>
+        <span *ngIf="registerForm.get('email')?.errors?.['email']">Enter a valid email.</span>
+        <span *ngIf="registerForm.get('email')?.errors?.['maxlength']">Email is too long.</span>
+      </div>
 
-            <!-- Phone (Added) -->
-            <label class="text-sm font-medium mt-3 mb-1 block">Phone Number</label>
-            <input formControlName="phone" class="auth-input mb-1" />
-            <div class="auth-error mt-1"
-                *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid">
-                <span *ngIf="registerForm.get('phone')?.errors?.['required']">Phone number is required.</span>
-            </div>
+      <!-- Phone (Added) -->
+      <label class="text-sm font-medium mt-3 mb-1 block">Phone Number</label>
+      <input formControlName="phone" class="auth-input mb-1" />
+      <div class="auth-error mt-1" *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid">
 
-            <!-- Center Name (Added) -->
-            <label class="text-sm font-medium mt-3 mb-1 block">Center Name (Optional)</label>
-            <input formControlName="centerName" placeholder="Defaults to your name if empty" class="auth-input mb-1" />
+        <span *ngIf="registerForm.get('phone')?.errors?.['required']">
+          Phone number is required.
+        </span>
 
-            <!-- Password -->
-            <label class="text-sm font-medium mt-3 mb-1 block">Password</label>
-            <div class="password-field mb-1">
-                <input [type]="passwordVisibility.password ? 'text' : 'password'" formControlName="password"
-                    class="auth-input" />
-                <button type="button" class="password-toggle" (click)="togglePasswordVisibility('password')"
-                    aria-label="Toggle password visibility">
-                    <i class="fa-solid" [ngClass]="passwordVisibility.password ? 'fa-eye-slash' : 'fa-eye'"></i>
-                </button>
-            </div>
-            <div class="auth-error mt-1"
-                *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
-                <span *ngIf="registerForm.get('password')?.errors?.['required']">Password is required.</span>
-                <span *ngIf="registerForm.get('password')?.errors?.['minlength']">Password must be at least 8
-                    characters.</span>
-                <span *ngIf="registerForm.get('password')?.errors?.['pattern']">Password must contain uppercase,
-                    lowercase, number & symbol.</span>
-            </div>
+        <span *ngIf="registerForm.get('phone')?.errors?.['minlength']">
+          Phone number must be at least 11 digits.
+        </span>
 
-            <!-- Confirm Password -->
-            <label class="text-sm font-medium mt-3 mb-1 block">Confirm Password</label>
-            <div class="password-field mb-1">
-                <input [type]="passwordVisibility.confirm ? 'text' : 'password'" formControlName="confirmPassword"
-                    class="auth-input" />
-                <button type="button" class="password-toggle" (click)="togglePasswordVisibility('confirm')"
-                    aria-label="Toggle confirm password visibility">
-                    <i class="fa-solid" [ngClass]="passwordVisibility.confirm ? 'fa-eye-slash' : 'fa-eye'"></i>
-                </button>
-            </div>
-            <div class="auth-error mt-1" *ngIf="(registerForm.get('confirmPassword')?.touched || registerForm.get('password')?.touched) &&
+        <span *ngIf="registerForm.get('phone')?.errors?.['maxlength']">
+          Phone number must not exceed 15 digits.
+        </span>
+
+        <span *ngIf="registerForm.get('phone')?.errors?.['pattern']">
+          Phone number must start with 01 and contain digits only.
+        </span>
+
+      </div>
+
+
+      <!-- Center Name (Added) -->
+      <label class="text-sm font-medium mt-3 mb-1 block">Center Name (Optional)</label>
+      <input formControlName="centerName" placeholder="Defaults to your name if empty" class="auth-input mb-1" />
+
+      <!-- Password -->
+      <label class="text-sm font-medium mt-3 mb-1 block">Password</label>
+      <div class="password-field mb-1">
+        <input [type]="passwordVisibility.password ? 'text' : 'password'" formControlName="password"
+          class="auth-input" />
+        <button type="button" class="password-toggle" (click)="togglePasswordVisibility('password')"
+          aria-label="Toggle password visibility">
+          <i class="fa-solid" [ngClass]="passwordVisibility.password ? 'fa-eye-slash' : 'fa-eye'"></i>
+        </button>
+      </div>
+      <div class="auth-error mt-1"
+        *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
+        <span *ngIf="registerForm.get('password')?.errors?.['required']">Password is required.</span>
+        <span *ngIf="registerForm.get('password')?.errors?.['minlength']">Password must be at least 8
+          characters.</span>
+        <span *ngIf="registerForm.get('password')?.errors?.['pattern']">Password must contain uppercase,
+          lowercase, number & symbol.</span>
+      </div>
+
+      <!-- Confirm Password -->
+      <label class="text-sm font-medium mt-3 mb-1 block">Confirm Password</label>
+      <div class="password-field mb-1">
+        <input [type]="passwordVisibility.confirm ? 'text' : 'password'" formControlName="confirmPassword"
+          class="auth-input" />
+        <button type="button" class="password-toggle" (click)="togglePasswordVisibility('confirm')"
+          aria-label="Toggle confirm password visibility">
+          <i class="fa-solid" [ngClass]="passwordVisibility.confirm ? 'fa-eye-slash' : 'fa-eye'"></i>
+        </button>
+      </div>
+      <div class="auth-error mt-1" *ngIf="(registerForm.get('confirmPassword')?.touched || registerForm.get('password')?.touched) &&
               (registerForm.get('confirmPassword')?.invalid || registerForm.errors?.['mismatch'])">
-                <span *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">Confirm Password is
-                    required.</span>
-                <span *ngIf="registerForm.errors?.['mismatch']">Passwords do not match.</span>
-            </div>
+        <span *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">Confirm Password is
+          required.</span>
+        <span *ngIf="registerForm.errors?.['mismatch']">Passwords do not match.</span>
+      </div>
 
-            <!-- Submit -->
-            <button type="submit" class="auth-button mt-6 w-full py-3">
-                Create an account
-            </button>
+      <!-- Submit -->
+      <button type="submit" class="auth-button mt-6 w-full py-3">
+        Create an account
+      </button>
 
-            <!-- Footer -->
-            <p class="auth-meta text-center mt-4">
-                Already have an account?
-                <a (click)="onSwitch('login')" class="auth-link">Sign
-                    in</a>
-            </p>
+      <!-- Footer -->
+      <p class="auth-meta text-center mt-4">
+        Already have an account?
+        <a (click)="onSwitch('login')" class="auth-link">Sign
+          in</a>
+      </p>
 
-        </form>
+    </form>
 
-    </div>
+  </div>
 </div>
 
 <!-- Animation -->
 <ng-container *ngIf="shouldLoadAnimation">
-    <div class="auth-animation-section-right hidden md:flex items-center justify-center px-4">
-        <lottie-player src="/animation/Login.json" background="transparent" speed="1" loop autoplay
-            class="auth-animation" aria-hidden="true"></lottie-player>
-    </div>
+  <div class="auth-animation-section-right hidden md:flex items-center justify-center px-4">
+    <lottie-player src="/animation/Login.json" background="transparent" speed="1" loop autoplay class="auth-animation"
+      aria-hidden="true"></lottie-player>
+  </div>
 </ng-container>

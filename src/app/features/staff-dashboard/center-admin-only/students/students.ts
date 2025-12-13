@@ -45,6 +45,7 @@ export class Students implements OnInit {
   groupFilter = '';
   studentFilter = '';
   searchedStudents: any[] = [];
+  groupToAddId: number | null = null;
 
   ngOnInit(): void {
     this.roles = this.tokenStorage.getUser()?.roles ?? [];
@@ -123,11 +124,12 @@ export class Students implements OnInit {
 
               students.forEach((student: any) => {
                 const groupName = group?.name ?? 'Group';
+                const groupObj = { id: group.id, name: groupName };
                 const existing = aggregated.get(student.id);
 
                 if (existing) {
-                  if (!existing.groups.includes(groupName)) {
-                    existing.groups.push(groupName);
+                  if (!existing.groups.some((g: any) => g.id === group.id)) {
+                    existing.groups.push(groupObj);
                   }
                 } else {
                   aggregated.set(student.id, {
@@ -137,7 +139,7 @@ export class Students implements OnInit {
                     center: group?.center?.name ?? '',
                     status: 'active',
                     phone: student.phone ?? '',
-                    groups: [groupName],
+                    groups: [groupObj],
                     parents: student.parents ?? [],
                     raw: student
                   });
@@ -207,7 +209,7 @@ export class Students implements OnInit {
     }
 
     return this.students.filter((student) =>
-      [student.name, student.email, student.center, student.status, (student.groups ?? []).join(', ')]
+      [student.name, student.email, student.center, student.status, (student.groups ?? []).map((g: any) => g.name).join(', ')]
         .filter(Boolean)
         .some((value) => value.toLowerCase().includes(q))
     );
@@ -244,6 +246,7 @@ export class Students implements OnInit {
     this.panelMode = 'info';
     this.studentErrors = { name: '', email: '', phone: '', groupId: '' };
     this.parentErrors = { name: '', email: '', phone: '', studentId: '' };
+    this.groupToAddId = null;
   }
 
   onSearchChange(value: string): void {
@@ -308,6 +311,10 @@ export class Students implements OnInit {
 
   get canEditStudents(): boolean {
     return this.isCenterAdmin;
+  }
+
+  get canManageGroup(): boolean {
+    return this.isCenterAdmin || this.roles.some((role) => role === 'teacher' || role === 'assistant');
   }
 
   get panelTitle(): string {
@@ -577,6 +584,94 @@ export class Students implements OnInit {
                 tone: 'error'
               });
               this.cdr.detectChanges();
+            }
+          });
+      },
+      onSecondary: () => this.feedback.closeModal()
+    });
+  }
+
+  isGroupAssigned(groupId: number): boolean {
+    return this.selectedStudent?.groups?.some((g: any) => g.id === groupId) ?? false;
+  }
+
+  assignGroup(): void {
+    if (!this.selectedStudent || !this.groupToAddId || this.processing) return;
+
+    this.processing = true;
+    this.staffService.addStudentToGroup(this.groupToAddId, this.selectedStudent.id)
+      .pipe(finalize(() => {
+        this.processing = false;
+        this.cdr.detectChanges();
+      }))
+      .subscribe({
+        next: () => {
+          this.feedback.showToast({
+            title: 'Group added',
+            message: 'Student assigned to group successfully.',
+            tone: 'success'
+          });
+
+          // Update local state
+          const group = this.availableGroups.find(g => g.id == this.groupToAddId);
+          if (group && this.selectedStudent) {
+            const groupObj = { id: group.id, name: group.name };
+            if (!this.selectedStudent.groups) this.selectedStudent.groups = [];
+            this.selectedStudent.groups.push(groupObj);
+          }
+
+          this.groupToAddId = null;
+          // Ideally reload to sync everything perfectly
+          // this.loadStudents(); 
+        },
+        error: (err) => {
+          this.feedback.showToast({
+            title: 'Error',
+            message: this.extractErrorMessage(err, 'Failed to assign group.'),
+            tone: 'error'
+          });
+        }
+      });
+  }
+
+  removeStudentFromGroup(student: any, group: any): void {
+    if (this.processing) return;
+
+    this.feedback.openModal({
+      icon: 'warning',
+      title: 'Remove from group?',
+      message: `Remove ${student.name} from ${group.name}?`,
+      primaryText: 'Remove',
+      secondaryText: 'Cancel',
+      onPrimary: () => {
+        this.feedback.closeModal();
+        this.processing = true;
+        this.staffService.removeStudentFromGroup(group.id, student.id)
+          .pipe(finalize(() => {
+            this.processing = false;
+            this.cdr.detectChanges();
+          }))
+          .subscribe({
+            next: () => {
+              this.feedback.showToast({
+                title: 'Removed',
+                message: 'Student removed from group.',
+                tone: 'success'
+              });
+              // If we are in info mode and the student is selected, we might want to update the local list
+              // But easiest is to reload
+              this.loadStudents();
+              // If the student has no more groups, they might disappear from the list if filtered by group
+              if (this.selectedStudent && this.selectedStudent.id === student.id) {
+                this.selectedStudent.groups = this.selectedStudent.groups.filter((g: any) => g.id !== group.id);
+              }
+            },
+            error: (err) => {
+              this.feedback.showToast({
+                title: 'Error',
+                message: this.extractErrorMessage(err, 'Failed to remove student.'),
+                tone: 'error'
+              });
             }
           });
       },

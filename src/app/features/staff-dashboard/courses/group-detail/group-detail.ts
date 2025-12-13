@@ -63,10 +63,21 @@ export class StaffGroupDetail implements OnInit, OnDestroy {
   lessonForm = { title: '', description: '', scheduled_at: '' };
   lessonErrors = { title: '', description: '', scheduled_at: '' };
   lessonError = '';
+  viewMode: 'students' | 'lessons' = 'students';
+
+  setViewMode(mode: 'students' | 'lessons'): void {
+    this.viewMode = mode;
+  }
 
   // Student Side Panel
   selectedStudent: any = null;
   studentPanelOpen = false;
+  
+  // Add Student Panel
+  addStudentPanelOpen = false;
+  studentSearchTerm = '';
+  searchedStudents: any[] = [];
+  addingStudent = false;
 
   // Pagination
   studentsMeta: PaginationMeta | null = null;
@@ -145,6 +156,79 @@ export class StaffGroupDetail implements OnInit, OnDestroy {
   closeStudentPanel(): void {
     this.studentPanelOpen = false;
     this.selectedStudent = null;
+  }
+
+  openAddStudentPanel(): void {
+    if (!this.canManageGroup) return;
+    this.studentSearchTerm = '';
+    this.searchedStudents = [];
+    this.addStudentPanelOpen = true;
+    // Load initial list if needed, or wait for search
+    this.searchStudents('');
+  }
+
+  closeAddStudentPanel(): void {
+    this.addStudentPanelOpen = false;
+    this.studentSearchTerm = '';
+    this.searchedStudents = [];
+  }
+
+  onStudentSearchChange(query: string): void {
+    this.studentSearchTerm = query;
+    this.searchStudents(query);
+  }
+
+  searchStudents(query: string): void {
+    // If center admin, search all students in center
+    // If teacher, maybe search their students? Or all center students if allowed?
+    // Assuming 'getMembers' with role 'student' works for searching students to add.
+    
+    const params: any = { role: 'student', per_page: 20 };
+    if (query.trim()) {
+      params.search = query;
+    }
+
+    this.staffService.getMembers(params).subscribe({
+      next: (res) => {
+        const payload = res?.data ?? res;
+        const collection = payload?.students ?? payload?.data ?? [];
+        const items = Array.isArray(collection) ? collection : (collection.data ?? []);
+        
+        // Filter out students already in the group
+        const currentStudentIds = new Set(this.students.map(s => s.id));
+        
+        this.searchedStudents = items.map((s: any) => ({
+          id: s.id,
+          name: s.name,
+          email: s.email,
+          avatar: s.name.charAt(0).toUpperCase()
+        })).filter((s: any) => !currentStudentIds.has(s.id));
+        
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Search failed', err);
+      }
+    });
+  }
+
+  addStudentToGroup(student: any): void {
+    if (this.addingStudent || !this.groupId) return;
+    
+    this.addingStudent = true;
+    this.staffService.addStudentToGroup(this.groupId, student.id).subscribe({
+      next: () => {
+        this.addingStudent = false;
+        this.feedback.showToast({ title: 'Success', message: `${student.name} added to group.`, tone: 'success' });
+        this.closeAddStudentPanel();
+        this.loadStudents();
+      },
+      error: (err) => {
+        this.addingStudent = false;
+        this.feedback.showToast({ title: 'Error', message: 'Failed to add student.', tone: 'error' });
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   removeStudentFromGroup(): void {
