@@ -108,7 +108,7 @@
 
             <!-- Calendar Grid -->
             <div class="grid grid-cols-7 gap-2">
-                @for (day of getCalendarDays(); track day.date) {
+                @for (day of details.calendarDays; track day.date) {
                 <div class="aspect-square border border-slate-200 dark:border-slate-600 rounded-lg p-2 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
                     [class.bg-slate-50]="!day.isCurrentMonth" [class.dark:bg-slate-700/20]="!day.isCurrentMonth"
                     [class.border-indigo-500]="day.hasClass" [class.bg-indigo-50]="day.hasClass"

@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { StudentService } from '../../../core/services/student.service';
 import { map, shareReplay, tap } from 'rxjs';
 import { LoaderComponent } from '../../../shared/loader/loader';
@@ -15,6 +16,37 @@ import { LoaderComponent } from '../../../shared/loader/loader';
 export class StudentClassDetails {
     private route = inject(ActivatedRoute);
     private studentService = inject(StudentService);
+    private sanitizer = inject(DomSanitizer); // Inject DomSanitizer
+
+    videoModalOpen = false;
+    currentVideoUrl: SafeResourceUrl | null = null;
+    currentVideoTitle = '';
+
+    openVideo(url: string, title: string) {
+        const youtubeId = this.extractYouTubeId(url);
+        if (youtubeId) {
+            this.currentVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube.com/embed/${youtubeId}`);
+        } else {
+            // Try to use the URL directly if it's not a standard YouTube watch link
+            // This might fail for some sites due to X-Frame-Options, but it's a fallback
+            this.currentVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+        }
+        this.currentVideoTitle = title;
+        this.videoModalOpen = true;
+    }
+
+    closeVideoModal() {
+        this.videoModalOpen = false;
+        this.currentVideoUrl = null;
+        this.currentVideoTitle = '';
+    }
+
+    private extractYouTubeId(url: string): string | null {
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    }
 
     classId = this.route.snapshot.paramMap.get('id');
     classDetails$ = this.studentService.getClassDetails(Number(this.classId)).pipe(

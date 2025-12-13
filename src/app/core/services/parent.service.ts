@@ -26,7 +26,8 @@ export class ParentService {
         name: child.name,
         email: child.email,
         center: child.center,
-        avatar: child.avatar
+        avatar: child.avatar,
+        classes_count: child.classes_count
       }))),
       catchError(() => of([]))
     );
