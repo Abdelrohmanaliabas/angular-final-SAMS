@@ -1,101 +1,417 @@
-<section class="dashboard-page">
-  <header class="dashboard-header">
-    <h2>Centers</h2>
-    <p>Manage all registered centers</p>
+<section
+  class="max-w-[1100px] mx-auto my-6 p-5 max-[400px]:p-3 max-[320px]:px-2 bg-[var(--card)] rounded-2xl border border-[var(--glass-border)] shadow-[0_18px_40px_rgba(0,0,0,0.08)] backdrop-blur-xl text-[var(--text)]">
+  <header class="mb-4">
+    <h2 class="text-2xl font-bold">Centers</h2>
+    <p class="text-[var(--muted)] text-sm">Manage all registered and pending centers</p>
   </header>
 
-  <div class="dashboard-toolbar">
-    <input placeholder="Search centers..." class="dashboard-input" style="max-width: 300px;" [(ngModel)]="searchTerm"
-      (ngModelChange)="onSearchChange()" />
-    <div class="toolbar-actions">
-      <button class="btn-dashboard-primary" (click)="openForm()">Add center</button>
+  <!-- Tabs -->
+  <div class="flex gap-2 mb-4 border-b border-[var(--glass-border)] pb-3 flex-wrap">
+    <button class="px-4 py-2 rounded-full font-medium transition-all duration-200"
+      [ngClass]="activeTab === 'approved' ? 'bg-[linear-gradient(135deg,var(--primary),#7c3aed)] text-white shadow-md' : 'bg-[var(--glass)] text-[var(--text)] hover:bg-purple-500/10'"
+      (click)="switchTab('approved')">
+      Approved Centers
+    </button>
+    <button class="px-4 py-2 rounded-full font-medium transition-all duration-200 relative"
+      [ngClass]="activeTab === 'pending' ? 'bg-[linear-gradient(135deg,#f59e0b,#ea580c)] text-white shadow-md' : 'bg-[var(--glass)] text-amber-500 hover:bg-amber-500/10'"
+      (click)="switchTab('pending')">
+      Pending Approval
+      <span *ngIf="pendingCenters().length > 0"
+        class="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
+        {{ pendingCenters().length }}
+      </span>
+    </button>
+  </div>
+
+  <!-- APPROVED CENTERS TAB -->
+  <div *ngIf="activeTab === 'approved'">
+    <div class="flex justify-between items-center my-3 gap-3 max-[500px]:flex-col max-[500px]:items-stretch">
+      <input placeholder="Search centers..."
+        class="px-3 py-2 rounded-lg border border-[var(--glass-border)] w-[260px] bg-[var(--glass)] text-[var(--text)] max-[500px]:w-full focus:outline-none focus:border-[var(--primary)] transition-colors"
+        [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" />
+      <div class="inline-flex items-center gap-2 max-[500px]:justify-between">
+        <label class="text-[var(--muted)] text-sm">Per page</label>
+        <select
+          class="px-2.5 py-1.5 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none"
+          [(ngModel)]="perPage" (ngModelChange)="onPerPageChange($event)">
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="15">15</option>
+          <option [ngValue]="25">25</option>
+          <option [ngValue]="50">50</option>
+        </select>
+      </div>
     </div>
-  </div>
 
-  <div class="loading-overlay" *ngIf="loading">
-    <div class="spinner"></div>
-    <span>Loading centers...</span>
-  </div>
+    <div class="flex items-center gap-2.5 p-3 bg-[var(--glass)] border border-[var(--glass-border)] rounded-xl mb-2"
+      *ngIf="loadingCenters">
+      <div class="w-[18px] h-[18px] border-[3px] border-black/10 border-t-[var(--primary)] rounded-full animate-spin">
+      </div>
+      <span>Loading centers...</span>
+    </div>
 
-  <div class="dashboard-table-wrapper">
-    <table class="dashboard-table">
-      <thead>
+    <div class="flex flex-col items-center justify-center py-12 text-center text-[var(--muted)]"
+      *ngIf="!loadingCenters && centers.length === 0">
+      <div class="text-4xl mb-4">📋</div>
+      <h3 class="text-lg font-bold text-[var(--text)] mb-2">No Centers Found</h3>
+      <p>There are no approved centers at the moment.</p>
+    </div>
+
+    <table *ngIf="!loadingCenters && centers.length > 0"
+      class="w-full border-collapse mt-2.5 bg-[var(--card)] border border-[var(--glass-border)] rounded-xl overflow-hidden shadow-sm max-[1200px]:block max-[1200px]:bg-transparent max-[1200px]:border-none max-[1200px]:shadow-none">
+      <thead class="max-[1200px]:hidden">
         <tr>
-          <th>Name</th>
-          <th>Status</th>
-          <th>Actions</th>
+          <th
+            class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+            Center</th>
+          <th
+            class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+            Owner</th>
+          <th
+            class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+            Email</th>
+          <th
+            class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+            Status</th>
+          <th
+            class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+            Actions</th>
         </tr>
       </thead>
-      <tbody>
-        <tr *ngFor="let c of filteredCenters">
-          <td>
-            <div class="stack">
-              <span class="strong">{{ c.name }}</span>
+      <tbody
+        class="max-[1200px]:grid max-[1200px]:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] max-[320px]:grid-cols-1 max-[1200px]:gap-4 max-[1200px]:w-full">
+        <tr *ngFor="let c of filteredCenters"
+          class="max-[1200px]:flex max-[1200px]:flex-col max-[1200px]:bg-[var(--card)] max-[1200px]:border max-[1200px]:border-[var(--glass-border)] max-[1200px]:rounded-2xl max-[1200px]:p-4 max-[400px]:p-3 max-[1200px]:shadow-sm max-[1200px]:h-full">
+          <td
+            class="p-3 border-b border-[var(--glass-border)] align-middle font-bold text-[var(--text)] max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+            data-label="Center">
+            <div class="flex items-center gap-3 max-[1200px]:justify-end">
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-sm flex-shrink-0">
+                {{ c.name.charAt(0).toUpperCase() }}
+              </div>
+              <span class="font-bold text-[var(--text)] break-words">{{ c.name }}</span>
             </div>
           </td>
-          <td><span class="badge" [ngClass]="c.paid ? 'badge-success' : 'badge-neutral'">{{ c.paid ? 'Active' :
-              'Inactive' }}</span></td>
-          <td>
-            <button class="btn-dashboard-ghost" (click)="openInfo(c)">Info</button>
-            <button class="btn-dashboard-ghost" (click)="openForm(c)">Edit</button>
-            <button class="btn-dashboard-ghost text-red" (click)="delete(c)">Delete</button>
+          <td
+            class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+            data-label="Owner">
+            <span class="text-[var(--text)] break-words">{{ c.ownerName || '—' }}</span>
+          </td>
+          <td
+            class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+            data-label="Email">
+            <span class="text-sm text-[var(--text)] break-all">{{ c.ownerEmail || '—' }}</span>
+          </td>
+          <td
+            class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+            data-label="Status">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm"
+              [ngClass]="c.paid ? 'bg-[#ecfdf3] text-[#15803d] border-[#bbf7d0]' : 'bg-[#f3f4f6] text-[#4b5563] border-transparent'">
+              {{ c.paid ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td
+            class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-center max-[1200px]:items-center max-[1200px]:w-full max-[1200px]:pt-4 max-[1200px]:pb-0 max-[1200px]:mt-auto max-[1200px]:border-none"
+            data-label="Actions">
+            <div class="flex gap-2 flex-wrap max-[1200px]:justify-center">
+              <button
+                class="bg-[var(--glass)] border border-[var(--glass-border)] px-3.5 py-1.5 rounded-full cursor-pointer text-[var(--text)] shadow-sm hover:-translate-y-px hover:bg-purple-500/10 hover:border-purple-500/30 hover:shadow-md transition-all duration-200"
+                (click)="openInfo(c)">Info</button>
+              <button
+                class="bg-[var(--glass)] border border-[var(--glass-border)] px-3.5 py-1.5 rounded-full cursor-pointer text-[var(--text)] shadow-sm hover:-translate-y-px hover:bg-purple-500/10 hover:border-purple-500/30 hover:shadow-md transition-all duration-200"
+                (click)="openForm(c)">Edit</button>
+              <button
+                class="bg-[var(--glass)] border border-[var(--glass-border)] px-3.5 py-1.5 rounded-full cursor-pointer text-red-500 shadow-sm hover:-translate-y-px hover:bg-red-500/10 hover:border-red-500/30 hover:shadow-md transition-all duration-200"
+                (click)="delete(c)">Delete</button>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
+
+    <!-- Pagination for approved centers -->
+    <div
+      class="flex justify-between items-center mt-4 gap-3 bg-[var(--glass)] border border-[var(--glass-border)] p-2.5 rounded-xl max-[450px]:flex-col max-[450px]:items-center"
+      *ngIf="!loadingCenters && (lastPage > 1 || total)">
+      <div class="text-[var(--muted)] text-sm">Showing {{ (page - 1) * perPage + 1 }} - {{ page * perPage > total ?
+        total : page * perPage }} of {{ total }}</div>
+      <div class="inline-flex items-center gap-2.5 flex-wrap max-[450px]:justify-center">
+        <button
+          class="bg-[var(--glass)] border border-[var(--glass-border)] px-3.5 py-1.5 rounded-full cursor-pointer text-[var(--text)] shadow-sm hover:-translate-y-px hover:bg-purple-500/10 hover:border-purple-500/30 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+          [disabled]="page === 1" (click)="onPageChange(page - 1)">Prev</button>
+        <span class="font-bold">Page {{ page }} / {{ lastPage }}</span>
+        <button
+          class="bg-[var(--glass)] border border-[var(--glass-border)] px-3.5 py-1.5 rounded-full cursor-pointer text-[var(--text)] shadow-sm hover:-translate-y-px hover:bg-purple-500/10 hover:border-purple-500/30 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+          [disabled]="page === lastPage" (click)="onPageChange(page + 1)">Next</button>
+      </div>
+    </div>
   </div>
 
-  <app-pagination [page]="page" [perPage]="perPage" [total]="total" [lastPage]="lastPage"
-    (pageChange)="onPageChange($event)" (perPageChange)="onPerPageChange($event)">
-  </app-pagination>
+  <!-- PENDING CENTERS TAB -->
+  <div *ngIf="activeTab === 'pending'">
+    <div class="flex justify-between items-center my-3 gap-3 max-[500px]:flex-col max-[500px]:items-stretch">
+      <input placeholder="Search pending..."
+        class="px-3 py-2 rounded-lg border border-[var(--glass-border)] w-[260px] bg-[var(--glass)] text-[var(--text)] max-[500px]:w-full focus:outline-none focus:border-amber-500 transition-colors"
+        [(ngModel)]="pendingSearchTerm" (ngModelChange)="onPendingSearchChange()" />
+      <div class="inline-flex items-center gap-2 max-[500px]:justify-between">
+        <label class="text-[var(--muted)] text-sm">Per page</label>
+        <select
+          class="px-2.5 py-1.5 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none"
+          [(ngModel)]="pendingPerPage" (ngModelChange)="onPendingPerPageChange($event)">
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="15">15</option>
+          <option [ngValue]="25">25</option>
+          <option [ngValue]="50">50</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2.5 p-3 bg-[var(--glass)] border border-[var(--glass-border)] rounded-xl mb-2"
+      *ngIf="loadingPending()">
+      <div class="w-[18px] h-[18px] border-[3px] border-black/10 border-t-amber-500 rounded-full animate-spin"></div>
+      <span>Loading pending requests...</span>
+    </div>
+
+    <div class="flex flex-col items-center justify-center py-12 text-center text-[var(--muted)]"
+      *ngIf="!loadingPending() && pendingCenters().length === 0">
+      <div class="text-4xl mb-4 text-green-500">✓</div>
+      <h3 class="text-lg font-bold text-[var(--text)] mb-2">All Caught Up!</h3>
+      <p>There are no pending center registration requests at the moment.</p>
+    </div>
+
+    <table *ngIf="!loadingPending() && pendingCenters().length > 0"
+      class="w-full border-collapse mt-2.5 bg-[var(--card)] border border-[var(--glass-border)] rounded-xl overflow-hidden shadow-sm max-[1200px]:block max-[1200px]:bg-transparent max-[1200px]:border-none max-[1200px]:shadow-none">
+      <thead class="max-[1200px]:hidden">
+        <tr>
+          <th
+            class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+            Center Name</th>
+          <th
+            class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+            Owner</th>
+          <th
+            class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+            Email</th>
+          <th
+            class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+            Phone</th>
+          <th
+            class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+            Date</th>
+          <th
+            class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+            Actions</th>
+        </tr>
+      </thead>
+      <tbody
+        class="max-[1200px]:grid max-[1200px]:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] max-[320px]:grid-cols-1 max-[1200px]:gap-4 max-[1200px]:w-full">
+        <tr *ngFor="let center of filteredPendingCenters"
+          class="max-[1200px]:flex max-[1200px]:flex-col max-[1200px]:bg-[var(--card)] max-[1200px]:border max-[1200px]:border-amber-400/30 max-[1200px]:rounded-2xl max-[1200px]:p-4 max-[400px]:p-3 max-[1200px]:shadow-sm max-[1200px]:h-full">
+          <td
+            class="p-3 border-b border-[var(--glass-border)] align-middle font-bold text-[var(--text)] max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+            data-label="Center">
+            <div class="flex items-center gap-3 max-[1200px]:justify-end">
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-lg shadow-sm flex-shrink-0">
+                {{ center.centerName.charAt(0).toUpperCase() }}
+              </div>
+              <span class="font-bold text-[var(--text)] break-words">{{ center.centerName }}</span>
+            </div>
+          </td>
+          <td
+            class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+            data-label="Owner">
+            <span class="text-[var(--text)] break-words">{{ center.ownerName }}</span>
+          </td>
+          <td
+            class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+            data-label="Email">
+            <span class="text-sm text-[var(--text)] break-all">{{ center.email }}</span>
+          </td>
+          <td
+            class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+            data-label="Phone">
+            <span class="text-sm text-[var(--text)]">{{ center.phone }}</span>
+          </td>
+          <td
+            class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+            data-label="Date">
+            <span class="text-sm text-[var(--muted)]">{{ formatDate(center.createdAt) }}</span>
+          </td>
+          <td
+            class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-center max-[1200px]:items-center max-[1200px]:w-full max-[1200px]:pt-4 max-[1200px]:pb-0 max-[1200px]:mt-auto max-[1200px]:border-none"
+            data-label="Actions">
+            <div class="flex gap-2 flex-wrap max-[1200px]:justify-center">
+              <button
+                class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-1.5 rounded-full font-medium shadow-sm hover:-translate-y-px hover:shadow-md transition-all duration-200"
+                (click)="approve(center)">Approve</button>
+              <button
+                class="bg-[var(--glass)] border border-red-400/50 px-4 py-1.5 rounded-full cursor-pointer text-red-500 shadow-sm hover:-translate-y-px hover:bg-red-500/10 hover:border-red-500/30 hover:shadow-md transition-all duration-200"
+                (click)="openRejectModal(center)">Reject</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination for pending centers -->
+    <div
+      class="flex justify-between items-center mt-4 gap-3 bg-[var(--glass)] border border-[var(--glass-border)] p-2.5 rounded-xl max-[450px]:flex-col max-[450px]:items-center"
+      *ngIf="!loadingPending() && (pendingLastPage > 1 || pendingTotal)">
+      <div class="text-[var(--muted)] text-sm">Showing {{ (pendingPage - 1) * pendingPerPage + 1 }} - {{ pendingPage *
+        pendingPerPage > pendingTotal ? pendingTotal : pendingPage * pendingPerPage }} of {{ pendingTotal }}</div>
+      <div class="inline-flex items-center gap-2.5 flex-wrap max-[450px]:justify-center">
+        <button
+          class="bg-[var(--glass)] border border-[var(--glass-border)] px-3.5 py-1.5 rounded-full cursor-pointer text-[var(--text)] shadow-sm hover:-translate-y-px hover:bg-amber-500/10 hover:border-amber-500/30 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+          [disabled]="pendingPage === 1" (click)="onPendingPageChange(pendingPage - 1)">Prev</button>
+        <span class="font-bold">Page {{ pendingPage }} / {{ pendingLastPage }}</span>
+        <button
+          class="bg-[var(--glass)] border border-[var(--glass-border)] px-3.5 py-1.5 rounded-full cursor-pointer text-[var(--text)] shadow-sm hover:-translate-y-px hover:bg-amber-500/10 hover:border-amber-500/30 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+          [disabled]="pendingPage === pendingLastPage" (click)="onPendingPageChange(pendingPage + 1)">Next</button>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- overlay form -->
-<div class="overlay" [class.open]="isFormOpen" (click)="closeForm()"></div>
-<div class="dashboard-form-panel" [class.open]="isFormOpen" (click)="$event.stopPropagation()">
-  <div class="panel-header">
-    <h3>{{ isEditMode ? 'Edit center' : 'Add center' }}</h3>
-    <button class="close-btn" (click)="closeForm()">X</button>
+<!-- Edit Form Panel -->
+<div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300"
+  [ngClass]="isFormOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'" (click)="closeForm()">
+</div>
+<div
+  class="fixed top-0 right-0 h-screen w-[400px] max-[640px]:w-full bg-[var(--card)] border-l border-[var(--glass-border)] z-50 shadow-2xl transition-transform duration-300"
+  [ngClass]="isFormOpen ? 'translate-x-0' : 'translate-x-full'" (click)="$event.stopPropagation()">
+  <div class="flex items-center justify-between p-4 border-b border-[var(--glass-border)]">
+    <h3 class="text-lg font-bold">{{ isEditMode ? 'Edit Center' : 'Add Center' }}</h3>
+    <button
+      class="w-8 h-8 rounded-full bg-[var(--glass)] flex items-center justify-center hover:bg-red-500/10 transition-colors"
+      (click)="closeForm()">✕</button>
   </div>
-  <form class="panel-body" (ngSubmit)="save()">
-    <label class="dashboard-label">Center Name</label>
-    <input class="dashboard-input" [class.input-error]="formErrors.name" name="name" [(ngModel)]="formCenter.name" required />
-    <p class="form-error" *ngIf="formErrors.name">{{ formErrors.name }}</p>
+  <form class="p-4 space-y-4" (ngSubmit)="save()">
+    <div>
+      <label class="block text-sm font-medium mb-1.5">Center Name</label>
+      <input
+        class="w-full px-3 py-2 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        [ngClass]="{'border-red-500': formErrors.name}" name="name" [(ngModel)]="formCenter.name"
+        [disabled]="isEditMode" [readonly]="isEditMode" placeholder="Enter center name" />
+      <p class="text-red-500 text-sm mt-1" *ngIf="formErrors.name">{{ formErrors.name }}</p>
+      <p class="text-[var(--muted)] text-xs mt-1" *ngIf="isEditMode">Center name cannot be changed by admin.</p>
+    </div>
 
-    <label class="dashboard-label">Status</label>
-    <select class="dashboard-select" name="paid" [(ngModel)]="formCenter.paid">
-      <option [ngValue]="true">Active</option>
-      <option [ngValue]="false">Inactive</option>
-    </select>
+    <div>
+      <label class="block text-sm font-medium mb-1.5">Status</label>
+      <select
+        class="w-full px-3 py-2 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-colors"
+        name="paid" [(ngModel)]="formCenter.paid">
+        <option [ngValue]="true">Active</option>
+        <option [ngValue]="false">Inactive</option>
+      </select>
+    </div>
 
-    <button type="submit" class="btn-dashboard-primary full" [disabled]="formSubmitting">
+    <button type="submit"
+      class="w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-purple-500 to-purple-700 shadow-lg hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+      [disabled]="formSubmitting">
       {{ formSubmitting ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Center') }}
     </button>
   </form>
 </div>
 
-<div class="overlay" [class.open]="infoOpen" (click)="closeInfo()"></div>
-<div class="side-panel glass" [class.open]="infoOpen" (click)="$event.stopPropagation()">
-  <div class="panel-header">
-    <h3>Center Details</h3>
-    <button class="close-btn" (click)="closeInfo()">X</button>
+<!-- Info Panel -->
+<div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300"
+  [ngClass]="infoOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'" (click)="closeInfo()">
+</div>
+<div
+  class="fixed top-0 right-0 h-screen w-[400px] max-[640px]:w-full bg-[var(--card)] border-l border-[var(--glass-border)] z-50 shadow-2xl transition-transform duration-300 overflow-y-auto"
+  [ngClass]="infoOpen ? 'translate-x-0' : 'translate-x-full'" (click)="$event.stopPropagation()">
+  <div class="flex items-center justify-between p-4 border-b border-[var(--glass-border)]">
+    <h3 class="text-lg font-bold">Center Details</h3>
+    <button
+      class="w-8 h-8 rounded-full bg-[var(--glass)] flex items-center justify-center hover:bg-red-500/10 transition-colors"
+      (click)="closeInfo()">✕</button>
   </div>
-  <div class="panel-body" *ngIf="selectedCenter">
-    <p><strong>Name:</strong> {{ selectedCenter.name }}</p>
-    <p><strong>Status:</strong> {{ selectedCenter.paid ? 'Active' : 'Inactive' }}</p>
-    <p><strong>ID:</strong> {{ selectedCenter.id }}</p>
-    <div *ngIf="selectedCenter.courses?.length">
-      <p><strong>Courses:</strong></p>
-      <div class="chips">
-        <div class="chip" *ngFor="let c of selectedCenter.courses">
-          <div class="chip-title">{{ c.name }}</div>
-          <div class="chip-meta">
-            <span *ngIf="c.teacher">Teacher: {{ c.teacher }}</span>
-            <span class="dot"></span>
-            <span>{{ c.studentsCount }} students</span>
+  <div class="p-4 space-y-4" *ngIf="selectedCenter">
+    <!-- Center Info Card -->
+    <div class="bg-[var(--glass)] border border-[var(--glass-border)] rounded-xl p-4">
+      <div class="flex items-center gap-4 mb-4">
+        <div
+          class="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-md flex-shrink-0">
+          {{ selectedCenter.name.charAt(0).toUpperCase() }}
+        </div>
+        <div class="min-w-0">
+          <h4 class="font-bold text-lg break-words">{{ selectedCenter.name }}</h4>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm"
+            [ngClass]="selectedCenter.paid ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
+            {{ selectedCenter.paid ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between items-center py-2 border-b border-[var(--glass-border)]">
+          <span class="text-[var(--muted)]">Owner</span>
+          <span class="font-medium break-words text-right max-w-[60%]">{{ selectedCenter.ownerName || '—' }}</span>
+        </div>
+        <div class="flex justify-between items-center py-2 border-b border-[var(--glass-border)]">
+          <span class="text-[var(--muted)]">Email</span>
+          <span class="font-medium break-all text-right max-w-[60%]">{{ selectedCenter.ownerEmail || '—' }}</span>
+        </div>
+        <div class="flex justify-between items-center py-2 border-b border-[var(--glass-border)]">
+          <span class="text-[var(--muted)]">Phone</span>
+          <span class="font-medium">{{ selectedCenter.ownerPhone || '—' }}</span>
+        </div>
+        <div class="flex justify-between items-center py-2">
+          <span class="text-[var(--muted)]">ID</span>
+          <span class="font-medium">{{ selectedCenter.id }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Courses -->
+    <div *ngIf="selectedCenter.courses.length"
+      class="bg-[var(--glass)] border border-[var(--glass-border)] rounded-xl p-4">
+      <h5 class="font-bold mb-3">Courses ({{ selectedCenter.courses.length }})</h5>
+      <div class="space-y-2">
+        <div *ngFor="let course of selectedCenter.courses"
+          class="bg-[var(--card)] border border-[var(--glass-border)] rounded-lg p-3">
+          <div class="font-medium break-words">{{ course.name }}</div>
+          <div class="text-sm text-[var(--muted)] flex flex-wrap gap-2 mt-1">
+            <span *ngIf="course.teacher">Teacher: {{ course.teacher }}</span>
+            <span>{{ course.studentsCount }} students</span>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4 transition-opacity duration-300"
+  [ngClass]="rejectModalOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'">
+  <div class="bg-[var(--card)] rounded-2xl shadow-2xl w-full max-w-md p-6 transform transition-transform duration-300"
+    [ngClass]="rejectModalOpen ? 'scale-100' : 'scale-95'" (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-red-500">Reject Registration</h3>
+      <button
+        class="w-8 h-8 rounded-full bg-[var(--glass)] flex items-center justify-center hover:bg-red-500/10 transition-colors"
+        (click)="closeRejectModal()">✕</button>
+    </div>
+    <p class="text-[var(--muted)] mb-4" *ngIf="rejectingCenter">
+      You are about to reject the registration for <strong class="text-[var(--text)]">{{ rejectingCenter.centerName
+        }}</strong> by {{ rejectingCenter.ownerName }}.
+    </p>
+    <div class="mb-4">
+      <label class="block text-sm font-medium mb-1.5">Reason (optional)</label>
+      <textarea
+        class="w-full px-3 py-2 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-red-500 transition-colors resize-none"
+        rows="3" placeholder="Provide a reason for rejection..." [(ngModel)]="rejectReason"></textarea>
+    </div>
+    <div class="flex gap-3">
+      <button
+        class="flex-1 py-2.5 rounded-xl font-medium bg-[var(--glass)] border border-[var(--glass-border)] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        (click)="closeRejectModal()">Cancel</button>
+      <button
+        class="flex-1 py-2.5 rounded-xl font-bold text-white bg-gradient-to-r from-red-500 to-red-600 shadow-lg hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200"
+        (click)="confirmReject()">Reject</button>
     </div>
   </div>
 </div>

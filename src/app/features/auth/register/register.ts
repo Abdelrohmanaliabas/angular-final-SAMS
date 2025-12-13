@@ -1,16 +1,17 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { FeedbackService } from '../../../core/services/feedback.service';
 import { ThemeService } from '../../../core/services/theme.service';
+import { ThemeToggleComponent } from '../../../shared/ui/theme-toggle/theme-toggle';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ThemeToggleComponent],
   templateUrl: './register.html',
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
@@ -33,7 +34,12 @@ export class Register implements OnInit {
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
       fullName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]],
-      phone: ['', [Validators.required]],
+      phone: ['', [
+        Validators.required,
+        Validators.minLength(11),
+        Validators.maxLength(15),
+        Validators.pattern(/^(01)[0-9]{9,13}$/)
+      ]],
       centerName: [''],
       password: ['', [
         Validators.required,

@@ -2,90 +2,168 @@
   <header class="list-header">
     <h2>Payments</h2>
     <p class="muted">Track which centers are paid or unpaid</p>
-  </header>
+    <section
+      class="max-w-[1100px] mx-auto my-6 p-5 max-[400px]:p-3 bg-[var(--card)] rounded-2xl border border-[var(--glass-border)] shadow-[0_18px_40px_rgba(0,0,0,0.08)] backdrop-blur-xl text-[var(--text)]">
+      <header class="mb-4">
+        <h2 class="text-2xl font-bold">Payments</h2>
+        <p class="text-[var(--muted)] text-sm">Manage center payments and invoices</p>
+      </header>
 
-  <div class="toolbar">
-    <input placeholder="Search..." class="search" />
-    <div style="display:flex; gap:0.6rem">
-      <button class="btn-simple" [class.active]="filter==='all'" (click)="filter='all'; page=1">All</button>
-      <button class="btn-simple" [class.active]="filter==='paid'" (click)="filter='paid'; page=1">Paid</button>
-      <button class="btn-simple" [class.active]="filter==='unpaid'" (click)="filter='unpaid'; page=1">Unpaid</button>
+      <div class="flex justify-between items-center my-3 gap-3 max-[500px]:flex-col max-[500px]:items-stretch">
+        <div class="inline-flex items-center gap-2 max-[500px]:justify-between">
+          <label class="text-[var(--muted)] text-sm">Filter:</label>
+          <select
+            class="px-2.5 py-1.5 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none"
+            [(ngModel)]="filter">
+            <option value="all">All</option>
+            <option value="paid">Paid</option>
+            <option value="unpaid">Unpaid</option>
+          </select>
+        </div>
+        <div class="inline-flex items-center max-[500px]:justify-between gap-2">
+          <label class="text-[var(--muted)] text-sm">Per page</label>
+          <select
+            class="px-2.5 py-1.5 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none"
+            [(ngModel)]="perPage" (ngModelChange)="changePerPage(perPage)">
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="15">15</option>
+            <option [ngValue]="25">25</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+        <button
+          class="bg-gradient-to-br from-[var(--primary)] to-purple-600 text-white border-none px-4 py-2 rounded-full font-bold shadow-lg hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 cursor-pointer max-[500px]:w-full"
+          (click)="openForm()">
+          + Add Payment
+        </button>
+      </div>
+
+      <table
+        class="w-full border-collapse mt-2.5 bg-[var(--card)] border border-[var(--glass-border)] rounded-xl overflow-hidden shadow-sm max-[1200px]:block max-[1200px]:bg-transparent max-[1200px]:border-none max-[1200px]:shadow-none">
+        <thead class="max-[1200px]:hidden">
+          <tr>
+            <th
+              class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+              Center</th>
+            <th
+              class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+              City</th>
+            <th
+              class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+              Phone</th>
+            <th
+              class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+              Amount</th>
+            <th
+              class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+              Status</th>
+            <th
+              class="p-3 text-left border-b border-[var(--glass-border)] bg-[var(--glass)] font-bold text-[var(--muted)]">
+              Actions</th>
+          </tr>
+        </thead>
+        <tbody
+          class="max-[1200px]:grid max-[1200px]:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] max-[1200px]:gap-4 max-[1200px]:w-full">
+          <tr *ngFor="let c of paginatedCenters"
+            class="max-[1200px]:flex max-[1200px]:flex-col max-[1200px]:bg-[var(--card)] max-[1200px]:border max-[1200px]:border-[var(--glass-border)] max-[1200px]:rounded-2xl max-[1200px]:p-4 max-[400px]:p-3 max-[1200px]:shadow-sm max-[1200px]:h-full">
+            <td
+              class="p-3 border-b border-[var(--glass-border)] align-middle font-bold text-[var(--text)] max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+              data-label="Center">
+              <span class="font-bold text-[var(--text)]">{{ c.name }}</span>
+            </td>
+            <td
+              class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+              data-label="City">
+              <span class="text-[var(--text)]">{{ c.city }}</span>
+            </td>
+            <td
+              class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+              data-label="Phone">
+              <span class="text-[var(--text)]">{{ c.phone }}</span>
+            </td>
+            <td
+              class="p-3 border-b border-[var(--glass-border)] align-middle font-bold text-[var(--text)] max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+              data-label="Amount">
+              {{ c.amount | currency }}
+            </td>
+            <td
+              class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-between max-[1200px]:items-center max-[1200px]:gap-4 max-[1200px]:w-full max-[1200px]:py-3 max-[1200px]:px-0 max-[1200px]:text-right max-[1200px]:before:content-[attr(data-label)] max-[1200px]:before:font-semibold max-[1200px]:before:text-[var(--muted)] max-[1200px]:before:mr-auto max-[1200px]:before:text-left"
+              data-label="Status">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm"
+                [ngClass]="c.paid ? 'bg-[#ecfdf3] text-[#15803d] border-[#bbf7d0]' : 'bg-[#fef2f2] text-[#b91c1c] border-[#fecaca]'">
+                {{ c.paid ? 'Paid' : 'Unpaid' }}
+              </span>
+            </td>
+            <td
+              class="p-3 border-b border-[var(--glass-border)] align-middle max-[1200px]:flex max-[1200px]:justify-center max-[1200px]:items-center max-[1200px]:w-full max-[1200px]:pt-4 max-[1200px]:pb-0 max-[1200px]:mt-auto max-[1200px]:border-none"
+              data-label="Actions">
+              <div class="flex gap-2">
+                <button
+                  class="bg-[var(--glass)] border border-[var(--glass-border)] px-3 py-1.5 rounded-lg cursor-pointer text-[var(--text)] shadow-sm hover:-translate-y-px hover:bg-purple-500/10 hover:border-purple-500/30 hover:shadow-md transition-all duration-200"
+                  (click)="openForm(c)">Edit</button>
+                <button
+                  class="bg-[var(--glass)] border border-red-200 text-red-500 px-3 py-1.5 rounded-lg cursor-pointer shadow-sm hover:-translate-y-px hover:bg-red-50 hover:shadow-md transition-all duration-200"
+                  (click)="delete(c)">Delete</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </section>
+
+    <div
+      class="max-w-[1100px] mx-auto flex justify-between items-center mt-4 gap-3 bg-[var(--glass)] border border-[var(--glass-border)] p-2.5 rounded-xl max-[450px]:flex-col max-[450px]:items-center"
+      *ngIf="lastPage > 1 || total">
+      <div class="text-[var(--muted)] text-sm">Showing {{ rangeStart }} - {{ rangeEnd }} of {{ total }}</div>
+      <div class="inline-flex items-center gap-2.5">
+        <button
+          class="bg-[var(--glass)] border border-[var(--glass-border)] px-3.5 py-1.5 rounded-full cursor-pointer text-[var(--text)] shadow-sm hover:-translate-y-px hover:bg-purple-500/10 hover:border-purple-500/30 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+          [disabled]="page === 1" (click)="changePage(page - 1)">Prev</button>
+        <span class="font-bold">Page {{ page }} / {{ lastPage }}</span>
+        <button
+          class="bg-[var(--glass)] border border-[var(--glass-border)] px-3.5 py-1.5 rounded-full cursor-pointer text-[var(--text)] shadow-sm hover:-translate-y-px hover:bg-purple-500/10 hover:border-purple-500/30 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+          [disabled]="page === lastPage" (click)="changePage(page + 1)">Next</button>
+      </div>
     </div>
-    <div class="toolbar-actions">
-      <label class="muted">Per page</label>
-      <select class="select" [(ngModel)]="perPage" (ngModelChange)="changePerPage($event)">
-        <option [ngValue]="5">5</option>
-        <option [ngValue]="10">10</option>
-        <option [ngValue]="15">15</option>
-      </select>
-      <button class="btn-primary" (click)="openForm()">Add payment</button>
+
+    <div class="fixed inset-0 bg-black/20 opacity-0 pointer-events-none transition-opacity duration-250"
+      [class.opacity-100]="isFormOpen" [class.pointer-events-auto]="isFormOpen" (click)="closeForm()"></div>
+    <div
+      class="fixed inset-y-0 right-0 w-[min(420px,90vw)] max-[640px]:w-full bg-[var(--card)] border-l border-[var(--glass-border)] shadow-[-8px_0_24px_rgba(0,0,0,0.18)] transition-transform duration-300 p-5 flex flex-col gap-3.5 z-[999]"
+      [ngClass]="isFormOpen ? 'translate-x-0' : 'translate-x-full'" (click)="$event.stopPropagation()">
+      <div class="flex justify-between items-center font-bold">
+        <h3>{{ isEditMode ? 'Edit Payment' : 'New Payment' }}</h3>
+        <button class="border-none bg-transparent text-2xl cursor-pointer text-[var(--text)]"
+          (click)="closeForm()">X</button>
+      </div>
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm text-[var(--muted)]">Center Name</label>
+          <input [(ngModel)]="formCenter.name"
+            class="p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)]" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm text-[var(--muted)]">City</label>
+          <input [(ngModel)]="formCenter.city"
+            class="p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)]" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm text-[var(--muted)]">Phone</label>
+          <input [(ngModel)]="formCenter.phone"
+            class="p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)]" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm text-[var(--muted)]">Amount</label>
+          <input type="number" [(ngModel)]="formCenter.amount"
+            class="p-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)]" />
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" [(ngModel)]="formCenter.paid" id="paidCheck" class="w-4 h-4 accent-[var(--primary)]" />
+          <label for="paidCheck" class="text-[var(--text)]">Mark as Paid</label>
+        </div>
+        <button
+          class="w-full py-2.5 mt-2 bg-gradient-to-br from-[var(--primary)] to-purple-600 text-white rounded-lg font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+          (click)="save()">Save Payment</button>
+      </div>
     </div>
-  </div>
-
-  <table class="list-table glass">
-    <thead>
-      <tr>
-        <th>Center</th>
-        <th>City</th>
-        <th>Phone</th>
-        <th>Amount</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let c of paginatedCenters">
-        <td>{{ c.name }}</td>
-        <td>{{ c.city }}</td>
-        <td>{{ c.phone }}</td>
-        <td>{{ c.amount | currency:'USD' }}</td>
-        <td><strong [class.paid]="c.paid">{{ c.paid ? 'Paid' : 'Unpaid' }}</strong></td>
-        <td>
-          <button class="btn-simple" (click)="openForm(c)">Edit</button>
-          <button class="btn-simple muted" (click)="delete(c)">Delete</button>
-        </td>
-      </tr>
-      <tr *ngIf="paginatedCenters.length === 0">
-        <td colspan="6" class="text-center muted">No payments found.</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="pagination" *ngIf="lastPage > 1 || total">
-    <div class="muted small">Showing {{ rangeStart }} - {{ rangeEnd }} of {{ total }}</div>
-    <div class="page-controls">
-      <button class="btn-simple" [disabled]="page === 1" (click)="changePage(page - 1)">Prev</button>
-      <span class="page-indicator">Page {{ page }} / {{ lastPage }}</span>
-      <button class="btn-simple" [disabled]="page === lastPage" (click)="changePage(page + 1)">Next</button>
-    </div>
-  </div>
-</section>
-
-<div class="overlay" [class.open]="isFormOpen" (click)="closeForm()"></div>
-<div class="side-panel glass" [class.open]="isFormOpen" (click)="$event.stopPropagation()">
-  <div class="panel-header">
-    <h3>{{ isEditMode ? 'Edit' : 'Add payment' }}</h3>
-    <button class="close-btn" (click)="closeForm()">X</button>
-  </div>
-  <form class="panel-body" (ngSubmit)="save()">
-    <label class="label">Center</label>
-    <input class="input" name="name" [(ngModel)]="formCenter.name" required />
-
-    <label class="label">City</label>
-    <input class="input" name="city" [(ngModel)]="formCenter.city" required />
-
-    <label class="label">Phone</label>
-    <input class="input" name="phone" [(ngModel)]="formCenter.phone" required />
-
-    <label class="label">Amount</label>
-    <input class="input" type="number" name="amount" [(ngModel)]="formCenter.amount" required />
-
-    <label class="label">Status</label>
-    <select class="input" name="paid" [(ngModel)]="formCenter.paid">
-      <option [ngValue]="true">Paid</option>
-      <option [ngValue]="false">Unpaid</option>
-    </select>
-
-    <button type="submit" class="btn-primary full">{{ isEditMode ? 'Edit' : 'Add payment' }}</button>
-  </form>
-</div>

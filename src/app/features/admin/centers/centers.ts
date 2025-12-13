@@ -1,31 +1,61 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, signal, NgZone } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
 import { HttpParams } from '@angular/common/http';
-import { PaginationComponent } from '../../../shared/ui/pagination/pagination';
 import { FeedbackService } from '../../../core/services/feedback.service';
+import { LoadingService } from '../../../core/services/loading.service';
+import { interval, Subscription } from 'rxjs';
+
+interface Center {
+  id: number;
+  name: string;
+  paid: boolean;
+  ownerName?: string;
+  ownerEmail?: string;
+  ownerPhone?: string;
+  city?: string;
+  address?: string;
+  courses: { id: number; name: string; teacher: string; studentsCount: number }[];
+  raw?: any;
+}
+
+interface PendingCenter {
+  id: number;
+  centerName: string;
+  ownerName: string;
+  email: string;
+  phone: string;
+  createdAt: string;
+  raw?: any;
+}
 
 @Component({
   selector: 'app-admin-centers',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './centers.html',
   styleUrl: './centers.css',
 })
-export class Centers implements OnInit {
+export class Centers implements OnInit, OnDestroy {
   constructor(
     private api: ApiService,
     private cdr: ChangeDetectorRef,
-    private feedback: FeedbackService
-  ) {}
+    private feedback: FeedbackService,
+    private loadingService: LoadingService,
+    private zone: NgZone
+  ) { }
 
-  centers: any[] = [];
-  loading = false;
+  // Tab control
+  activeTab: 'approved' | 'pending' = 'approved';
+
+  // Approved Centers
+  centers: Center[] = [];
+  loadingCenters = false;
   currentId: number | null = null;
   searchTerm = '';
   infoOpen = false;
-  selectedCenter: any = null;
+  selectedCenter: Center | null = null;
 
   isFormOpen = false;
   isEditMode = false;
@@ -34,18 +64,55 @@ export class Centers implements OnInit {
   formErrors = { name: '' };
   formSubmitting = false;
 
-  // Pagination
+  // Pagination for approved
   page = 1;
   perPage = 10;
   total = 0;
   lastPage = 1;
 
+  // Pending Centers
+  pendingCenters = signal<PendingCenter[]>([]);
+  loadingPending = signal(false);
+  pendingSearchTerm = '';
+  pendingPage = 1;
+  pendingPerPage = 10;
+  pendingTotal = 0;
+  pendingLastPage = 1;
+
+  // Reject modal
+  rejectModalOpen = false;
+  rejectingCenter: PendingCenter | null = null;
+  rejectReason = '';
+
+  private pollingSub: Subscription | null = null;
+
   ngOnInit(): void {
     this.loadCenters();
+    this.loadPendingCenters();
+
+    // Poll every 3 seconds to keep pending centers updated
+    this.zone.runOutsideAngular(() => {
+      this.pollingSub = interval(3000).subscribe(() => {
+        this.zone.run(() => {
+          this.loadPendingCenters(this.pendingPage, true);
+        });
+      });
+    });
   }
 
+  ngOnDestroy(): void {
+    if (this.pollingSub) {
+      this.pollingSub.unsubscribe();
+    }
+  }
+
+  switchTab(tab: 'approved' | 'pending') {
+    this.activeTab = tab;
+  }
+
+  // ==================== APPROVED CENTERS ====================
   loadCenters(page = this.page) {
-    this.setLoading(true);
+    this.loadingCenters = true;
     const params = new HttpParams()
       .set('page', page)
       .set('per_page', this.perPage)
@@ -53,62 +120,48 @@ export class Centers implements OnInit {
 
     this.api.get<any>('/centers', params).subscribe({
       next: (res) => {
-        const payload = res?.data ?? res;
-        const items = payload?.data ?? payload ?? [];
-        this.centers = items.map((c: any) => ({
-          id: c.id,
-          name: c.name,
-          paid: !!c.is_active,
-          courses: (c.groups || []).map((g: any) => ({
-            id: g.id,
-            name: g.name,
-            teacher: g.teacher?.name || '',
-            studentsCount: g.students_count ?? g.studentsCount ?? 0,
-          })),
-          raw: c,
-        }));
+        this.zone.run(() => {
+          const payload = res?.data ?? res;
+          const items = payload?.data ?? payload ?? [];
+          this.centers = items.map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            paid: !!c.is_active,
+            ownerName: c.owner?.name || '',
+            ownerEmail: c.owner?.email || '',
+            ownerPhone: c.owner?.phone || '',
+            city: c.city || '',
+            address: c.address || '',
+            courses: [], // Groups are not loaded in list view, only count is available
+            groupsCount: c.groups_count || 0,
+            raw: c,
+          }));
 
-        // Normalize pagination regardless of API shape
-        const paginationSource =
-          res?.meta?.pagination ??
-          res?.pagination ??
-          res?.meta ??
-          payload?.meta?.pagination ??
-          payload?.meta ??
-          {};
-        const currentPage = paginationSource.current_page ?? page;
-        const perPage = paginationSource.per_page ?? this.perPage;
-        const total = paginationSource.total ?? payload?.total ?? this.centers.length;
-        const lastPage =
-          paginationSource.last_page ??
-          payload?.last_page ??
-          Math.max(Math.ceil(total / perPage) || 1, 1);
+          const paginationSource = res?.meta?.pagination ?? res?.pagination ?? res?.meta ?? payload?.meta ?? {};
+          this.page = paginationSource.current_page ?? page;
+          this.perPage = paginationSource.per_page ?? this.perPage;
+          this.total = paginationSource.total ?? payload?.total ?? this.centers.length;
+          this.lastPage = paginationSource.last_page ?? payload?.last_page ?? Math.max(Math.ceil(this.total / this.perPage) || 1, 1);
 
-        this.page = currentPage;
-        this.perPage = perPage;
-        this.total = total;
-        this.lastPage = lastPage;
-
-        this.cdr.detectChanges();
+          this.loadingCenters = false;
+          this.cdr.detectChanges();
+        });
       },
-      error: () => { this.setLoading(false); this.cdr.detectChanges(); },
-      complete: () => { this.setLoading(false); this.cdr.detectChanges(); }
+      error: () => { this.loadingCenters = false; this.cdr.detectChanges(); },
+      complete: () => { this.loadingCenters = false; this.cdr.detectChanges(); }
     });
   }
 
-  // Backend handles search; display results as returned
   get filteredCenters() {
     return this.centers;
   }
 
-  /** Handle page change from pagination component */
   onPageChange(page: number): void {
     if (page < 1 || page > this.lastPage) return;
     this.page = page;
     this.loadCenters(page);
   }
 
-  /** Handle per-page change from pagination component */
   onPerPageChange(perPage: number): void {
     this.perPage = perPage;
     this.page = 1;
@@ -120,13 +173,13 @@ export class Centers implements OnInit {
     this.loadCenters(1);
   }
 
-  openForm(center?: typeof this.formCenter) {
+  openForm(center?: Center) {
     this.isFormOpen = true;
     if (center) {
       this.isEditMode = true;
-      this.formCenter = { id: center.id ?? null, name: center.name, paid: center.paid };
+      this.formCenter = { id: center.id, name: center.name, paid: center.paid };
       this.currentIndex = this.centers.findIndex(c => c.id === center.id);
-      this.currentId = center.id ?? null;
+      this.currentId = center.id;
     } else {
       this.isEditMode = false;
       this.currentIndex = null;
@@ -142,32 +195,24 @@ export class Centers implements OnInit {
       return;
     }
 
-    const payload = {
-      name: this.formCenter.name,
-      is_active: this.formCenter.paid,
-    };
+    // For edit mode, admin cannot change name - only paid status
+    const payload: any = { is_active: this.formCenter.paid };
+    if (!this.isEditMode) {
+      payload.name = this.formCenter.name;
+    }
 
     if (this.isEditMode && this.currentId !== null) {
       this.formSubmitting = true;
       this.api.put<any>(`/centers/${this.currentId}`, payload).subscribe({
         next: () => {
           this.formSubmitting = false;
-          this.cdr.detectChanges();
           this.closeForm();
-          this.feedback.showToast({
-            title: 'Center updated',
-            message: `"${this.formCenter.name}" has been updated.`,
-            tone: 'success'
-          });
+          this.feedback.showToast({ title: 'Center updated', message: `Status has been updated.`, tone: 'success' });
           this.loadCenters();
         },
         error: () => {
           this.formSubmitting = false;
-          this.feedback.showToast({
-            title: 'Update failed',
-            message: 'Could not update the center. Please try again.',
-            tone: 'error'
-          });
+          this.feedback.showToast({ title: 'Update failed', message: 'Could not update the center.', tone: 'error' });
           this.cdr.detectChanges();
         }
       });
@@ -176,21 +221,13 @@ export class Centers implements OnInit {
       this.api.post<any>('/centers', payload).subscribe({
         next: () => {
           this.formSubmitting = false;
-          this.feedback.showToast({
-            title: 'Center created',
-            message: `"${this.formCenter.name}" has been added.`,
-            tone: 'success'
-          });
+          this.feedback.showToast({ title: 'Center created', message: `"${this.formCenter.name}" has been added.`, tone: 'success' });
           this.loadCenters();
           this.closeForm();
         },
         error: () => {
           this.formSubmitting = false;
-          this.feedback.showToast({
-            title: 'Create failed',
-            message: 'Could not create the center. Please try again.',
-            tone: 'error'
-          });
+          this.feedback.showToast({ title: 'Create failed', message: 'Could not create the center.', tone: 'error' });
           this.cdr.detectChanges();
         }
       });
@@ -199,9 +236,9 @@ export class Centers implements OnInit {
 
   private validateForm(): boolean {
     this.formErrors = { name: '' };
+    if (this.isEditMode) return true; // No validation needed for edit (name is readonly)
 
     const name = this.formCenter.name?.trim() ?? '';
-
     this.formCenter = { ...this.formCenter, name };
 
     if (!name) {
@@ -209,41 +246,26 @@ export class Centers implements OnInit {
     } else if (name.length < 3) {
       this.formErrors.name = 'Center name must be at least 3 characters.';
     }
-
     return !this.formErrors.name;
   }
 
-  delete(center: typeof this.formCenter) {
-    const found = this.centers.find(c => c.id === center.id);
-    if (!found?.id) {
-      this.centers = this.centers.filter(c => c.id !== center.id);
-      return;
-    }
-
+  delete(center: Center) {
     this.feedback.openModal({
       icon: 'warning',
       title: 'Delete Center?',
-      message: `Are you sure you want to delete "${found.name}"? This action cannot be undone.`,
+      message: `Are you sure you want to delete "${center.name}"? This action cannot be undone.`,
       primaryText: 'Delete',
       secondaryText: 'Cancel',
       onPrimary: () => {
-        this.setLoading(true);
-        this.api.delete(`/centers/${found.id}`).subscribe({
+        this.loadingCenters = true;
+        this.api.delete(`/centers/${center.id}`).subscribe({
           next: () => {
-            this.feedback.showToast({
-              title: 'Center deleted',
-              message: `"${found.name}" has been removed.`,
-              tone: 'success'
-            });
-            this.loadCenters(); // Reload to update pagination
+            this.feedback.showToast({ title: 'Center deleted', message: `"${center.name}" has been removed.`, tone: 'success' });
+            this.loadCenters();
           },
           error: () => {
-            this.setLoading(false);
-            this.feedback.showToast({
-              title: 'Delete failed',
-              message: 'Could not delete the center. Please try again.',
-              tone: 'error'
-            });
+            this.loadingCenters = false;
+            this.feedback.showToast({ title: 'Delete failed', message: 'Could not delete the center.', tone: 'error' });
             this.cdr.detectChanges();
           }
         });
@@ -252,11 +274,9 @@ export class Centers implements OnInit {
     });
   }
 
-  closeForm() {
-    this.isFormOpen = false;
-  }
+  closeForm() { this.isFormOpen = false; }
 
-  openInfo(center: any) {
+  openInfo(center: Center) {
     this.selectedCenter = center;
     this.infoOpen = true;
   }
@@ -266,12 +286,135 @@ export class Centers implements OnInit {
     this.selectedCenter = null;
   }
 
-  private setLoading(state: boolean) {
-    this.loading = state;
-    try {
-      this.cdr.detectChanges();
-    } catch {
-      // View might be destroyed; ignore
-    }
+  // ==================== PENDING CENTERS ====================
+  loadPendingCenters(page = this.pendingPage, background = false) {
+    if (!background) this.loadingPending.set(true);
+
+    const params = new HttpParams()
+      .set('page', page)
+      .set('per_page', this.pendingPerPage)
+      .set('search', this.pendingSearchTerm.trim())
+      .set('_t', Date.now().toString()); // Cache buster
+
+    this.api.get<any>('/admin/pending-centers', params).subscribe({
+      next: (res) => {
+        this.zone.run(() => {
+          const payload = res?.data ?? res;
+          const items = payload?.data ?? payload ?? [];
+
+          // Update data
+          this.pendingCenters.set(items.map((item: any) => ({
+            id: item.id,
+            centerName: item.center?.name || item.center_name || item.centerName || item.name || '',
+            ownerName: item.name || item.ownerName || '',
+            email: item.email || '',
+            phone: item.phone || '',
+            createdAt: item.created_at || item.createdAt || '',
+            raw: item,
+          })));
+
+          const meta = res?.meta ?? payload?.meta ?? {};
+          this.pendingPage = meta.current_page ?? page;
+          this.pendingPerPage = meta.per_page ?? this.pendingPerPage;
+          this.pendingTotal = meta.total ?? this.pendingCenters().length;
+          this.pendingLastPage = meta.last_page ?? Math.max(Math.ceil(this.pendingTotal / this.pendingPerPage) || 1, 1);
+
+          if (!background) this.loadingPending.set(false);
+          this.cdr.detectChanges();
+        });
+      },
+      error: () => {
+        if (!background) this.loadingPending.set(false);
+        this.cdr.detectChanges();
+      },
+      complete: () => {
+        if (!background) this.loadingPending.set(false);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  get filteredPendingCenters() {
+    return this.pendingCenters();
+  }
+
+  onPendingPageChange(page: number): void {
+    if (page < 1 || page > this.pendingLastPage) return;
+    this.pendingPage = page;
+    this.loadPendingCenters(page);
+  }
+
+  onPendingPerPageChange(perPage: number): void {
+    this.pendingPerPage = perPage;
+    this.pendingPage = 1;
+    this.loadPendingCenters(1);
+  }
+
+  onPendingSearchChange() {
+    this.pendingPage = 1;
+    this.loadPendingCenters(1);
+  }
+
+  approve(center: PendingCenter) {
+    this.feedback.openModal({
+      icon: 'info',
+      title: 'Approve Center?',
+      message: `Approve "${center.centerName}" by ${center.ownerName}?`,
+      primaryText: 'Approve',
+      secondaryText: 'Cancel',
+      onPrimary: () => this.doApprove(center),
+      onSecondary: () => this.feedback.closeModal()
+    });
+  }
+
+  doApprove(center: PendingCenter) {
+    this.loadingService.show();
+    this.api.post(`/admin/centers/${center.id}/approve`, {}).subscribe({
+      next: () => {
+        this.loadingService.hide();
+        this.feedback.showToast({ title: 'Approved', message: `"${center.centerName}" has been approved.`, tone: 'success' });
+        this.loadPendingCenters();
+        this.loadCenters();
+      },
+      error: () => {
+        this.loadingService.hide();
+        this.feedback.showToast({ title: 'Error', message: 'Could not approve the center.', tone: 'error' });
+      }
+    });
+  }
+
+  openRejectModal(center: PendingCenter) {
+    this.rejectingCenter = center;
+    this.rejectReason = '';
+    this.rejectModalOpen = true;
+  }
+
+  closeRejectModal() {
+    this.rejectModalOpen = false;
+    this.rejectingCenter = null;
+    this.rejectReason = '';
+  }
+
+  confirmReject() {
+    if (!this.rejectingCenter) return;
+    this.loadingService.show();
+    this.api.post(`/admin/centers/${this.rejectingCenter.id}/reject`, { reason: this.rejectReason }).subscribe({
+      next: () => {
+        this.loadingService.hide();
+        this.feedback.showToast({ title: 'Rejected', message: `"${this.rejectingCenter?.centerName}" has been rejected.`, tone: 'info' });
+        this.closeRejectModal();
+        this.loadPendingCenters();
+      },
+      error: () => {
+        this.loadingService.hide();
+        this.feedback.showToast({ title: 'Error', message: 'Could not reject the center.', tone: 'error' });
+      }
+    });
+  }
+
+  formatDate(dateStr: string): string {
+    if (!dateStr) return '—';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   }
 }

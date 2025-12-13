@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, interval } from 'rxjs';
 import Pusher from 'pusher-js';
 import Echo from 'laravel-echo';
 import { ToastrService } from 'ngx-toastr';
@@ -44,7 +44,9 @@ export class NotificationService {
     return this.unreadCountSubject.getValue();
   }
 
-  constructor() {}
+  private pollingSubscription: any = null;
+
+  constructor() { }
 
   initialize(): void {
     const user = this.tokenStorage.getUser();
@@ -74,6 +76,17 @@ export class NotificationService {
     // Load initial data
     this.loadLatestNotifications();
     this.loadUnreadCount();
+
+    // Start polling as fallback/supplement
+    this.startPolling();
+  }
+
+  private startPolling(): void {
+    // Poll every 30 seconds
+    this.pollingSubscription = interval(30000).subscribe(() => {
+      this.loadLatestNotifications();
+      this.loadUnreadCount();
+    });
   }
 
   private subscribeToUserChannel(userId: number): void {
@@ -127,7 +140,8 @@ export class NotificationService {
   loadUnreadCount(): void {
     this.apiService.get<any>('/notifications/unread-count').subscribe({
       next: (response) => {
-        this.unreadCountSubject.next(response.count || 0);
+        const payload = response.data ?? response;
+        this.unreadCountSubject.next(payload.count || 0);
       },
       error: (error) => {
         console.error('Error loading unread count:', error);
@@ -151,6 +165,11 @@ export class NotificationService {
     if (this.echo) {
       this.echo.disconnect();
       this.echo = null;
+    }
+
+    if (this.pollingSubscription) {
+      this.pollingSubscription.unsubscribe();
+      this.pollingSubscription = null;
     }
 
     this.notificationsSubject.next([]);

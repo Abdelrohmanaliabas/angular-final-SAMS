@@ -44,6 +44,8 @@ export class Students implements OnInit {
   centerGroupsUnavailable = false;
   groupFilter = '';
   studentFilter = '';
+  searchedStudents: any[] = [];
+  groupToAddId: number | null = null;
 
   ngOnInit(): void {
     this.roles = this.tokenStorage.getUser()?.roles ?? [];
@@ -77,6 +79,7 @@ export class Students implements OnInit {
             status: student.status ?? 'active',
             phone: student.phone ?? '',
             groups: [],
+            parents: student.parents ?? [],
             raw: student
           }));
           this.finishLoading();
@@ -96,7 +99,7 @@ export class Students implements OnInit {
   }
 
   private loadTeacherStudents(): void {
-    this.staffService.getGroups().subscribe({
+    this.staffService.getGroups(1, { per_page: 100 }).subscribe({
       next: (res) => {
         const payload = res?.data ?? res;
         const groups = this.unwrapCollection(payload);
@@ -116,16 +119,17 @@ export class Students implements OnInit {
             const aggregated = new Map<number, any>();
 
             results.forEach((result, index) => {
-              const students = this.unwrapCollection(result);
+              const students = this.extractStudentsFromGroupResponse(result);
               const group = groups[index];
 
               students.forEach((student: any) => {
                 const groupName = group?.name ?? 'Group';
+                const groupObj = { id: group.id, name: groupName };
                 const existing = aggregated.get(student.id);
 
                 if (existing) {
-                  if (!existing.groups.includes(groupName)) {
-                    existing.groups.push(groupName);
+                  if (!existing.groups.some((g: any) => g.id === group.id)) {
+                    existing.groups.push(groupObj);
                   }
                 } else {
                   aggregated.set(student.id, {
@@ -135,7 +139,8 @@ export class Students implements OnInit {
                     center: group?.center?.name ?? '',
                     status: 'active',
                     phone: student.phone ?? '',
-                    groups: [groupName],
+                    groups: [groupObj],
+                    parents: student.parents ?? [],
                     raw: student
                   });
                 }
@@ -171,6 +176,28 @@ export class Students implements OnInit {
     return Array.isArray(collection.items) ? collection.items : [];
   }
 
+  private extractStudentsFromGroupResponse(response: any): any[] {
+    const payload = response?.data ?? response;
+    if (!payload) {
+      return [];
+    }
+    if (Array.isArray(payload)) {
+      return payload;
+    }
+
+    const approved = payload?.approved ?? payload;
+    const approvedArray = approved?.data ?? approved?.items ?? (Array.isArray(approved) ? approved : null);
+    if (Array.isArray(approvedArray)) {
+      return approvedArray;
+    }
+
+    if (Array.isArray(payload?.data)) {
+      return payload.data;
+    }
+
+    return Array.isArray(payload?.items) ? payload.items : [];
+  }
+
   get filteredStudents(): any[] {
     if (this.isCenterAdmin) {
       // Backend handles search/pagination for center admins
@@ -182,7 +209,7 @@ export class Students implements OnInit {
     }
 
     return this.students.filter((student) =>
-      [student.name, student.email, student.center, student.status, (student.groups ?? []).join(', ')]
+      [student.name, student.email, student.center, student.status, (student.groups ?? []).map((g: any) => g.name).join(', ')]
         .filter(Boolean)
         .some((value) => value.toLowerCase().includes(q))
     );
@@ -219,6 +246,7 @@ export class Students implements OnInit {
     this.panelMode = 'info';
     this.studentErrors = { name: '', email: '', phone: '', groupId: '' };
     this.parentErrors = { name: '', email: '', phone: '', studentId: '' };
+    this.groupToAddId = null;
   }
 
   onSearchChange(value: string): void {
@@ -236,6 +264,12 @@ export class Students implements OnInit {
   goToPage(nextPage: number): void {
     if (nextPage < 1 || nextPage > this.totalPages) return;
     this.page = nextPage;
+    this.loadStudents();
+  }
+
+  onPerPageChange(newPerPage: number): void {
+    this.perPage = newPerPage;
+    this.page = 1;
     this.loadStudents();
   }
 
@@ -279,6 +313,10 @@ export class Students implements OnInit {
     return this.isCenterAdmin;
   }
 
+  get canManageGroup(): boolean {
+    return this.isCenterAdmin || this.roles.some((role) => role === 'teacher' || role === 'assistant');
+  }
+
   get panelTitle(): string {
     switch (this.panelMode) {
       case 'create-student':
@@ -301,6 +339,9 @@ export class Students implements OnInit {
   }
 
   get filteredStudentsForSelect(): any[] {
+    if (this.isCenterAdmin) {
+      return this.searchedStudents;
+    }
     const q = this.studentFilter.trim().toLowerCase();
     if (!q) return this.students;
     return this.students.filter((s) =>
@@ -309,10 +350,11 @@ export class Students implements OnInit {
   }
 
   private loadGroupsForForms(): void {
+    const params = { per_page: 100 };
     const source$ =
       this.isCenterAdmin && !this.centerGroupsUnavailable
-        ? this.staffService.getCenterGroups()
-        : this.staffService.getGroups();
+        ? this.staffService.getCenterGroups(1, params)
+        : this.staffService.getGroups(1, params);
 
     source$.subscribe({
       next: (res) => {
@@ -343,10 +385,43 @@ export class Students implements OnInit {
 
   openCreateParent(): void {
     this.studentFilter = '';
-    this.parentForm = { name: '', email: '', phone: '', studentId: this.filteredStudentsForSelect[0]?.id ?? '' };
+    this.parentForm = { name: '', email: '', phone: '', studentId: '' };
     this.parentErrors = { name: '', email: '', phone: '', studentId: '' };
     this.panelMode = 'create-parent';
     this.panelOpen = true;
+
+    if (this.isCenterAdmin) {
+      this.searchedStudents = this.students.slice(0, 50); // Initial list
+    }
+  }
+
+  onStudentFilterChange(value: string): void {
+    this.studentFilter = value;
+    if (this.isCenterAdmin) {
+      this.searchStudents(value);
+    }
+  }
+
+  private searchStudents(query: string): void {
+    this.staffService.getMembers({ role: 'student', search: query, per_page: 20 }).subscribe({
+      next: (res) => {
+        const payload = res?.data ?? res;
+        const collection = payload?.students ?? [];
+        const items = this.unwrapCollection(collection);
+        this.searchedStudents = items.map((student: any) => ({
+          id: student.id,
+          name: student.name,
+          email: student.email,
+          center: payload?.center?.name ?? student.center?.name ?? '',
+          status: student.status ?? 'active',
+          phone: student.phone ?? '',
+          groups: [],
+          parents: student.parents ?? [],
+          raw: student
+        }));
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   openEditStudent(student: any): void {
@@ -509,6 +584,94 @@ export class Students implements OnInit {
                 tone: 'error'
               });
               this.cdr.detectChanges();
+            }
+          });
+      },
+      onSecondary: () => this.feedback.closeModal()
+    });
+  }
+
+  isGroupAssigned(groupId: number): boolean {
+    return this.selectedStudent?.groups?.some((g: any) => g.id === groupId) ?? false;
+  }
+
+  assignGroup(): void {
+    if (!this.selectedStudent || !this.groupToAddId || this.processing) return;
+
+    this.processing = true;
+    this.staffService.addStudentToGroup(this.groupToAddId, this.selectedStudent.id)
+      .pipe(finalize(() => {
+        this.processing = false;
+        this.cdr.detectChanges();
+      }))
+      .subscribe({
+        next: () => {
+          this.feedback.showToast({
+            title: 'Group added',
+            message: 'Student assigned to group successfully.',
+            tone: 'success'
+          });
+
+          // Update local state
+          const group = this.availableGroups.find(g => g.id == this.groupToAddId);
+          if (group && this.selectedStudent) {
+            const groupObj = { id: group.id, name: group.name };
+            if (!this.selectedStudent.groups) this.selectedStudent.groups = [];
+            this.selectedStudent.groups.push(groupObj);
+          }
+
+          this.groupToAddId = null;
+          // Ideally reload to sync everything perfectly
+          // this.loadStudents(); 
+        },
+        error: (err) => {
+          this.feedback.showToast({
+            title: 'Error',
+            message: this.extractErrorMessage(err, 'Failed to assign group.'),
+            tone: 'error'
+          });
+        }
+      });
+  }
+
+  removeStudentFromGroup(student: any, group: any): void {
+    if (this.processing) return;
+
+    this.feedback.openModal({
+      icon: 'warning',
+      title: 'Remove from group?',
+      message: `Remove ${student.name} from ${group.name}?`,
+      primaryText: 'Remove',
+      secondaryText: 'Cancel',
+      onPrimary: () => {
+        this.feedback.closeModal();
+        this.processing = true;
+        this.staffService.removeStudentFromGroup(group.id, student.id)
+          .pipe(finalize(() => {
+            this.processing = false;
+            this.cdr.detectChanges();
+          }))
+          .subscribe({
+            next: () => {
+              this.feedback.showToast({
+                title: 'Removed',
+                message: 'Student removed from group.',
+                tone: 'success'
+              });
+              // If we are in info mode and the student is selected, we might want to update the local list
+              // But easiest is to reload
+              this.loadStudents();
+              // If the student has no more groups, they might disappear from the list if filtered by group
+              if (this.selectedStudent && this.selectedStudent.id === student.id) {
+                this.selectedStudent.groups = this.selectedStudent.groups.filter((g: any) => g.id !== group.id);
+              }
+            },
+            error: (err) => {
+              this.feedback.showToast({
+                title: 'Error',
+                message: this.extractErrorMessage(err, 'Failed to remove student.'),
+                tone: 'error'
+              });
             }
           });
       },

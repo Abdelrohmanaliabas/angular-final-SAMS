@@ -1,4 +1,5 @@
-<section class="w-full max-w-6xl mx-auto px-4 lg:px-0 py-4 space-y-4 text-slate-900 dark:text-slate-100">
+<section
+  class="w-full max-w-6xl mx-auto px-4 lg:px-0 py-4 space-y-4 text-slate-900 dark:text-slate-100 max-[400px]:px-3 max-[320px]:px-2 overflow-x-hidden">
   <div *ngIf="loading">Loading...</div>
 
   <div
@@ -31,13 +32,13 @@
       <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <p class="text-sm text-slate-500 dark:text-slate-400">Courses</p>
         <p class="text-3xl font-extrabold text-slate-900 dark:text-white">{{ stats.courses }}</p>
-        <span class="text-sm text-slate-500 dark:text-slate-400">Active: {{ stats.activeCourses }}</span>
+        <!-- <span class="text-sm text-slate-500 dark:text-slate-400">Active: {{ stats.activeCourses }}</span> -->
       </div>
       <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <p class="text-sm text-slate-500 dark:text-slate-400">Centers</p>
         <p class="text-3xl font-extrabold text-slate-900 dark:text-white">{{ stats.centers }}</p>
-        <span class="text-sm text-slate-500 dark:text-slate-400">Paid: {{ stats.paidCenters }} | Unpaid:
-          {{ stats.unpaidCenters }}</span>
+        <!-- <span class="text-sm text-slate-500 dark:text-slate-400">Paid: {{ stats.paidCenters }} | Unpaid:
+          {{ stats.unpaidCenters }}</span> -->
       </div>
     </div>
   </div>
@@ -120,9 +121,22 @@
         <p class="uppercase tracking-[0.18em] text-xs text-slate-500 dark:text-slate-400">Recent activity</p>
         <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Latest activity</h2>
       </div>
-      <button routerLink="/dashboard/admin/centers"
-        class="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-800 shadow-sm hover:-translate-y-0.5 transition dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">View
-        centers</button>
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="inline-flex items-center gap-2">
+          <label class="text-[var(--muted)] text-sm">Per page</label>
+          <select
+            class="px-2.5 py-1.5 rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--text)] focus:outline-none"
+            [(ngModel)]="perPage" (ngModelChange)="onPerPageChange($event)">
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="15">15</option>
+            <option [ngValue]="25">25</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+        <button routerLink="/dashboard/admin/centers"
+          class="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-800 shadow-sm hover:-translate-y-0.5 transition dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">View
+          centers</button>
+      </div>
     </div>
     <ul class="divide-y divide-slate-200 dark:divide-slate-800" *ngIf="recent.length; else emptyActivity">
       <li *ngFor="let item of recent" class="flex flex-col sm:flex-row sm:items-center justify-between py-3 gap-2">
@@ -138,12 +152,25 @@
     </ng-template>
 
     <!-- Pagination for Latest Activity -->
-    <app-pagination [page]="page" [perPage]="perPage" [total]="total" [lastPage]="lastPage"
-      (pageChange)="onPageChange($event)" (perPageChange)="onPerPageChange($event)">
-    </app-pagination>
+    <div
+      class="flex justify-between items-center mt-4 gap-3 bg-[var(--glass)] border border-[var(--glass-border)] p-2.5 rounded-xl max-[450px]:flex-col max-[450px]:items-center"
+      *ngIf="lastPage > 1 || total">
+      <div class="text-[var(--muted)] text-sm">Showing {{ (page - 1) * perPage + 1 }} - {{ page * perPage > total ?
+        total :
+        page * perPage }} of {{ total }}</div>
+      <div class="inline-flex items-center gap-2.5">
+        <button
+          class="bg-[var(--glass)] border border-[var(--glass-border)] px-3.5 py-1.5 rounded-full cursor-pointer text-[var(--text)] shadow-sm hover:-translate-y-px hover:bg-purple-500/10 hover:border-purple-500/30 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+          [disabled]="page === 1" (click)="onPageChange(page - 1)">Prev</button>
+        <span class="font-bold text-[var(--text)]">Page {{ page }} / {{ lastPage }}</span>
+        <button
+          class="bg-[var(--glass)] border border-[var(--glass-border)] px-3.5 py-1.5 rounded-full cursor-pointer text-[var(--text)] shadow-sm hover:-translate-y-px hover:bg-purple-500/10 hover:border-purple-500/30 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+          [disabled]="page === lastPage" (click)="onPageChange(page + 1)">Next</button>
+      </div>
+    </div>
   </section>
 
-  <div class="grid md:grid-cols-2 gap-4">
+  <div class="grid md:grid-cols-2 gap-4 max-[320px]:gap-3 overflow-hidden min-w-0">
     <app-ai-chat-widget></app-ai-chat-widget>
     <app-ai-insights-card></app-ai-insights-card>
   </div>

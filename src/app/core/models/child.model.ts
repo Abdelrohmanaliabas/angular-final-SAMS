@@ -5,4 +5,5 @@ export interface Child {
     center?: { id: number; name: string };
     className?: string;
     avatar?: string;
+    classes_count?: number;
 }

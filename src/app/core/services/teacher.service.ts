@@ -79,6 +79,10 @@ export class TeacherService {
     return this.api.post(`/groups/${groupId}/students`, { student_id: studentId });
   }
 
+  removeStudentFromGroup(groupId: number, studentId: number): Observable<any> {
+    return this.api.delete(`/groups/${groupId}/students/${studentId}`);
+  }
+
   // ========================================
   // Lessons
   // ========================================

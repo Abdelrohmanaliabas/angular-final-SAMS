@@ -6,7 +6,6 @@ import { UnifiedDashboard } from '../../layouts/unified-dashboard/unified-dashbo
 import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { Setting } from '../shared-dashboard-pages/setting/setting';
 import { Centers } from './centers/centers';
-import { PendingCenters } from './pending-centers/pending-centers';
 import { Courses } from './courses/courses';
 import { Teachers } from './teachers/teachers';
 import { Students } from './students/students';
@@ -24,7 +23,7 @@ export const AdminRoutes: Routes = [
       { path: '', component: AdminDashboard, data: { breadcrumb: 'Overview' } },
       { path: 'settings', component: Setting, data: { breadcrumb: 'Settings' } },
       { path: 'centers', component: Centers, data: { breadcrumb: 'Centers' } },
-      { path: 'pending-centers', component: PendingCenters, data: { breadcrumb: 'Pending Centers' } },
+      { path: 'pending-centers', redirectTo: 'centers', pathMatch: 'full' },
       { path: 'courses', component: Courses, data: { breadcrumb: 'Courses' } },
       { path: 'teachers', component: Teachers, data: { breadcrumb: 'Teachers' } },
       { path: 'students', component: Students, data: { breadcrumb: 'Students' } },

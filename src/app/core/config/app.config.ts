@@ -5,7 +5,7 @@
 export const APP_CONFIG = {
   name: 'ClassSphere',
   shortName: 'CS',
-  tagline: 'Smart Attendance & Management Suite',
+  tagline: 'Smart Attendance & Management Site',
   description: 'A single control center for attendance, staff, and student success—built for teams that crave clarity and speed.',
 } as const;
 
