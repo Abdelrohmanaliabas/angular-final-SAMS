@@ -1,37 +1,74 @@
-# SAMS - Frontend (Angular)
+# 💻 SAMS - Frontend (Angular)
 
-## Overview
-This is the frontend application for the Student Attendance Management System (SAMS), built with **Angular 18+**. It features a modern, responsive design with a robust authentication system and dynamic role-based dashboards.
+![Angular](https://img.shields.io/badge/Angular-18%2B-DD0031?style=for-the-badge&logo=angular&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![RxJS](https://img.shields.io/badge/RxJS-7.8-B7178C?style=for-the-badge&logo=reactivex&logoColor=white)
+
+## 🌟 Overview
+
+This is the modern, responsive frontend for the **Student Attendance Management System (SAMS)**. Built with **Angular 18+**, it delivers a seamless Single Page Application (SPA) experience with dynamic dashboards, real-time updates, and an intuitive design system.
+
+---
 
 ## 🚀 Key Features
 
-### Authentication & Security
-- **Secure Auth Flow**: JWT-based authentication with `HttpInterceptor` to attach tokens automatically.
-- **Google Login**: Implements **Secure Exchange Token** flow to safely authenticate with the backend.
-- **Guards**: 
+### 🔐 Authentication & Security
+- **JWT Authentication**: Secure HTTP interceptors automatically handle token attachment and refresh.
+- **Secure Google Login**: Implements a secure exchange token flow to prevent token leakage.
+- **Role-Based Routing**:
   - `AuthGuard`: Protects private routes.
-  - `GuestGuard`: Prevents logged-in users from accessing login/register pages.
-  - `RoleGuard`: Restricts access based on user roles (Admin vs Staff vs Student).
-- **Auto-Logout**: Handles 401 Unauthorized errors by clearing session and redirecting to login.
+  - `RoleGuard`: Ensures users only access dashboards authorized for their role (Admin, Staff, Student, Parent).
+- **Auto-Logout**: Session management handles token expiration gracefully.
 
-### Architecture
-- **Standalone Components**: Modern Angular architecture without NgModules.
-- **Layouts**:
-  - `AuthLayout`: For login, register, and reset password pages.
-  - `MainLayout`: For dashboard and internal pages (Sidebar, Navbar).
-  - `PublicLayout`: For landing pages.
-- **Services**: Centralized `AuthService`, `ApiService`, and `TokenStorageService`.
+### 🎨 UI/UX & Design
+- **Modern Architecture**: Fully **Standalone Components** (No NgModules).
+- **Responsive Design**: Mobile-first layout using **Tailwind CSS**.
+- **Dark Mode**: System-aware dark mode with manual toggle and persistence.
+- **Glassmorphism**: Premium UI aesthetic with glass-effect cards and panels.
+- **Interactive Feedback**: Toast notifications (`ngx-toastr`) and skeleton loaders.
 
-### UI/UX
-- **Responsive Design**: Mobile-first approach.
-- **Dark Mode**: Built-in theme switcher with persistence.
-- **Feedback**: Toast notifications and loading indicators.
+### 📊 Dynamic Dashboards
+
+#### 👨‍💼 Admin Dashboard
+- **Center Approvals**: Review and approve pending center applications.
+- **System Stats**: Visual analytics of system-wide usage.
+- **User Management**: Full CRUD for system users.
+
+#### 🏫 Staff Dashboard (Center Admin/Teacher)
+- **Class Management**: Create groups, schedule lessons, and manage resources.
+- **Attendance**: Interactive lesson-based attendance taking.
+- **Student Management**: Add students to groups, view profiles, and contact parents.
+
+#### 🎓 Student Dashboard
+- **My Learning**: View enrolled courses, upcoming lessons, and assignments.
+- **AI Lab**: Access AI quiz generator and study planner.
+- **Grades**: Track assessment scores and feedback.
+
+#### 👨‍👩‍👧 Parent Dashboard
+- **Child Overview**: Monitor attendance rates and academic progress.
+- **AI Summaries**: View weekly AI-generated performance reports.
+- **Notifications**: Real-time alerts for absence or low grades.
+
+### 🤖 AI Integration
+- **Chat Widget**: Floating AI assistant available across the platform.
+- **Insights Components**: Visual AI analytics cards.
+
+---
 
 ## 🛠️ Tech Stack
-- **Framework**: Angular 18+
-- **Styling**: Vanilla CSS (with custom design system variables).
-- **State Management**: RxJS (Signals for some UI states).
-- **Routing**: Angular Router with lazy loading.
+
+| Category | Technology |
+|----------|------------|
+| **Framework** | Angular 18+ |
+| **Language** | TypeScript |
+| **Styling** | Tailwind CSS, Flowbite, FontAwesome |
+| **State Management** | RxJS (Observables & Signals) |
+| **Real-Time** | Pusher JS, Laravel Echo |
+| **Charts** | Chart.js |
+| **Build Tool** | Angular CLI (Vite-based) |
+
+---
 
 ## ⚙️ Setup & Installation
 
@@ -45,11 +82,22 @@ This is the frontend application for the Student Attendance Management System (S
    npm install
    ```
 
-3. **Run Development Server**
+3. **Configuration**
+   Ensure the backend API URL is correctly set in `src/environments/environment.ts`:
+   ```typescript
+   export const environment = {
+     production: false,
+     apiUrl: 'http://localhost:8000/api'
+   };
+   ```
+
+4. **Run Development Server**
    ```bash
    npm start
    ```
-   The app will typically run on `http://localhost:4200` (or `http://localhost:35045` if configured).
+   The app will run on `http://localhost:4200`.
+
+---
 
 ## 📂 Project Structure
 
@@ -57,18 +105,28 @@ This is the frontend application for the Student Attendance Management System (S
 src/app/
 ├── core/               # Singleton services, guards, interceptors, models
 │   ├── auth/           # Auth logic (Service, Guards, TokenStorage)
-│   ├── interceptors/   # HTTP Interceptors
-│   ├── models/         # TypeScript Interfaces (User, etc.)
-│   └── services/       # Global services (Api, Theme, Loading)
-├── features/           # Feature modules (Pages)
-│   ├── admin/          # Admin Dashboard & Routes
-│   ├── auth/           # Login, Register, Reset Password components
-│   ├── public/         # Home, Landing pages
-│   └── staff-dashboard/# Staff/Teacher Dashboard
+│   ├── interceptors/   # HTTP Interceptors (Token, Error handling)
+│   ├── models/         # TypeScript Interfaces (User, Group, Lesson)
+│   └── services/       # Global services (Api, Theme, Notification)
+├── features/           # Feature modules (Lazy Loaded Pages)
+│   ├── admin/          # Super Admin Dashboard
+│   ├── auth/           # Login, Register, Reset Password
+│   ├── staff-dashboard/# Center Admin & Teacher Interface
+│   ├── student-pages/  # Student Interface
+│   ├── parent-pages/   # Parent Interface
+│   └── public/         # Landing pages
 ├── layouts/            # Layout components (Auth, Main, Public)
-└── shared/             # Reusable UI components
+└── shared/             # Reusable UI components (Cards, Tables, Modals)
 ```
 
+---
+
 ## 🔗 Backend Integration
-This frontend is configured to talk to the Laravel backend at `http://localhost:8000/api`.
-Ensure the backend is running and CORS is configured correctly.
+This frontend is designed to consume the **Laravel SAMS API**.
+- **CORS**: Ensure the Laravel backend allows requests from `http://localhost:4200`.
+- **Real-Time**: Configure Pusher credentials in `src/environments/environment.ts` to match the backend.
+
+---
+
+## 📄 License
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
